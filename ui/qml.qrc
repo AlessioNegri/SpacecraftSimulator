@@ -1,0 +1,36 @@
+<!DOCTYPE RCC><RCC version="1.0">
+    <qresource prefix="/">
+        <file>qtquickcontrols2.conf</file>
+
+        <file>main.qml</file>
+
+        <file>components/qmldir</file>
+        <file>components/Figure.qml</file>
+        <file>components/Maneuver.qml</file>
+
+        <file>dialogs/qmldir</file>
+        <file>dialogs/DialogAbout.qml</file>
+        <file>dialogs/DialogFigure.qml</file>
+        <file>dialogs/DialogManeuvers.qml</file>
+        <file>dialogs/DialogOrbit.qml</file>
+        <file>dialogs/DialogSpacecraft.qml</file>
+
+        <file>pages/qmldir</file>
+        <file>pages/PageOrbitTransfer.qml</file>
+    </qresource>
+
+    <qresource prefix="/images">
+        <file>../img/add.svg</file>
+        <file>../img/arrow_back.svg</file>
+        <file>../img/arrow_forward.svg</file>
+        <file>../img/clear.svg</file>
+        <file>../img/delete.svg</file>
+        <file>../img/error.svg</file>
+        <file>../img/home.svg</file>
+        <file>../img/icon.ico</file>
+        <file>../img/icon.png</file>
+        <file>../img/pan_tool.svg</file>
+        <file>../img/warning.svg</file>
+        <file>../img/zoom_in.svg</file>
+    </qresource>
+</RCC>

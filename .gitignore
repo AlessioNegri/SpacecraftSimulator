@@ -1,0 +1,5 @@
+# * Ignore all pycache files
+*.pyc
+
+# * Ignore all pdf files
+*.pdf

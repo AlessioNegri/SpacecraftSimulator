@@ -1,0 +1,7 @@
+module Material.Extras
+
+DialogAbout 1.0 DialogAbout.qml
+DialogFigure 1.0 DialogFigure.qml
+DialogManeuvers 1.0 DialogManeuvers.qml
+DialogOrbit 1.0 DialogOrbit.qml
+DialogSpacecraft 1.0 DialogSpacecraft.qml

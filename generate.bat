@@ -1,0 +1,1 @@
+pyside6-rcc ".\ui\qml.qrc" -o ".\ui\qml_rc.py"
