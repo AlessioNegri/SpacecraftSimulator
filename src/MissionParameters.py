@@ -11,6 +11,7 @@ from Maneuver import Maneuver, ManeuverType
 
 from tools.ThreeDimensionalOrbit import *
 from tools.OrbitalManeuvers import *
+from tools.InterplanetaryTrajectories import *
 
 class StateType(IntEnum):
     
@@ -44,6 +45,14 @@ class MissionParameters(qtCore.QObject):
     I_sp_changed    = qtCore.Signal()
     T_changed       = qtCore.Signal()
     
+    planet_dep_changed          = qtCore.Signal()
+    planet_arr_changed          = qtCore.Signal()
+    date_dep_changed            = qtCore.Signal()
+    date_arr_changed            = qtCore.Signal()
+    height_periapse_dep_changed = qtCore.Signal()
+    height_periapse_arr_changed = qtCore.Signal()
+    period_arr_changed          = qtCore.Signal()
+    
     def get_body(self):     return self._body
     def get_state(self):    return self._state
     def get_x(self):        return format(self._x)
@@ -63,6 +72,14 @@ class MissionParameters(qtCore.QObject):
     def get_m_0(self):      return format(self._m_0)
     def get_I_sp(self):     return format(self._I_sp)
     def get_T(self):        return format(self._T)
+    
+    def get_planet_dep(self):           return self._planet_dep
+    def get_planet_arr(self):           return self._planet_arr
+    def get_date_dep(self):             return self._date_dep
+    def get_date_arr(self):             return self._date_arr
+    def get_height_periapse_dep(self):  return format(self._height_periapse_dep)
+    def get_height_periapse_arr(self):  return format(self._height_periapse_arr)
+    def get_period_arr(self):           return format(self._period_arr)
 
     def set_body(self, body : int):     self._body = body; self.body_changed.emit()
     def set_state(self, state : int):   self._state = state; self.state_changed.emit()
@@ -84,6 +101,14 @@ class MissionParameters(qtCore.QObject):
     def set_I_sp(self, I_sp : float):   self._I_sp = I_sp; self.I_sp_changed.emit()
     def set_T(self, T : float):         self._T = T; self.T_changed.emit()
     
+    def set_planet_dep(self, planet_dep : int):                     self._planet_dep = planet_dep; self.planet_dep_changed.emit()
+    def set_planet_arr(self, planet_arr : float):                   self._planet_arr = planet_arr; self.planet_arr_changed.emit()
+    def set_date_dep(self, date_dep : str):                         self._date_dep = date_dep; self.date_dep_changed.emit()
+    def set_date_arr(self, date_arr : str):                         self._date_arr = date_arr; self.date_arr_changed.emit()
+    def set_height_periapse_dep(self, height_periapse_dep : float): self._height_periapse_dep = height_periapse_dep; self.height_periapse_dep_changed.emit()
+    def set_height_periapse_arr(self, height_periapse_arr : float): self._height_periapse_arr= height_periapse_arr; self.height_periapse_arr_changed.emit()
+    def set_period_arr(self, period_arr : float):                   self._period_arr = period_arr; self.period_arr_changed.emit()
+    
     body    = qtCore.Property(int, get_body, set_body, notify=body_changed)
     state   = qtCore.Property(int, get_state, set_state, notify=state_changed)
     x       = qtCore.Property(float, get_x, set_x, notify=x_changed)
@@ -103,6 +128,14 @@ class MissionParameters(qtCore.QObject):
     m_0     = qtCore.Property(float, get_m_0, set_m_0, notify=m_0_changed)
     I_sp    = qtCore.Property(float, get_I_sp, set_I_sp, notify=I_sp_changed)
     T       = qtCore.Property(float, get_T, set_T, notify=T_changed)
+    
+    planet_dep          = qtCore.Property(int, get_planet_dep, set_planet_dep, notify=planet_dep_changed)
+    planet_arr          = qtCore.Property(int, get_planet_arr, set_planet_arr, notify=planet_arr_changed)
+    date_dep            = qtCore.Property(str, get_date_dep, set_date_dep, notify=date_dep_changed)
+    date_arr            = qtCore.Property(str, get_date_arr, set_date_arr, notify=date_arr_changed)
+    height_periapse_dep = qtCore.Property(float, get_height_periapse_dep, set_height_periapse_dep, notify=height_periapse_dep_changed)
+    height_periapse_arr = qtCore.Property(float, get_height_periapse_arr, set_height_periapse_arr, notify=height_periapse_arr_changed)
+    period_arr          = qtCore.Property(float, get_period_arr, set_period_arr, notify=period_arr_changed)
     
     # ! METHODS
 
@@ -137,6 +170,14 @@ class MissionParameters(qtCore.QObject):
         self._I_sp  = 300
         self._T     = 10e3
         
+        self._planet_dep            = 0
+        self._planet_arr            = 0
+        self._date_dep              = '00.00.0000 00:00:00'
+        self._date_arr              = '00.00.0000 00:00:00'
+        self._height_periapse_dep   = 0
+        self._height_periapse_arr   = 0
+        self._period_arr            = 0
+        
         # * Departure parameters
         
         self.body_dep                   = CelestialBody.EARTH
@@ -164,6 +205,10 @@ class MissionParameters(qtCore.QObject):
         self.parameters_tra             = ORBITAL_PARAMETERS()
         self.oe_tra                     = ORBITAL_ELEMENTS()
         self.orbit_transfer_figure      = FigureCanvas()
+        
+        # * Interplanetary Transfer
+        
+        
         
         # * Context properties
         
@@ -572,6 +617,37 @@ class MissionParameters(qtCore.QObject):
         """
         
         self.plotOrbitTransfer()
+    
+    # ? Interplanetary Transfer
+    
+    @qtCore.Slot()
+    def loadInterplanetaryParameters(self) -> None:
+        """Loads the interplanetary parameters
+        """
+        
+        pass
+    
+    @qtCore.Slot()
+    def saveInterplanetaryParameters(self) -> None:
+        """Saves the interplanetary parameters
+        """
+        
+        depPlanet = celestialBodyFromPlanet(planetFromIndex(self.get_planet_dep()))
+        arrPlanet = celestialBodyFromPlanet(planetFromIndex(self.get_planet_arr()))
+        
+        depDate = datetime.strptime(self.get_date_dep(), '%Y-%m-%d %H:%M:%S')
+        arrDate = datetime.strptime(self.get_date_arr(), '%Y-%m-%d %H:%M:%S')
+        
+        r_p_D = AstronomicalData.EquatiorialRadius(depPlanet) + self.get_height_periapse_dep()
+        r_p_A = AstronomicalData.EquatiorialRadius(arrPlanet) + self.get_height_periapse_arr()
+        T = self.get_period_arr() * 3600
+        
+        if self.get_height_periapse_arr() == 0: r_p_A = 0
+        
+        print(depPlanet, arrPlanet, depDate, arrDate, r_p_D, r_p_A, T)
+        
+        print(InterplanetaryTrajectories.OptimalTransfer(depPlanet, arrPlanet, depDate, arrDate, r_p_D, r_p_A, T, self.get_m_0()))
+    
     
     # ! PRIVATE
     

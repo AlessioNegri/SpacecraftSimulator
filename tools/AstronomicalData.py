@@ -19,6 +19,42 @@ class CelestialBody(IntEnum):
     URANUS  = 8
     NEPTUNE = 9
     PLUTO   = 10
+
+class Planet(IntEnum):
+    
+    MERCURY = 0
+    VENUS   = 1
+    EARTH   = 2
+    MARS    = 3
+    JUPITER = 4
+    SATURN  = 5
+    URANUS  = 6
+    NEPTUNE = 7
+    PLUTO   = 8
+    
+def celestialBodyFromPlanet(planet : Planet) -> CelestialBody:
+    """Converts the Planet enum to the CelestialBody enum
+
+    Args:
+        planet (Planet): Planet
+
+    Returns:
+        CelestialBody: Celestial body
+    """
+    
+    match (planet):
+        
+        case Planet.MERCURY:    return CelestialBody.MERCURY
+        case Planet.VENUS:      return CelestialBody.VENUS
+        case Planet.EARTH:      return CelestialBody.EARTH
+        case Planet.MARS:       return CelestialBody.MARS
+        case Planet.JUPITER:    return CelestialBody.JUPITER
+        case Planet.SATURN:     return CelestialBody.SATURN
+        case Planet.URANUS:     return CelestialBody.URANUS
+        case Planet.NEPTUNE:    return CelestialBody.NEPTUNE
+        case Planet.PLUTO:      return CelestialBody.PLUTO
+        case _:                 return CelestialBody.EARTH
+
     
 def celestialBodyFromIndex(index : int) -> CelestialBody:
     """Converts the index to the CelestialBody enum
@@ -69,6 +105,53 @@ def indexFromCelestialBody(celestialBody : CelestialBody) -> int:
         case CelestialBody.NEPTUNE: return 9
         case CelestialBody.PLUTO:   return 10
         case _:                     return 3
+
+def planetFromIndex(index : int) -> Planet:
+    """Converts the index to the Planet enum
+
+    Args:
+        index (int): Index
+
+    Returns:
+        Planet: Planet
+    """
+    
+    match (index):
+            
+        case 0: return Planet.MERCURY
+        case 1: return Planet.VENUS
+        case 2: return Planet.EARTH
+        case 3: return Planet.MARS
+        case 4: return Planet.JUPITER
+        case 5: return Planet.SATURN
+        case 6: return Planet.URANUS
+        case 7: return Planet.NEPTUNE
+        case 8: return Planet.PLUTO
+        case _: return Planet.EARTH
+        
+def indexFromCelestialBody(planet : Planet) -> int:
+    """Converts the Planet enum to the index
+
+    Args:
+        planet (Planet): Planet
+
+    Returns:
+        int: Index
+    """
+    
+    match (planet):
+        
+        case Planet.MERCURY: return 0
+        case Planet.VENUS:   return 1
+        case Planet.EARTH:   return 2
+        case Planet.MARS:    return 3
+        case Planet.JUPITER: return 4
+        case Planet.SATURN:  return 5
+        case Planet.URANUS:  return 6
+        case Planet.NEPTUNE: return 7
+        case Planet.PLUTO:   return 8
+        case _:              return 2
+
 
 class AstronomicalData():
     
@@ -496,6 +579,209 @@ class AstronomicalData():
             case CelestialBody.NEPTUNE: return './tools/texture/Neptune.jpg'
             case CelestialBody.PLUTO:   return './tools/texture/Earth.jpg'
             case _:                     return './tools/texture/Earth.jpg'
+    
+    @classmethod
+    def PlanetaryOrbitalElementsAndRates(cls, celestialBody : CelestialBody) -> list:
+        """Planetary Orbital Elements & Rates
+
+        Args:
+            celestialBody (CelestialBody): Celestial body
+
+        Returns:
+            list: [Orbital Elements, Orbital Elements Rates]
+        """
+        
+        orbital_elements = dict(a=0.0, e=0.0, i=0.0, Omega=0.0, bomega=0.0, L=0.0)
+        
+        orbital_elements_rates = dict(a=0.0, e=0.0, i=0.0, Omega=0.0, bomega=0.0, L=0.0)
+        
+        match (celestialBody):
+            
+            case CelestialBody.SUN:
+                
+                return [orbital_elements, orbital_elements_rates]
+            
+            case CelestialBody.MERCURY:
+                
+                # ? 0.38709893 0.20563069 7.00487 48.33167 77.45645 252.25084
+                
+                orbital_elements['a']               = 0.38709927
+                orbital_elements['e']               = 0.20563593
+                orbital_elements['i']               = 7.00497902
+                orbital_elements['Omega']           = 48.33076593
+                orbital_elements['bomega']          = 77.45779628
+                orbital_elements['L']               = 252.25032350
+                
+                # ? 0.00000066 0.00002527 -23.51 -446.30 573.57 538101628.29 (arcsec)
+                
+                orbital_elements_rates['a']         = 0.00000037
+                orbital_elements_rates['e']         = 0.00001906
+                orbital_elements_rates['i']         = -0.00594749
+                orbital_elements_rates['Omega']     = -0.12534081
+                orbital_elements_rates['bomega']    = 0.16047689
+                orbital_elements_rates['L']         = 149472.67411175
+                
+            case CelestialBody.VENUS:
+                
+                # ? 0.72333199 0.00677323 3.39471 76.68069 131.53298 181.97973
+                
+                orbital_elements['a']               = 0.72333566
+                orbital_elements['e']               = 0.00677672
+                orbital_elements['i']               = 3.39467605
+                orbital_elements['Omega']           = 76.67984255
+                orbital_elements['bomega']          = 131.60246717
+                orbital_elements['L']               = 181.97909950
+                
+                # ? 0.00000092 -0.00004938 -2.86 -996.89 -108.80 210664136.06 (arcsec)
+                
+                orbital_elements_rates['a']         = 0.00000390
+                orbital_elements_rates['e']         = -0.00004107
+                orbital_elements_rates['i']         = -0.00078890
+                orbital_elements_rates['Omega']     = -0.27769418
+                orbital_elements_rates['bomega']    = 0.00268329
+                orbital_elements_rates['L']         = 58517.81538729
+            
+            case CelestialBody.EARTH:
+                
+                # ? 1.00000011 0.01671022 0.00005 -11.26064 102.94719 100.46435
+                
+                orbital_elements['a']               = 1.00000261
+                orbital_elements['e']               = 0.01671123
+                orbital_elements['i']               = -0.00001531 # !
+                orbital_elements['Omega']           = 0.0 # !
+                orbital_elements['bomega']          = 102.93768193
+                orbital_elements['L']               = 100.46457166
+                
+                # ? -0.00000005 -0.00003804 -46.94 -18228.25 1198.28 129597740.63 (arcsec)
+                
+                orbital_elements_rates['a']         = 0.00000562
+                orbital_elements_rates['e']         = -0.00004932
+                orbital_elements_rates['i']         = -0.01294668
+                orbital_elements_rates['Omega']     = 0.0
+                orbital_elements_rates['bomega']    = 0.32327364
+                orbital_elements_rates['L']         = 35999.37244981
+                
+            case CelestialBody.MARS:
+                
+                # ? 1.52366231 0.09341233 1.85061 49.57854 336.04084 355.45332
+                
+                orbital_elements['a']               = 1.52371034
+                orbital_elements['e']               = 0.09339410
+                orbital_elements['i']               = 1.84969142
+                orbital_elements['Omega']           = 49.55953891
+                orbital_elements['bomega']          = 360 - 23.94362959 # !
+                orbital_elements['L']               = 360 - 4.55343205 # !
+                
+                # ? -0.00007221 0.00011902 -25.47 -1020.19 1560.78 68905103.78 (arcsec)
+                
+                orbital_elements_rates['a']         = 0.0001847
+                orbital_elements_rates['e']         = 0.00007882
+                orbital_elements_rates['i']         = -0.00813131
+                orbital_elements_rates['Omega']     = -0.29257343
+                orbital_elements_rates['bomega']    = 0.44441088
+                orbital_elements_rates['L']         = 19140.30268499
+            
+            case CelestialBody.JUPITER:
+                
+                # ? 5.20336301 0.04839266 1.30530 100.55615 14.75385 34.40438
+                
+                orbital_elements['a']               = 5.20288700
+                orbital_elements['e']               = 0.04838624
+                orbital_elements['i']               = 1.30439695
+                orbital_elements['Omega']           = 100.47390909
+                orbital_elements['bomega']          = 14.72847983
+                orbital_elements['L']               = 34.39644501
+                
+                # ? 0.00060737 -0.00012880 -4.15 1217.17 839.93 10925078.35 (arcsec)
+                
+                orbital_elements_rates['a']         = -0.00011607
+                orbital_elements_rates['e']         = 0.00013253
+                orbital_elements_rates['i']         = -0.00183714
+                orbital_elements_rates['Omega']     = 0.20469106
+                orbital_elements_rates['bomega']    = 0.21252668
+                orbital_elements_rates['L']         = 3034.74612775
+                
+            case CelestialBody.SATURN:
+                
+                # ? 9.53707032 0.05415060 2.48446 113.71504 92.43194 49.94432
+                
+                orbital_elements['a']               = 9.53667594
+                orbital_elements['e']               = 0.05386179
+                orbital_elements['i']               = 2.48599187
+                orbital_elements['Omega']           = 113.66242448
+                orbital_elements['bomega']          = 92.59887831
+                orbital_elements['L']               = 49.95424423
+                
+                # ? -0.00301530 -0.00036762 6.11 -1591.05 -1948.89 4401052.95 (arcsec)
+                
+                orbital_elements_rates['a']         = -0.00125060
+                orbital_elements_rates['e']         = -0.00050991
+                orbital_elements_rates['i']         = 0.00193609
+                orbital_elements_rates['Omega']     = -0.28867794
+                orbital_elements_rates['bomega']    = -0.41897216
+                orbital_elements_rates['L']         = 1222.49362201
+            
+            case CelestialBody.URANUS:
+                
+                # ? 19.19126393 0.04716771 0.76986 74.22988 170.96424 313.23218
+                
+                orbital_elements['a']               = 19.18916464
+                orbital_elements['e']               = 0.04725744
+                orbital_elements['i']               = 0.77263783
+                orbital_elements['Omega']           = 74.01692503
+                orbital_elements['bomega']          = 170.95427630
+                orbital_elements['L']               = 313.23810451
+                
+                # ? 0.00152025 -0.00019150 -2.09 -1681.4 1312.56 1542547.79 (arcsec)
+                
+                orbital_elements_rates['a']         = -0.00196176
+                orbital_elements_rates['e']         = -0.00004397
+                orbital_elements_rates['i']         = -0.00242939
+                orbital_elements_rates['Omega']     = 0.04240589
+                orbital_elements_rates['bomega']    = 0.40805281
+                orbital_elements_rates['L']         = 424.48202785
+                
+            case CelestialBody.NEPTUNE:
+                
+                # ? 30.06896348 0.00858587 1.76917 131.72169 44.97135 304.88003
+                
+                orbital_elements['a']               = 30.06992276
+                orbital_elements['e']               = 0.00859048
+                orbital_elements['i']               = 1.77004347
+                orbital_elements['Omega']           = 131.78422574
+                orbital_elements['bomega']          = 44.96476227
+                orbital_elements['L']               = 360 - 55.12002969 # !
+                
+                # ? -0.00125196 0.00002514 -3.64 -151.25 -844.43 786449.21 (arcsec)
+                
+                orbital_elements_rates['a']         = 0.00026291
+                orbital_elements_rates['e']         = 0.00005105
+                orbital_elements_rates['i']         = 0.00035372
+                orbital_elements_rates['Omega']     = -0.00508664
+                orbital_elements_rates['bomega']    = -0.32241464
+                orbital_elements_rates['L']         = 218.45945325
+                
+            case CelestialBody.PLUTO:
+                
+                # ? 39.48168677 0.24880766 17.14175 110.30347 224.06676 238.92881
+                
+                orbital_elements['a']               = 39.48211675
+                orbital_elements['e']               = 0.24882730
+                orbital_elements['i']               = 17.14001206
+                orbital_elements['Omega']           = 110.30393684
+                orbital_elements['bomega']          = 224.06891629
+                orbital_elements['L']               = 238.92903833
+                
+                # ? -0.00076912 0.00006465 11.07 -37.33 -132.25 522747.90 (arcsec)
+                
+                orbital_elements_rates['a']         = -0.00031596
+                orbital_elements_rates['e']         = 0.00005170
+                orbital_elements_rates['i']         = 0.00004818
+                orbital_elements_rates['Omega']     = -0.01183482
+                orbital_elements_rates['bomega']    = -0.04062942
+                orbital_elements_rates['L']         = 145.20780515
+        
+        return [orbital_elements, orbital_elements_rates]
 
 if __name__ == '__main__':
     

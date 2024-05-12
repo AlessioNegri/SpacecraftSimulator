@@ -23,6 +23,22 @@ class OrbitDetermination():
     
     def __init__(self) -> None: pass
     
+    @classmethod
+    def setCelestialBody(cls, celestialBody : CelestialBody) -> None:
+        """Sets the current celectial body
+
+        Args:
+            celestialBody (CelestialBody): Celestial body
+        """
+        
+        cls.mu = AstronomicalData.GravitationalParameter(celestialBody)
+        
+        cls.R_E = AstronomicalData.EquatiorialRadius(celestialBody)
+        
+        cls.f = AstronomicalData.Flattening(celestialBody)
+        
+        cls.omega = AstronomicalData.GroundTrackAngularVelocity(celestialBody)
+    
     # ! SECTION 5.2
     
     # ! ALGORITHM 5.1

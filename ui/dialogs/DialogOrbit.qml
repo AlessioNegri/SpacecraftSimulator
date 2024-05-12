@@ -11,6 +11,8 @@ Dialog
     // ? Updates the parameters and saves based on the \a save option.
     function updateParameters(save)
     {
+        __MissionParameters.body = _celestialBody_.currentIndex
+
         switch (_selection_.currentIndex)
         {
             case 0: // * Cartesian
@@ -117,7 +119,6 @@ Dialog
                 implicitHeight: 50
                 model: [ "SUN", "MERCURY", "VENUS", "EARTH", "MOON", "MARS", "JUPITER", "SATURN", "URANUS", "NEPTUNE", "PLUTO" ]
                 currentIndex: __MissionParameters.body
-                onCurrentIndexChanged: __MissionParameters.body = currentIndex
             }
 
             Item { width: 10 }

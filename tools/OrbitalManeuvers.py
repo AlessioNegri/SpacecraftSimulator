@@ -1004,3 +1004,4 @@ if __name__ == '__main__':
     print(OrbitalManeuvers.ApseLineRotationFromEta(p_0.r_p, p_0.r_a, p_0.r_p, p_0.r_a, oe_f.omega - res.oe.omega))
     print(OrbitalManeuvers.HohmannTransfer(p_0.r_p, p_0.r_a, p_f.r_p, p_f.r_a, HohmannDirection.APO2PER))
     print(OrbitalManeuvers.BiEllipticHohmannTransfer(p_0.r_p, p_0.r_a, p_f.r_p, p_f.r_a, 4 * p_f.r_a, HohmannDirection.PER2APO))
+    print('-' * 40, '\n')

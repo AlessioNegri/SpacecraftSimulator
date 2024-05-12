@@ -22,7 +22,9 @@ from enum import IntEnum
 
 from PIL import Image
 
-from AstronomicalData import AstronomicalData, CelestialBody, celestialBodyFromIndex, indexFromCelestialBody
+from datetime import datetime
+
+from AstronomicalData import *
 
 #sbn.set_style('whitegrid')
 
@@ -54,7 +56,7 @@ def wrapTo2Pi(x : float) -> float:
         float: Wrapped angle
     """
 
-    return np.remainder(x, 2 * np.pi)
+    return np.remainder(x, 2 * np.pi if x > 0 else - 2 * np.pi)
 
 def wrapTo360Deg(x : float) -> float:
     """Wraps the angle in the range 0 - 360 degrees
@@ -66,4 +68,4 @@ def wrapTo360Deg(x : float) -> float:
         float: Wrapped angle
     """
 
-    return np.remainder(x, 360)
+    return np.remainder(x, 360 if x > 0 else -360)

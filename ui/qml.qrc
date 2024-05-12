@@ -11,11 +11,13 @@
         <file>dialogs/qmldir</file>
         <file>dialogs/DialogAbout.qml</file>
         <file>dialogs/DialogFigure.qml</file>
+        <file>dialogs/DialogInterplanetaryTransfer.qml</file>
         <file>dialogs/DialogManeuvers.qml</file>
         <file>dialogs/DialogOrbit.qml</file>
         <file>dialogs/DialogSpacecraft.qml</file>
 
         <file>pages/qmldir</file>
+        <file>pages/PageInterplanetaryTransfer.qml</file>
         <file>pages/PageOrbitTransfer.qml</file>
     </qresource>
 

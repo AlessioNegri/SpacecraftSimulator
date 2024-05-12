@@ -17,6 +17,16 @@ class Time():
     
     def __init__(self) -> None: pass
     
+    @classmethod
+    def setCelestialBody(cls, celestialBody : CelestialBody) -> None:
+        """Sets the current celectial body
+
+        Args:
+            celestialBody (CelestialBody): Celestial body
+        """
+        
+        cls.mu = AstronomicalData.GravitationalParameter(celestialBody)
+    
     # ! SECTION 3.3
     
     @classmethod

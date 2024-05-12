@@ -31,6 +31,8 @@ ApplicationWindow
 
     DialogManeuvers { id: _dlgManeuvers_ }
 
+    DialogInterplanetaryTransfer { id: _dlgInterplanetaryTransfer_ }
+
     // ? Menu Bar
 
     menuBar: MenuBar
@@ -82,7 +84,12 @@ ApplicationWindow
                     text: "Orbit Transfer"
                     checkable: true
                     checked: gp_CurrentMission === 0
-                    onTriggered: gp_CurrentMission = 0
+                    onTriggered:
+                    {
+                        gp_CurrentMission = 0
+
+                        _view_.setCurrentIndex(0)
+                    }
                 }
                 
                 MenuItem
@@ -98,7 +105,12 @@ ApplicationWindow
                     text: "Interplanetary Transfer"
                     checkable: true
                     checked: gp_CurrentMission === 2
-                    onTriggered: gp_CurrentMission = 2
+                    onTriggered:
+                    {
+                        gp_CurrentMission = 2
+
+                        _view_.setCurrentIndex(1)
+                    }
                 }
             }
 
@@ -114,7 +126,12 @@ ApplicationWindow
             
             Action { text: "Relative Navigation"; enabled: gp_CurrentMission === 1 }
             
-            Action { text: "Interplanetary Transfer"; enabled: gp_CurrentMission === 2 }
+            Action
+            {
+                text: "Interplanetary Transfer"
+                enabled: gp_CurrentMission === 2
+                onTriggered: _dlgInterplanetaryTransfer_.open()
+            }
         }
         
         Menu
@@ -125,19 +142,26 @@ ApplicationWindow
         }
     }
 
-    // ? Stack View
+    // ? Swipe View
 
-    StackView
+    SwipeView
     {
-        id: _stack_
+        id: _view_
+        currentIndex: 0
+        interactive: false
         anchors.fill: parent
-        initialItem: _pageOrbitTransfer_
+
+        PageOrbitTransfer { width: window.width; height: window.height }
+
+        PageInterplanetaryTransfer { width: window.width; height: window.height }
     }
 
-    Component
+    PageIndicator
     {
-        id: _pageOrbitTransfer_
-        
-        PageOrbitTransfer { width: window.width; height: window.height }
+        id: indicator
+        count: _view_.count
+        currentIndex: _view_.currentIndex
+        anchors.bottom: _view_.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
     }
 }
