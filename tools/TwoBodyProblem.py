@@ -96,7 +96,7 @@ class TwoBodyProblem:
         
         parameters = cls.calculateOrbitalParameters(y_0[:3], y_0[3:])
         
-        if t_f == 0.0:
+        if t_f == 0.0 and t_0 >= 0.0:
             
             t_f = parameters.T
         
@@ -166,7 +166,7 @@ class TwoBodyProblem:
             plt.legend()
             plt.show()
         
-        return dict(t=integrationResult['t'], y=integrationResult['y'])
+        return dict(t=integrationResult['t'], y=integrationResult['y'], dt=np.abs(integrationResult['t'][-1] - integrationResult['t'][0]))
     
     # ! SECTION 2.4 - 2.9
     

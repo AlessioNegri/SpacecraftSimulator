@@ -9,12 +9,10 @@ Page
 {
     background: Rectangle { color: "transparent" }
 
-    /*
     Figure {
-        p_ObjectName: "OrbitTransferFigure"
-        r_Model: __OrbitTransferFigure
+        p_ObjectName: "InterplanetaryTransferFigure"
+        r_Model: __InterplanetaryTransferFigure
         anchors.fill: parent
         anchors.margins: 16
     }
-    */
 }

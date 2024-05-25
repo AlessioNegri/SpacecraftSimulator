@@ -129,7 +129,7 @@ def planetFromIndex(index : int) -> Planet:
         case 8: return Planet.PLUTO
         case _: return Planet.EARTH
         
-def indexFromCelestialBody(planet : Planet) -> int:
+def indexFromPlanet(planet : Planet) -> int:
     """Converts the Planet enum to the index
 
     Args:

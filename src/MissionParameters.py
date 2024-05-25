@@ -42,6 +42,7 @@ class MissionParameters(qtCore.QObject):
     r_p_changed     = qtCore.Signal()
     r_a_changed     = qtCore.Signal()
     m_0_changed     = qtCore.Signal()
+    m_c_changed     = qtCore.Signal()
     I_sp_changed    = qtCore.Signal()
     T_changed       = qtCore.Signal()
     
@@ -70,6 +71,7 @@ class MissionParameters(qtCore.QObject):
     def get_r_p(self):      return format(self._r_p)
     def get_r_a(self):      return format(self._r_a)
     def get_m_0(self):      return format(self._m_0)
+    def get_m_c(self):      return format(self._m_c)
     def get_I_sp(self):     return format(self._I_sp)
     def get_T(self):        return format(self._T)
     
@@ -98,6 +100,7 @@ class MissionParameters(qtCore.QObject):
     def set_r_p(self, r_p : float):     self._r_p = r_p; self.r_p_changed.emit()
     def set_r_a(self, r_a : float):     self._r_a = r_a; self.r_a_changed.emit()
     def set_m_0(self, m_0 : float):     self._m_0 = m_0; self.m_0_changed.emit()
+    def set_m_c(self, m_c : float):     self._m_c = m_c; self.m_c_changed.emit()
     def set_I_sp(self, I_sp : float):   self._I_sp = I_sp; self.I_sp_changed.emit()
     def set_T(self, T : float):         self._T = T; self.T_changed.emit()
     
@@ -126,6 +129,7 @@ class MissionParameters(qtCore.QObject):
     r_p     = qtCore.Property(float, get_r_p, set_r_p, notify=r_p_changed)
     r_a     = qtCore.Property(float, get_r_a, set_r_a, notify=r_a_changed)
     m_0     = qtCore.Property(float, get_m_0, set_m_0, notify=m_0_changed)
+    m_c     = qtCore.Property(float, get_m_c, set_m_c, notify=m_c_changed)
     I_sp    = qtCore.Property(float, get_I_sp, set_I_sp, notify=I_sp_changed)
     T       = qtCore.Property(float, get_T, set_T, notify=T_changed)
     
@@ -167,16 +171,17 @@ class MissionParameters(qtCore.QObject):
         self._r_p   = 0.0
         self._r_a   = 0.0
         self._m_0   = 2000
+        self._m_c   = 2000
         self._I_sp  = 300
         self._T     = 10e3
         
-        self._planet_dep            = 0
-        self._planet_arr            = 0
-        self._date_dep              = '00.00.0000 00:00:00'
-        self._date_arr              = '00.00.0000 00:00:00'
-        self._height_periapse_dep   = 0
-        self._height_periapse_arr   = 0
-        self._period_arr            = 0
+        self._planet_dep            = indexFromPlanet(Planet.EARTH)
+        self._planet_arr            = indexFromPlanet(Planet.MARS)
+        self._date_dep              = '1996-11-07 00:00:00'
+        self._date_arr              = '1997-09-12 00:00:00'
+        self._height_periapse_dep   = 180
+        self._height_periapse_arr   = 300
+        self._period_arr            = 48
         
         # * Departure parameters
         
@@ -208,7 +213,7 @@ class MissionParameters(qtCore.QObject):
         
         # * Interplanetary Transfer
         
-        
+        self.interplanetary_transfer_figure = FigureCanvas()
         
         # * Context properties
         
@@ -217,6 +222,7 @@ class MissionParameters(qtCore.QObject):
         engine.rootContext().setContextProperty("__ArrivalOrbitFigure", self.orbit_figure_arr)
         engine.rootContext().setContextProperty("__ArrivalGroundTrackFigure", self.ground_track_figure_arr)
         engine.rootContext().setContextProperty("__OrbitTransferFigure", self.orbit_transfer_figure)
+        engine.rootContext().setContextProperty("__InterplanetaryTransferFigure", self.interplanetary_transfer_figure)
         
         # * Init
         
@@ -241,9 +247,13 @@ class MissionParameters(qtCore.QObject):
         self.orbit_figure_arr.updateWithCanvas(win.findChild(qtCore.QObject, "ArrivalOrbitFigure"), win.findChild(qtCore.QObject, "ArrivalOrbitFigureParent"), dof3=True, figsize=(8, 6))
         self.ground_track_figure_arr.updateWithCanvas(win.findChild(qtCore.QObject, "ArrivalGroundTrackFigure"), win.findChild(qtCore.QObject, "ArrivalGroundTrackFigureParent"), figsize=(8, 6))
         self.orbit_transfer_figure.updateWithCanvas(win.findChild(qtCore.QObject, "OrbitTransferFigure"), win.findChild(qtCore.QObject, "OrbitTransferFigureParent"), dof3=True)
+        self.interplanetary_transfer_figure.updateWithCanvas(win.findChild(qtCore.QObject, "InterplanetaryTransferFigure"), win.findChild(qtCore.QObject, "InterplanetaryTransferFigureParent"), dof3=True)
         
         self.orbit_transfer_figure.figure.tight_layout()
         self.orbit_transfer_figure.axes.set_aspect('equal', adjustable='box')
+        
+        self.interplanetary_transfer_figure.figure.tight_layout()
+        self.interplanetary_transfer_figure.axes.set_aspect('equal', adjustable='box')
     
     # ! SLOTS
     
@@ -644,10 +654,9 @@ class MissionParameters(qtCore.QObject):
         
         if self.get_height_periapse_arr() == 0: r_p_A = 0
         
-        print(depPlanet, arrPlanet, depDate, arrDate, r_p_D, r_p_A, T)
-        
-        print(InterplanetaryTrajectories.OptimalTransfer(depPlanet, arrPlanet, depDate, arrDate, r_p_D, r_p_A, T, self.get_m_0()))
-    
+        maneuver_1, maneuver_2, lambert_oe, theta_2 = InterplanetaryTrajectories.OptimalTransfer(depPlanet, arrPlanet, depDate, arrDate, r_p_D, r_p_A, T, self.get_m_0())
+
+        self.plotInterplanetaryTransfer(maneuver_1, maneuver_2, lambert_oe, theta_2)
     
     # ! PRIVATE
     
@@ -737,6 +746,9 @@ class MissionParameters(qtCore.QObject):
         """Plots the orbit transfer
         """
         
+        ThreeDimensionalOrbit.setCelestialBody(self.body_dep)
+        Time.setCelestialBody(self.body_dep)
+        
         # * Integrate departure/arrival orbits
         
         TwoBodyProblem.setCelestialBody(self.body_dep)
@@ -761,6 +773,8 @@ class MissionParameters(qtCore.QObject):
         
         self.parameters_tra.r_p = self.parameters_dep.r_p
         self.parameters_tra.r_a = self.parameters_dep.r_a
+        
+        self.set_m_c(self.get_m_0())
         
         for idx, maneuver in enumerate(self.maneuvers):
             
@@ -848,6 +862,8 @@ class MissionParameters(qtCore.QObject):
         
         result_man = dict(y=np.zeros(shape=(6,1)))
         
+        dt = 0.0
+        
         # * Choose maneuver
         
         match maneuver.getType():
@@ -861,7 +877,7 @@ class MissionParameters(qtCore.QObject):
                 
                 # * Maneuver
                 
-                maneuverResult = OrbitalManeuvers.HohmannTransfer(self.parameters_tra.r_p, self.parameters_tra.r_a, self.parameters_arr.r_p, self.parameters_arr.r_a, maneuver.getOption(), self.m_0)
+                maneuverResult = OrbitalManeuvers.HohmannTransfer(self.parameters_tra.r_p, self.parameters_tra.r_a, self.parameters_arr.r_p, self.parameters_arr.r_a, maneuver.getOption(), self.get_m_c())
                 
                 maneuverResult.oe.i     = self.oe_tra.i
                 maneuverResult.oe.Omega = self.oe_tra.Omega
@@ -870,9 +886,30 @@ class MissionParameters(qtCore.QObject):
                 
                 # * Integrate
                 
-                if first: result_first = self.integrateFirstManeuver(theta_0)
+                if first:
+                    
+                    result_first = self.integrateFirstManeuver(theta_0)
+                    
+                    dt += result_first['dt']
+                    
+                    result_man = self.integrateManeuver(maneuverResult.oe, theta_0, theta_f)
+                    
+                    dt += result_first['dt']
+                    
+                else:
                 
-                result_man = self.integrateManeuver(maneuverResult.oe, theta_0, theta_f)
+                    temp1 = self.integrateManeuver(self.oe_tra, self.oe_tra.theta, maneuverResult.oe.theta)
+                    
+                    dt += temp1['dt']
+                    
+                    temp2 = self.integrateManeuver(maneuverResult.oe, theta_0, theta_f)
+                    
+                    print(np.rad2deg(self.oe_tra.theta), np.rad2deg(maneuverResult.oe.theta), ' --> ',
+                          np.rad2deg(theta_0), np.rad2deg(theta_f))
+                    
+                    dt += temp2['dt']
+                
+                    result_man['y'] = np.append(temp1['y'], temp2['y'], axis=1)
                 
                 # * New  orbital elements
                 
@@ -883,6 +920,14 @@ class MissionParameters(qtCore.QObject):
                 
                 self.parameters_tra.r_p = self.parameters_arr.r_p
                 self.parameters_tra.r_a = self.parameters_arr.r_a
+                
+                # * Budget
+                
+                maneuver.setDeltaVelocity(maneuverResult.dv)
+                maneuver.setDeltaTime(dt / 3600 + maneuverResult.dt / 3600)
+                maneuver.setDeltaMass(maneuverResult.dm)
+                
+                self.set_m_c(self.get_m_c() - maneuverResult.dm)
                 
             case ManeuverType.BI_ELLIPTIC_HOHMANN:
                 
@@ -895,7 +940,7 @@ class MissionParameters(qtCore.QObject):
                 
                 # * Maneuver - 1
                 
-                maneuverResult_1, maneuverResult_2 = OrbitalManeuvers.BiEllipticHohmannTransfer(self.parameters_tra.r_p, self.parameters_tra.r_a, self.parameters_arr.r_p, self.parameters_arr.r_a, maneuver.getOptionValue(), maneuver.getOption(), self.m_0)
+                maneuverResult_1, maneuverResult_2 = OrbitalManeuvers.BiEllipticHohmannTransfer(self.parameters_tra.r_p, self.parameters_tra.r_a, self.parameters_arr.r_p, self.parameters_arr.r_a, maneuver.getOptionValue(), maneuver.getOption(), self.get_m_c())
                 
                 maneuverResult_1.oe.i       = self.oe_tra.i
                 maneuverResult_1.oe.Omega   = self.oe_tra.Omega
@@ -904,9 +949,28 @@ class MissionParameters(qtCore.QObject):
                 
                 # * Integrate - 1
                 
-                if first: result_first = self.integrateFirstManeuver(theta_0_1)
                 
-                result_man_1 = self.integrateManeuver(maneuverResult_1.oe, theta_0_1, theta_f_1)
+                if first:
+                    
+                    result_first = self.integrateFirstManeuver(theta_0_1)
+                    
+                    dt += result_first['dt']
+                    
+                    result_man_1 = self.integrateManeuver(maneuverResult_1.oe, theta_0_1, theta_f_1)
+                    
+                    dt += result_man_1['dt']
+                    
+                else:
+                
+                    temp1 = self.integrateManeuver(self.oe_tra, self.oe_tra.theta, maneuverResult_1.oe.theta)
+                    
+                    dt += temp1['dt']
+                    
+                    temp2 = self.integrateManeuver(maneuverResult_1.oe, theta_0_1, theta_f_1)
+                    
+                    dt += temp2['dt']
+                
+                    result_man_1['y'] = np.append(temp1['y'], temp2['y'], axis=1)
                 
                 # * Maneuver - 2
                 
@@ -919,6 +983,8 @@ class MissionParameters(qtCore.QObject):
                 
                 result_man_2 = self.integrateManeuver(maneuverResult_2.oe, theta_0_2, theta_f_2)
                 
+                dt += result_man_2['dt']
+                
                 result_man['y'] = np.append(result_man_1['y'], result_man_2['y'], axis=1)
                 
                 # * New  orbital elements
@@ -930,12 +996,20 @@ class MissionParameters(qtCore.QObject):
                 
                 self.parameters_tra.r_p = self.parameters_arr.r_p
                 self.parameters_tra.r_a = self.parameters_arr.r_a
+                
+                # * Budget
+                
+                maneuver.setDeltaVelocity(maneuverResult_1.dv + maneuverResult_2.dv)
+                maneuver.setDeltaTime(dt / 3600 + maneuverResult_1.dt / 3600 + maneuverResult_2.dt / 3600)
+                maneuver.setDeltaMass(maneuverResult_1.dm + maneuverResult_2.dm)
+                
+                self.set_m_c(self.get_m_c() - maneuverResult_1.dm - maneuverResult_2.dm)
             
             case ManeuverType.PLANE_CHANGE:
                 
                 # * Maneuver
                 
-                maneuverResult = OrbitalManeuvers.PlaneChangeManeuver2(self.parameters_tra.r_p, self.parameters_tra.r_a, self.oe_tra.Omega, self.oe_tra.omega, self.oe_tra.i, self.oe_arr.Omega, self.oe_arr.i, self.m_0)
+                maneuverResult = OrbitalManeuvers.PlaneChangeManeuver2(self.parameters_tra.r_p, self.parameters_tra.r_a, self.oe_tra.Omega, self.oe_tra.omega, self.oe_tra.i, self.oe_arr.Omega, self.oe_arr.i, self.get_m_c())
                 
                 maneuverResult.oe.h = self.oe_tra.h
                 maneuverResult.oe.e = self.oe_tra.e
@@ -947,9 +1021,13 @@ class MissionParameters(qtCore.QObject):
                         
                     result_first = self.integrateFirstManeuver(maneuverResult.oe.theta)
                     
+                    dt += result_first['dt']
+                    
                 else:
                 
                     result_man = self.integrateManeuver(self.oe_tra, self.oe_tra.theta, maneuverResult.oe.theta)
+                    
+                    dt += result_man['dt']
                 
                 # * New  orbital elements
                 
@@ -957,12 +1035,20 @@ class MissionParameters(qtCore.QObject):
                 self.oe_tra.Omega   = maneuverResult.oe.Omega
                 self.oe_tra.omega   = maneuverResult.oe.omega
                 self.oe_tra.theta   = maneuverResult.oe.theta
+                
+                # * Budget
+                
+                maneuver.setDeltaVelocity(maneuverResult.dv)
+                maneuver.setDeltaTime(dt / 3600 + maneuverResult.dt / 3600)
+                maneuver.setDeltaMass(maneuverResult.dm)
+                
+                self.set_m_c(self.get_m_c() - maneuverResult.dm)
             
             case ManeuverType.APSE_LINE_ROTATION:
                 
                 # * Maneuver
                 
-                maneuverResult = OrbitalManeuvers.ApseLineRotationFromEta(self.parameters_tra.r_p, self.parameters_tra.r_a, self.parameters_tra.r_p, self.parameters_tra.r_a, self.oe_arr.omega - self.oe_tra.omega, secondIntersectionPoint=maneuver.getOption()==1, m=self.m_0)
+                maneuverResult = OrbitalManeuvers.ApseLineRotationFromEta(self.parameters_tra.r_p, self.parameters_tra.r_a, self.parameters_tra.r_p, self.parameters_tra.r_a, self.oe_arr.omega - self.oe_tra.omega, secondIntersectionPoint=maneuver.getOption()==1, m=self.get_m_c())
                 
                 # * Integrate
                 
@@ -970,14 +1056,26 @@ class MissionParameters(qtCore.QObject):
                     
                     result_first = self.integrateFirstManeuver(maneuverResult.oe.theta)
                     
+                    dt += result_first['dt']
+                    
                 else:
                 
                     result_man = self.integrateManeuver(self.oe_tra, self.oe_tra.theta, maneuverResult.oe.theta)
+                    
+                    dt += result_man['dt']
                 
                 # * New  orbital elements
                 
                 self.oe_tra.omega   = self.oe_arr.omega
                 self.oe_tra.theta   = maneuverResult.oe.theta
+                
+                # * Budget
+                
+                maneuver.setDeltaVelocity(maneuverResult.dv)
+                maneuver.setDeltaTime(dt / 3600 + maneuverResult.dt / 3600)
+                maneuver.setDeltaMass(maneuverResult.dm)
+                
+                self.set_m_c(self.get_m_c() - maneuverResult.dm)
         
         # * Return
         
@@ -1038,3 +1136,69 @@ class MissionParameters(qtCore.QObject):
         if theta_f != 0.0 and t_0 > t_f: t_f += parameters.T
         
         return TwoBodyProblem.integrateRelativeMotion(np.hstack([r, v]), t_0, t_f)
+    
+    def plotInterplanetaryTransfer(self, maneuver_1 : MANEUVER_RESULT, maneuver_2 : MANEUVER_RESULT, lambert_oe : ORBITAL_ELEMENTS, theta_2 : float) -> None:
+        
+        self.interplanetary_transfer_figure.resetCanvas()
+        
+        # * Integrate
+        
+        ThreeDimensionalOrbit.setCelestialBody(CelestialBody.SUN)
+        TwoBodyProblem.setCelestialBody(CelestialBody.SUN)
+        Time.setCelestialBody(CelestialBody.SUN)
+        
+        r, v = ThreeDimensionalOrbit.PF2GEF(lambert_oe)
+        
+        parameters = TwoBodyProblem.calculateOrbitalParameters(r, v)
+        
+        t_0 = Time.calculateEllipticalOrbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=parameters.T, e=parameters.e, theta=lambert_oe.theta)
+        t_f = Time.calculateEllipticalOrbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=parameters.T, e=parameters.e, theta=theta_2)
+        
+        if theta_2 != 0.0 and t_0 > t_f: t_f += parameters.T
+        
+        result = TwoBodyProblem.integrateRelativeMotion(np.hstack([r, v]), t_0, t_f)
+        
+        # * Planet 1
+        
+        r_1_x, r_1_y, r_1_z = [], [], []
+        r_2_x, r_2_y, r_2_z = [], [], []
+        
+        start = datetime.strptime(self.get_date_dep(), '%Y-%m-%d %H:%M:%S')
+        
+        depPlanet = celestialBodyFromPlanet(planetFromIndex(self.get_planet_dep()))
+        arrPlanet = celestialBodyFromPlanet(planetFromIndex(self.get_planet_arr()))
+        
+        for dt in np.linspace(0, np.abs(t_f - t_0), 1000):
+            
+            r, v = InterplanetaryTrajectories.Ephemeris(depPlanet, start + timedelta(0, dt))
+            
+            r_1_x.append(r[0])
+            r_1_y.append(r[1])
+            r_1_z.append(r[2])
+            
+            r, v = InterplanetaryTrajectories.Ephemeris(arrPlanet, start + timedelta(0, dt))
+            
+            r_2_x.append(r[0])
+            r_2_y.append(r[1])
+            r_2_z.append(r[2])
+        
+        # * Celestial Bodies
+        
+        self.interplanetary_transfer_figure.axes.scatter(0, 0, 0, s=1000, c='y')
+        
+        # * Orbit
+        
+        self.interplanetary_transfer_figure.axes.plot(r_1_x, r_1_y, r_1_z, 'b--', label='Departure Planet')
+        self.interplanetary_transfer_figure.axes.plot(r_2_x, r_2_y, r_2_z, 'r--', label='Arrival Planet')
+        self.interplanetary_transfer_figure.axes.plot(result['y'][0,:], result['y'][1,:], result['y'][2,:], 'g', label='Orbit')
+        self.interplanetary_transfer_figure.axes.scatter(result['y'][0,0], result['y'][1,0], result['y'][2,0], c='b', label='Departure')
+        self.interplanetary_transfer_figure.axes.scatter(result['y'][0,-1], result['y'][1,-1], result['y'][2,-1], c='r', label='Arrival')
+        
+        # * Labels
+        
+        self.interplanetary_transfer_figure.axes.set_xlabel('$x$ [km]')
+        self.interplanetary_transfer_figure.axes.set_ylabel('$y$ [km]')
+        self.interplanetary_transfer_figure.axes.set_zlabel('$z$ [km]')
+        self.interplanetary_transfer_figure.axes.legend(bbox_to_anchor=(-0.5, 0.5), loc='center left')
+        
+        self.interplanetary_transfer_figure.redrawCanvas()

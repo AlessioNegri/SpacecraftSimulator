@@ -22,7 +22,7 @@ from enum import IntEnum
 
 from PIL import Image
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from AstronomicalData import *
 

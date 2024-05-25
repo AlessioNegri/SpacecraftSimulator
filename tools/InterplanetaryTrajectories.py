@@ -382,7 +382,17 @@ class InterplanetaryTrajectories:
     
     # ! ALGORITHM 8.2
     @classmethod
-    def OptimalTransfer(cls, departurePlanet : CelestialBody, arrivalPlanet : CelestialBody, departureDate : datetime, arrivalDate : datetime, r_p_D : float, r_p_A : float, T : float, m : float) -> list:
+    def OptimalTransfer(cls,
+                        departurePlanet : CelestialBody,
+                        arrivalPlanet : CelestialBody,
+                        departureDate : datetime,
+                        arrivalDate : datetime,
+                        r_p_D : float,
+                        r_p_A : float,
+                        T : float,
+                        m : float,
+                        gravityAssist : bool = False,
+                        side : FlybySide = FlybySide.DARK_SIDE) -> list:
         """Optimal transfer with Lambert
 
         Args:
@@ -394,9 +404,11 @@ class InterplanetaryTrajectories:
             r_p_A (float): Elliptical Capture Orbit pericenter radius
             T (float): Rendezvous Orbit period
             m (float): Mass of the spacecraft
+            gravityAssist (bool, optional): True for enabling gravity assist. Defaults to False.
+            side (FlybySide, optional): Side w.r.t. Sun. Defaults to FlybySide.DARK_SIDE.
         
         Returns:
-            list: [maneuver_1, maneuver_2]
+            list: [maneuver_1, maneuver_2, lambert orbital elements, lambert final true anomaly]
         """
         
         # * 1. Intial condition
@@ -453,45 +465,113 @@ class InterplanetaryTrajectories:
         
         mu_A = AstronomicalData.GravitationalParameter(arrivalPlanet)
         
+        maneuver_2 = MANEUVER_RESULT()
+        
+        if not gravityAssist:
+        
             # * a. Rendezvous orbit from period
         
-        a = (T * np.sqrt(mu_A) / (2 * np.pi))**(2/3)
-        
-        e = 1 - r_p_A / a if r_p_A != 0 else (2 * mu_A) / (a * linalg.norm(v_inf_A)**2) - 1
-        
-        r_p = r_p_A if r_p_A != 0 else 2 * mu_A / linalg.norm(v_inf_A)**2 * (1 - e) / (1 + e)
-        
-        r_a = 2 * a - r_p if r_p_A != 0 else 2 * mu_A / linalg.norm(v_inf_A)**2
-        
-        v_c = np.sqrt(mu_A * (1 + e) / r_p)
+            a = (T * np.sqrt(mu_A) / (2 * np.pi))**(2/3)
+            
+            e = 1 - r_p_A / a if r_p_A != 0 else (2 * mu_A) / (a * linalg.norm(v_inf_A)**2) - 1
+            
+            r_p = r_p_A if r_p_A != 0 else 2 * mu_A / linalg.norm(v_inf_A)**2 * (1 - e) / (1 + e)
+            
+            r_a = 2 * a - r_p if r_p_A != 0 else 2 * mu_A / linalg.norm(v_inf_A)**2
+            
+            v_c = np.sqrt(mu_A * (1 + e) / r_p)
         
             # * b. Hyperbola trajectory
         
-        e_hyp = 1 + r_p * linalg.norm(v_inf_A)**2 / mu_A
-        
-        h_hyp = r_p * np.sqrt(linalg.norm(v_inf_A)**2 + 2 * mu_A / r_p)
-        
-        delta = 2 * np.arcsin(1 / e_hyp)
-        
-        beta = np.arccos(1 / e_hyp)
-        
-        Delta = h_hyp**2 / mu_A * 1 / np.sqrt(e_hyp**2 - 1)
-        
-        v_p = h_hyp / r_p
+            e_hyp = 1 + r_p * linalg.norm(v_inf_A)**2 / mu_A
+            
+            h_hyp = r_p * np.sqrt(linalg.norm(v_inf_A)**2 + 2 * mu_A / r_p)
+            
+            delta = 2 * np.arcsin(1 / e_hyp)
+            
+            beta = np.arccos(1 / e_hyp)
+            
+            Delta = h_hyp**2 / mu_A * 1 / np.sqrt(e_hyp**2 - 1)
+            
+            v_p = h_hyp / r_p
         
             # * c. Maneuver
+            
+            maneuver_2.dv = np.abs(v_p - v_c)
+            
+            maneuver_2.dt = 0.0
+            
+            maneuver_2.dm = OrbitalManeuvers.propellantMass(m, maneuver_2.dv) # * - maneuver_1.dm
+            
+            maneuver_2.oe = ORBITAL_ELEMENTS(h_hyp, e_hyp, 0, 0, 0, 0, 0)
         
-        maneuver_2 = MANEUVER_RESULT()
+        else:
+            
+            # * a. Directions
+            
+            u_S = - R_1 / linalg.norm(R_1)
+            u_V = V_1 / linalg.norm(V_1)
+            
+            print(v_inf_A)
+            print(u_S)
+            print(u_V)
+            
+            return
+            
+            # * a. Hyperbola trajectory
+            
+            e_hyp = 1 + r_p_A * linalg.norm(v_inf_A)**2 / mu_A
+            
+            h_hyp = r_p_A * np.sqrt(linalg.norm(v_inf_A)**2 + 2 * mu_A / r_p)
+            
+            delta = 2 * np.arcsin(1 / e_hyp)
+            
+            beta = np.arccos(1 / e_hyp)
+            
+            theta_inf = np.arccos(- 1 / e_hyp)
+            
+            Delta = h_hyp**2 / mu_A * 1 / np.sqrt(e_hyp**2 - 1)
+            
+            v_p = h_hyp / r_p
+            
+            phi_1 = np.arctan(v_inf_1[1] / v_inf_1[0])
+            
+            # * 3. Approach
         
-        maneuver_2.dv = np.abs(v_p - v_c)
+            phi_2 = phi_1 + delta if side == FlybySide.DARK_SIDE else phi_1 - delta
         
-        maneuver_2.dt = 0.0
+            v_inf_2 = np.array([v_inf_m * np.cos(phi_2), v_inf_m * np.sin(phi_2)])
+            
+            V_2_v = V_2 + v_inf_2
+            
+            V_t_2 = V_2_v[0]
+            
+            V_r_2 = - V_2_v[1]
+            
+            # * 4. Postflyby ellipse (orbit 2)
+                
+            h_2 = R_2 * V_t_2
+            
+            e_cos = h_2**2 / (mu_sun * R_2) - 1
+            e_sin = V_r_2 * h_2 / mu_sun
+            
+            theta_2 = np.arctan2(e_sin, e_cos)
+            
+            e_2 = e_sin / np.sin(theta_2)
+            
+            R_p_2 = h_2**2 / mu_sun * 1 / (1 + e_2)
         
-        maneuver_2.dm = OrbitalManeuvers.propellantMass(m, maneuver_2.dv) # * - maneuver_1.dm
+            # * c. Maneuver
+            
+            maneuver_2.dv = np.abs(v_p - v_c)
+            
+            maneuver_2.dt = 0.0
+            
+            maneuver_2.dm = OrbitalManeuvers.propellantMass(m, maneuver_2.dv) # * - maneuver_1.dm
+            
+            maneuver_2.oe = ORBITAL_ELEMENTS(h_2, e_2, 0, 0, 0, 0, 0)
         
-        maneuver_2.oe = ORBITAL_ELEMENTS(h_hyp, e_hyp, 0, 0, 0, 0, 0)
-        
-        return [maneuver_1, maneuver_2]
+        return [maneuver_1, maneuver_2, oe, theta_2]
 
 if __name__ == '__main__':
     
@@ -528,6 +608,8 @@ if __name__ == '__main__':
     
     print('EXAMPLE 8.8 - 8.9 - 8.10\n')
     print(InterplanetaryTrajectories.OptimalTransfer(CelestialBody.EARTH, CelestialBody.MARS, datetime(1996, 11, 7, 0, 0, 0), datetime(1997, 9, 12, 0, 0, 0), 6378 + 180, 3380 + 300, 48 * 3600, 2000))
+    print('-' * 40, '\n')
+    print(InterplanetaryTrajectories.OptimalTransfer(CelestialBody.EARTH, CelestialBody.MARS, datetime(1996, 11, 7, 0, 0, 0), datetime(1997, 9, 12, 0, 0, 0), 6378 + 180, 3380 + 300, 48 * 3600, 2000, gravityAssist=True))
     print('-' * 40, '\n')
     
     print('Progetto')

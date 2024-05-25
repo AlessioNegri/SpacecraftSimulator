@@ -17,6 +17,15 @@ Rectangle
     // ? Value of the maneuver's option.
     property string p_OptionValue: ""
 
+    // ? Value of the maneuver's delta velocity.
+    property string p_DeltaVelocity: "0.0"
+
+    // ? Value of the maneuver's delta time.
+    property string p_DeltaTime: "0.0"
+
+    // ? Value of the maneuver's delta mass.
+    property string p_DeltaMass: "0.0"
+
     //!-----------------------------------------!//
 
     anchors.left: parent.left
@@ -55,9 +64,13 @@ Rectangle
             {
                 p_Type = currentIndex
 
-                if (currentIndex === 0 || currentIndex === 1)
+                if (currentIndex === 0)
                 {
                     _option_.model = [ "Periapsis > Apoapsis", "Apoapsis  > Periapsis" ]
+                }
+                else if (currentIndex === 1)
+                {
+                    _option_.model = [ "Periapsis > Apoapsis" ]
                 }
                 else if (currentIndex === 3)
                 {
@@ -93,6 +106,30 @@ Rectangle
             implicitWidth: 200
             placeholderText: "Support Radius"
             onTextEdited: p_OptionValue = text
+        }
+
+        TextField
+        {
+            text: p_DeltaVelocity
+            implicitWidth: 125
+            placeholderText: "Δv [km / s]"
+            readOnly: true
+        }
+
+        TextField
+        {
+            text: p_DeltaTime
+            implicitWidth: 125
+            placeholderText: "Δt [h]"
+            readOnly: true
+        }
+
+        TextField
+        {
+            text: p_DeltaMass
+            implicitWidth: 125
+            placeholderText: "Δm [kg]"
+            readOnly: true
         }
 
         Item { Layout.fillWidth: true }

@@ -33,10 +33,13 @@ Dialog
             {
                 var obj = component.createObject(_container_,
                 {
-                    "p_Id"          : r_Maneuvers.length + 1,
-                    "p_Type"        : maneuver.type,
-                    "p_Option"      : maneuver.option,
-                    "p_OptionValue" : maneuver.optionValue
+                    "p_Id"              : r_Maneuvers.length + 1,
+                    "p_Type"            : maneuver.type,
+                    "p_Option"          : maneuver.option,
+                    "p_OptionValue"     : maneuver.optionValue,
+                    "p_DeltaVelocity"   : maneuver.dv,
+                    "p_DeltaTime"       : maneuver.dt,
+                    "p_DeltaMass"       : maneuver.dm
                 })
                 
                 if (obj == null)
@@ -135,7 +138,7 @@ Dialog
     modal: true
     closePolicy: Popup.NoAutoClose
     font.pointSize: 14
-    width: 1100
+    width: 1400
     height: 700
 
     onVisibleChanged: if (visible) loadManeuvers()
