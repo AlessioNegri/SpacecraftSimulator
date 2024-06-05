@@ -573,6 +573,99 @@ class InterplanetaryTrajectories:
         
         return [maneuver_1, maneuver_2, oe, theta_2]
 
+    # ! EXTRA
+
+    @classmethod
+    def PorkChop(cls,
+                 departurePlanet : CelestialBody,
+                 arrivalPlanet : CelestialBody,
+                 launchWindow : list,
+                 arrivalWindow : list,
+                 step: int = 1,
+                 show : bool = False) -> None:
+        
+        # * 1. Extract dates
+        
+        lwBeg, lwEnd = launchWindow
+        
+        awBeg, awEnd = arrivalWindow
+        
+        # * 2. Cycle of time windows
+        
+        dv_1    = np.zeros(shape=(daterangeLength(awBeg, awEnd, step), daterangeLength(lwBeg, lwEnd, step)), dtype=float)
+        dv_2    = np.zeros(shape=(daterangeLength(awBeg, awEnd, step), daterangeLength(lwBeg, lwEnd, step)), dtype=float)
+        T_F     = np.zeros(shape=(daterangeLength(awBeg, awEnd, step), daterangeLength(lwBeg, lwEnd, step)), dtype=float)
+        X       = np.empty(shape=(daterangeLength(awBeg, awEnd, step), daterangeLength(lwBeg, lwEnd, step)), dtype='datetime64[s]')
+        Y       = np.empty(shape=(daterangeLength(awBeg, awEnd, step), daterangeLength(lwBeg, lwEnd, step)), dtype='datetime64[s]')
+
+        printProgressBar(0, daterangeLength(lwBeg, lwEnd, step), prefix = 'Progress:', suffix = 'Start', length = 50)
+        
+        for lwIndex, lwDate in enumerate(daterange(lwBeg, lwEnd, step)):
+            
+            printProgressBar(lwIndex, daterangeLength(lwBeg, lwEnd, step), prefix = 'Progress:', suffix = 'Processing...', length = 50)
+            
+            for awIndex, awDate in enumerate(daterange(awBeg, awEnd, step)):
+        
+                # * a. Extract ephemeris
+                
+                R_1, V_1 = cls.Ephemeris(departurePlanet, lwDate)
+                R_2, V_2 = cls.Ephemeris(arrivalPlanet, awDate)
+                
+                dt = (awDate - lwDate).total_seconds()
+                
+                T_F[awIndex, lwIndex] = dt / 3600 / 24
+                
+                # * b. Lambert problem
+                
+                OrbitDetermination.setCelestialBody(CelestialBody.SUN)
+                
+                V_D_v, V_A_v, oe, theta_2 = OrbitDetermination.solveLambertProblem(R_1, R_2, dt)
+                
+                # * c. Hyperbolic excess velocities
+                
+                dv_1[awIndex, lwIndex] = linalg.norm(V_D_v - V_1)
+                dv_2[awIndex, lwIndex] = linalg.norm(V_A_v - V_2)
+                
+                # * d. Times
+                
+                X[awIndex, lwIndex] = np.datetime64(lwDate.strftime('%Y-%m-%d'))
+                Y[awIndex, lwIndex] = np.datetime64(awDate.strftime('%Y-%m-%d'))
+        
+        printProgressBar(daterangeLength(lwBeg, lwEnd, step), daterangeLength(lwBeg, lwEnd, step), prefix = 'Progress:', suffix = 'Completed', length = 50)
+        
+        # * 3. Show plot
+        
+        if show:
+            
+            dv_cond = dv_1.copy()
+            
+            dv_cond[dv_cond > 12.5] = 0.0
+            
+            ax = plt.subplot()
+            
+            contourVelocity = plt.contourf(X, Y, dv_1 + dv_2, cmap='hot')
+            
+            contourVelocityConstraint = plt.contour(X, Y, dv_cond, cmap='flag')
+            
+            contourTimeOfFlight = plt.contour(X, Y, T_F, cmap='summer')
+            
+            ax.clabel(contourVelocityConstraint, inline=1, fontsize=10)
+            ax.clabel(contourTimeOfFlight, inline=1, fontsize=10)
+            
+            cb1 = plt.colorbar(contourVelocity, label='$\Delta V_{TOT}$ $[km / s]$', shrink=0.5)
+            cb2 = plt.colorbar(contourVelocityConstraint, label='$\Delta V_1$ $[km / s]$', orientation='vertical', shrink=0.5)
+            
+            l, b, w, h = ax.get_position().bounds
+            ll, bb, ww, hh = cb1.ax.get_position().bounds
+            cb1.ax.set_position([ll, b + 0.1*h, 0.1*ww, h*0.8])
+            #cb2.ax.set_position([ll, b + 0.1*h, 0.1*ww, h*0.8])
+            
+            plt.title('Pork Chop')
+            plt.xlabel('Launch Window')
+            plt.ylabel('Arrival Window')
+            
+            plt.show()
+        
 if __name__ == '__main__':
     
     print('EXAMPLE 8.1\n')
@@ -616,4 +709,13 @@ if __name__ == '__main__':
     print(InterplanetaryTrajectories.OptimalTransfer(CelestialBody.EARTH, CelestialBody.NEPTUNE, datetime(2020, 5, 8, 0, 0, 0), datetime(2039, 2, 15, 0, 0, 0), 6378 + 180, AstronomicalData.EquatiorialRadius(CelestialBody.NEPTUNE) + 300, 48 * 3600, 2000))
     print(InterplanetaryTrajectories.Departure(CelestialBody.EARTH, CelestialBody.NEPTUNE, 6378 + 180, 2000))
     print(InterplanetaryTrajectories.Rendezvous(CelestialBody.EARTH, CelestialBody.NEPTUNE, AstronomicalData.EquatiorialRadius(CelestialBody.NEPTUNE) + 300, 48 * 3600, 2000))
+    print('-' * 40, '\n')
+    
+    print('Pork Chop Plot')
+    InterplanetaryTrajectories.PorkChop(CelestialBody.EARTH,
+                                        CelestialBody.NEPTUNE,
+                                        [datetime(2020, 1, 1, 0, 0, 0), datetime(2021, 1, 1, 0, 0, 0)],
+                                        [datetime(2031, 1, 1, 0, 0, 0), datetime(2050, 6, 1, 0, 0, 0)],
+                                        step=3,
+                                        show=True)
     print('-' * 40, '\n')

@@ -21,6 +21,11 @@ Dialog
         close()
     }
 
+    function updateProgressBar(value)
+    {
+        _progressBar_.value = value
+    }
+
     //!-----------------------------------------!//
     
     anchors.centerIn: parent
@@ -29,6 +34,11 @@ Dialog
     font.pointSize: 14
     width: 1100
     height: 700
+
+    Component.onCompleted:
+    {
+        __MissionParameters.updateProgressBar.connect(updateProgressBar)
+    }
 
     header: Item
     {

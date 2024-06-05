@@ -5,4 +5,5 @@ DialogFigure 1.0 DialogFigure.qml
 DialogInterplanetaryTransfer 1.0 DialogInterplanetaryTransfer.qml
 DialogManeuvers 1.0 DialogManeuvers.qml
 DialogOrbit 1.0 DialogOrbit.qml
+DialogPorkChopPlot 1.0 DialogPorkChopPlot.qml
 DialogSpacecraft 1.0 DialogSpacecraft.qml

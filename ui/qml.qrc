@@ -14,6 +14,7 @@
         <file>dialogs/DialogInterplanetaryTransfer.qml</file>
         <file>dialogs/DialogManeuvers.qml</file>
         <file>dialogs/DialogOrbit.qml</file>
+        <file>dialogs/DialogPorkChopPlot.qml</file>
         <file>dialogs/DialogSpacecraft.qml</file>
 
         <file>pages/qmldir</file>

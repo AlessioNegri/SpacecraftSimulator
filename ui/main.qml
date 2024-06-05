@@ -31,6 +31,8 @@ ApplicationWindow
 
     DialogManeuvers { id: _dlgManeuvers_ }
 
+    DialogPorkChopPlot { id: _dlgPorkChopPlot_ }
+
     DialogInterplanetaryTransfer { id: _dlgInterplanetaryTransfer_ }
 
     // ? Menu Bar
@@ -126,11 +128,14 @@ ApplicationWindow
             
             Action { text: "Relative Navigation"; enabled: gp_CurrentMission === 1 }
             
-            Action
+            Menu
             {
-                text: "Interplanetary Transfer"
+                title: "Interplanetary"
                 enabled: gp_CurrentMission === 2
-                onTriggered: _dlgInterplanetaryTransfer_.open()
+
+                Action { text: "Pork Chop Plot"; onTriggered: _dlgPorkChopPlot_.open() }
+
+                Action { text: "Interplanetary Transfer"; onTriggered: _dlgInterplanetaryTransfer_.open() }
             }
         }
         

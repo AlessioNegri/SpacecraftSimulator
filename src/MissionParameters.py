@@ -8,6 +8,7 @@ sys.path.append(os.path.dirname(__file__))
 from Utility import format
 from FigureCanvas import FigureCanvas
 from Maneuver import Maneuver, ManeuverType
+from PorkChopPlot import PorkChopPlot
 
 from tools.ThreeDimensionalOrbit import *
 from tools.OrbitalManeuvers import *
@@ -23,7 +24,13 @@ class MissionParameters(qtCore.QObject):
     """Class that manages the mission parameters
     """
     
+    porkChopPlotFinished = qtCore.Signal()
+    
+    updateProgressBar = qtCore.Signal(float)
+    
     # ! PROPERTIES
+    
+    # ? SIGNAL
     
     body_changed    = qtCore.Signal()
     state_changed   = qtCore.Signal()
@@ -54,6 +61,16 @@ class MissionParameters(qtCore.QObject):
     height_periapse_arr_changed = qtCore.Signal()
     period_arr_changed          = qtCore.Signal()
     
+    pcp_planet_dep_changed          = qtCore.Signal()
+    pcp_planet_arr_changed          = qtCore.Signal()
+    pcp_launch_window_beg_changed   = qtCore.Signal()
+    pcp_launch_window_end_changed   = qtCore.Signal()
+    pcp_arrival_window_beg_changed  = qtCore.Signal()
+    pcp_arrival_window_end_changed  = qtCore.Signal()
+    pcp_step_changed                = qtCore.Signal()
+    
+    # ? GET
+    
     def get_body(self):     return self._body
     def get_state(self):    return self._state
     def get_x(self):        return format(self._x)
@@ -82,6 +99,16 @@ class MissionParameters(qtCore.QObject):
     def get_height_periapse_dep(self):  return format(self._height_periapse_dep)
     def get_height_periapse_arr(self):  return format(self._height_periapse_arr)
     def get_period_arr(self):           return format(self._period_arr)
+    
+    def get_pcp_planet_dep(self):           return self._pcp_planet_dep
+    def get_pcp_planet_arr(self):           return self._pcp_planet_arr
+    def get_pcp_launch_window_beg(self):    return self._pcp_launch_window_beg
+    def get_pcp_launch_window_end(self):    return self._pcp_launch_window_end
+    def get_pcp_arrival_window_beg(self):   return self._pcp_arrival_window_beg
+    def get_pcp_arrival_window_end(self):   return self._pcp_arrival_window_end
+    def get_pcp_step(self):                 return self._pcp_step
+    
+    # ? SET
 
     def set_body(self, body : int):     self._body = body; self.body_changed.emit()
     def set_state(self, state : int):   self._state = state; self.state_changed.emit()
@@ -105,12 +132,22 @@ class MissionParameters(qtCore.QObject):
     def set_T(self, T : float):         self._T = T; self.T_changed.emit()
     
     def set_planet_dep(self, planet_dep : int):                     self._planet_dep = planet_dep; self.planet_dep_changed.emit()
-    def set_planet_arr(self, planet_arr : float):                   self._planet_arr = planet_arr; self.planet_arr_changed.emit()
+    def set_planet_arr(self, planet_arr : int):                     self._planet_arr = planet_arr; self.planet_arr_changed.emit()
     def set_date_dep(self, date_dep : str):                         self._date_dep = date_dep; self.date_dep_changed.emit()
     def set_date_arr(self, date_arr : str):                         self._date_arr = date_arr; self.date_arr_changed.emit()
     def set_height_periapse_dep(self, height_periapse_dep : float): self._height_periapse_dep = height_periapse_dep; self.height_periapse_dep_changed.emit()
     def set_height_periapse_arr(self, height_periapse_arr : float): self._height_periapse_arr= height_periapse_arr; self.height_periapse_arr_changed.emit()
     def set_period_arr(self, period_arr : float):                   self._period_arr = period_arr; self.period_arr_changed.emit()
+    
+    def set_pcp_planet_dep(self, planet : int):         self._pcp_planet_dep = planet; self.pcp_planet_dep_changed.emit()
+    def set_pcp_planet_arr(self, planet : int):         self._pcp_planet_arr = planet; self.pcp_planet_arr_changed.emit()
+    def set_pcp_launch_window_beg(self, date : str):    self._pcp_launch_window_beg = date; self.pcp_launch_window_beg_changed.emit()
+    def set_pcp_launch_window_end(self, date : str):    self._pcp_launch_window_end = date; self.pcp_launch_window_end_changed.emit()
+    def set_pcp_arrival_window_beg(self, date : str):   self._pcp_arrival_window_beg = date; self.pcp_arrival_window_beg_changed.emit()
+    def set_pcp_arrival_window_end(self, date : str):   self._pcp_arrival_window_end = date; self.pcp_arrival_window_end_changed.emit()
+    def set_pcp_step(self, step : int):                 self._pcp_step = step; self.pcp_step_changed.emit()
+    
+    # ? PRIVATE MEMBER
     
     body    = qtCore.Property(int, get_body, set_body, notify=body_changed)
     state   = qtCore.Property(int, get_state, set_state, notify=state_changed)
@@ -140,6 +177,14 @@ class MissionParameters(qtCore.QObject):
     height_periapse_dep = qtCore.Property(float, get_height_periapse_dep, set_height_periapse_dep, notify=height_periapse_dep_changed)
     height_periapse_arr = qtCore.Property(float, get_height_periapse_arr, set_height_periapse_arr, notify=height_periapse_arr_changed)
     period_arr          = qtCore.Property(float, get_period_arr, set_period_arr, notify=period_arr_changed)
+    
+    pcp_planet_dep          = qtCore.Property(int, get_pcp_planet_dep, set_pcp_planet_dep, notify=pcp_planet_dep_changed)
+    pcp_planet_arr          = qtCore.Property(int, get_pcp_planet_arr, set_pcp_planet_arr, notify=pcp_planet_arr_changed)
+    pcp_launch_window_beg   = qtCore.Property(str, get_pcp_launch_window_beg, set_pcp_launch_window_beg, notify=pcp_launch_window_beg_changed)
+    pcp_launch_window_end   = qtCore.Property(str, get_pcp_launch_window_end, set_pcp_launch_window_end, notify=pcp_launch_window_end_changed)
+    pcp_arrival_window_beg  = qtCore.Property(str, get_pcp_arrival_window_beg, set_pcp_arrival_window_beg, notify=pcp_arrival_window_beg_changed)
+    pcp_arrival_window_end  = qtCore.Property(str, get_pcp_arrival_window_end, set_pcp_arrival_window_end, notify=pcp_arrival_window_end_changed)
+    pcp_step                = qtCore.Property(int, get_pcp_step, set_pcp_step, notify=pcp_step_changed)
     
     # ! METHODS
 
@@ -183,6 +228,14 @@ class MissionParameters(qtCore.QObject):
         self._height_periapse_arr   = 300
         self._period_arr            = 48
         
+        self._pcp_planet_dep            = indexFromPlanet(Planet.EARTH)
+        self._pcp_planet_arr            = indexFromPlanet(Planet.NEPTUNE)
+        self._pcp_launch_window_beg     = '2020-01-01'
+        self._pcp_launch_window_end     = '2021-01-01'
+        self._pcp_arrival_window_beg    = '2031-01-01'
+        self._pcp_arrival_window_end    = '2032-06-01'
+        self._pcp_step                  = 10
+        
         # * Departure parameters
         
         self.body_dep                   = CelestialBody.EARTH
@@ -214,6 +267,11 @@ class MissionParameters(qtCore.QObject):
         # * Interplanetary Transfer
         
         self.interplanetary_transfer_figure = FigureCanvas()
+        self.pork_chop_plot_figure          = FigureCanvas()
+        self.pork_chop_plot                 = PorkChopPlot()
+        
+        self.pork_chop_plot.statusChanged.connect(self.updateStatus)
+        self.pork_chop_plot.finished.connect(self.operationCompleted)
         
         # * Context properties
         
@@ -223,6 +281,7 @@ class MissionParameters(qtCore.QObject):
         engine.rootContext().setContextProperty("__ArrivalGroundTrackFigure", self.ground_track_figure_arr)
         engine.rootContext().setContextProperty("__OrbitTransferFigure", self.orbit_transfer_figure)
         engine.rootContext().setContextProperty("__InterplanetaryTransferFigure", self.interplanetary_transfer_figure)
+        engine.rootContext().setContextProperty("__PorkChopPlotFigure", self.pork_chop_plot_figure)
         
         # * Init
         
@@ -248,6 +307,7 @@ class MissionParameters(qtCore.QObject):
         self.ground_track_figure_arr.updateWithCanvas(win.findChild(qtCore.QObject, "ArrivalGroundTrackFigure"), win.findChild(qtCore.QObject, "ArrivalGroundTrackFigureParent"), figsize=(8, 6))
         self.orbit_transfer_figure.updateWithCanvas(win.findChild(qtCore.QObject, "OrbitTransferFigure"), win.findChild(qtCore.QObject, "OrbitTransferFigureParent"), dof3=True)
         self.interplanetary_transfer_figure.updateWithCanvas(win.findChild(qtCore.QObject, "InterplanetaryTransferFigure"), win.findChild(qtCore.QObject, "InterplanetaryTransferFigureParent"), dof3=True)
+        self.pork_chop_plot_figure.updateWithCanvas(win.findChild(qtCore.QObject, "PorkChopPlotFigure"), win.findChild(qtCore.QObject, "PorkChopPlotFigureParent"))
         
         self.orbit_transfer_figure.figure.tight_layout()
         self.orbit_transfer_figure.axes.set_aspect('equal', adjustable='box')
@@ -631,8 +691,22 @@ class MissionParameters(qtCore.QObject):
     # ? Interplanetary Transfer
     
     @qtCore.Slot()
+    def loadPorkChopPlotParameters(self) -> None:
+        """Loads the pork chop plot parameters
+        """
+        
+        pass
+    
+    @qtCore.Slot()
     def loadInterplanetaryParameters(self) -> None:
         """Loads the interplanetary parameters
+        """
+        
+        pass
+    
+    @qtCore.Slot()
+    def savePorkChopPlotParameters(self) -> None:
+        """Saves the pork chop plot parameters
         """
         
         pass
@@ -657,6 +731,57 @@ class MissionParameters(qtCore.QObject):
         maneuver_1, maneuver_2, lambert_oe, theta_2 = InterplanetaryTrajectories.OptimalTransfer(depPlanet, arrPlanet, depDate, arrDate, r_p_D, r_p_A, T, self.get_m_0())
 
         self.plotInterplanetaryTransfer(maneuver_1, maneuver_2, lambert_oe, theta_2)
+    
+    @qtCore.Slot()
+    def calculatePorkChopPlot(self) -> None:
+        """Calculates the Pork Chop Plot
+        """
+        
+        self.pork_chop_plot.departurePlanet = celestialBodyFromPlanet(planetFromIndex(self.get_pcp_planet_dep()))
+        
+        self.pork_chop_plot.arrivalPlanet = celestialBodyFromPlanet(planetFromIndex(self.get_pcp_planet_arr()))
+        
+        self.pork_chop_plot.launchWindow = [
+            datetime.strptime(self.get_pcp_launch_window_beg(), '%Y-%m-%d'),
+            datetime.strptime(self.get_pcp_launch_window_end(), '%Y-%m-%d')
+        ]
+        
+        self.pork_chop_plot.arrivalWindow = [
+            datetime.strptime(self.get_pcp_arrival_window_beg(), '%Y-%m-%d'),
+            datetime.strptime(self.get_pcp_arrival_window_end(), '%Y-%m-%d')
+        ]
+        
+        self.pork_chop_plot.step = self.get_pcp_step()
+        
+        self.pork_chop_plot.start()
+    
+    @qtCore.Slot()
+    def stopCalculatePorkChopPlot(self) -> None:
+        """Stops the calculation of the Pork Chop Plot
+        """
+        
+        self.pork_chop_plot.stop = True
+    
+    @qtCore.Slot()
+    def updateStatus(self, progress : float, text : str) -> None:
+        """Updates the status bar
+
+        Args:
+            progress (float): Progress bar value
+            text (str): Status description
+        """
+        
+        self.updateProgressBar.emit(progress)
+    
+    @qtCore.Slot()
+    def operationCompleted(self) -> None:
+        """Slot called when the dump manager has finished to load the data
+        """
+        
+        #self.dumpManager.statusChanged.disconnect(self.updateStatus)
+        #self.dumpManager.finished.disconnect(self.operationCompleted)
+        
+        self.plotPorkChop()
     
     # ! PRIVATE
     
@@ -1202,3 +1327,44 @@ class MissionParameters(qtCore.QObject):
         self.interplanetary_transfer_figure.axes.legend(bbox_to_anchor=(-0.5, 0.5), loc='center left')
         
         self.interplanetary_transfer_figure.redrawCanvas()
+    
+    def plotPorkChop(self) -> None:
+        
+        self.pork_chop_plot_figure.resetCanvas()
+        
+        # if (len(self.pork_chop_plot_figure.figure.axes) > 1):
+            
+        #     return
+            
+        #     self.pork_chop_plot_figure.figure.delaxes(self.pork_chop_plot_figure.figure.axes[2])
+        #     self.pork_chop_plot_figure.figure.delaxes(self.pork_chop_plot_figure.figure.axes[1])
+        
+        dv_1 = self.pork_chop_plot.dv_1
+        dv_2 = self.pork_chop_plot.dv_2
+        T_F = self.pork_chop_plot.T_F
+        X = self.pork_chop_plot.X
+        Y = self.pork_chop_plot.Y
+        
+        dv_cond = dv_1.copy()
+            
+        dv_cond[dv_cond > 12.5] = 0.0
+        
+        contourVelocity = self.pork_chop_plot_figure.axes.contourf(X, Y, dv_1 + dv_2, cmap='hot')
+        
+        contourVelocityConstraint = self.pork_chop_plot_figure.axes.contour(X, Y, dv_cond, cmap='flag')
+        
+        contourTimeOfFlight = self.pork_chop_plot_figure.axes.contour(X, Y, T_F, cmap='summer')
+        
+        self.pork_chop_plot_figure.axes.clabel(contourVelocityConstraint, inline=1, fontsize=10)
+        self.pork_chop_plot_figure.axes.clabel(contourTimeOfFlight, inline=1, fontsize=10)
+        
+        # self.pork_chop_plot_figure.figure.colorbar(contourVelocity, label='$\Delta V_{TOT}$ $[km / s]$', shrink=0.5)
+        # self.pork_chop_plot_figure.figure.colorbar(contourVelocityConstraint, label='$\Delta V_1$ $[km / s]$', orientation='vertical', shrink=0.5)
+        
+        self.pork_chop_plot_figure.axes.set_title('Pork Chop')
+        self.pork_chop_plot_figure.axes.set_xlabel('Launch Window')
+        self.pork_chop_plot_figure.axes.set_ylabel('Arrival Window')
+        
+        self.pork_chop_plot_figure.redrawCanvas()
+        
+        self.porkChopPlotFinished.emit()
