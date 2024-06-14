@@ -274,6 +274,58 @@ class OrbitDetermination():
         
         return J0 + UT / 24
     
+    @classmethod
+    def FracDay2HMS(cls, fracDay) -> list:
+        
+        temp = fracDay * 24
+        
+        hrs = np.fix(temp)
+        
+        mn = np.fix((temp - hrs) * 60)
+        
+        sec = (temp - hrs - mn / 60) * 3600
+        
+        return [hrs, mn, sec]
+    
+    @classmethod
+    def JulianDay2Date(cls, JD : float) -> datetime:
+        
+        j = np.floor(JD + 0.5) + 32044
+        
+        g = np.floor(j / 146097)
+        
+        dg = np.mod(j, 146097)
+        
+        c = np.floor((np.floor(dg / 36524) + 1) * 3/4)
+        
+        dc = dg - c * 36524
+        
+        b = np.floor(dc / 1461)
+        
+        db = np.mod(dc, 1461)
+        
+        a = np.floor((np.floor(db / 365) + 1) * 3/4)
+        
+        da = db - a * 365
+        
+        y = g * 400 + c * 100 + b * 4 + a
+        
+        m = np.floor((da * 5 + 308) / 153) - 2
+        
+        d = da - np.floor((m + 4)*153 / 5) + 122
+
+        # * Date
+        
+        Y = y - 4800 + np.floor((m + 2) / 12)
+        
+        M = np.mod((m + 2), 12) + 1
+        
+        D = np.floor(d + 1)
+        
+        [hrs, mn, sec] = cls.FracDay2HMS(np.mod(JD + 0.5, np.floor(JD + 0.5)))
+        
+        return datetime(int(Y), int(M), int(D), int(hrs), int(mn), int(sec))
+    
     # ! ALGORITHM 5.3
     @classmethod
     def LocalSiderealTime(cls, year : int, month : int, day : int, hours : float, minutes : float, seconds : float, longitude : float) -> float:

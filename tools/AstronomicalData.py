@@ -159,6 +159,12 @@ class AstronomicalData():
     
     AU = 149_597_870.707 # ? Astronimical Unit [km]
     
+    c = 299_792_458 # ? Speed of Light [m / s]
+    
+    S_0 = 5.670e-8 * 5777**4 # ? Radiated power intensity from the Sun photosphere [W / m**2]
+    
+    R_0 = 696000 # ? Photosphere radius [km]
+    
     def __init__(self) -> None: pass
     
     @classmethod
