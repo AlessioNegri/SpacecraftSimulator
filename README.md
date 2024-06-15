@@ -14,7 +14,9 @@ Spacecraft Dynamics And Missions Simulator
 3. Spacecraft Properties
 4. Missions
     - Orbit Transfer
-    - Interplanetary Transfer
+    - Interplanetary
+        - Pork Chop Plot
+        - Interplanetary Transfer
 
 ## 1. Introduction
 
@@ -35,6 +37,7 @@ The front-end is developed in `Qt 6.7.0` using the `QML` language.
 
 The project is structured in the following folders.
 
+- `images`: README images
 - `img`: icons and images used in the GUI
 - `lib`: list of external libraries
     - `lib\matplotlib_backend_qtquick`: library for integrating *matplotlib* in *QML*
@@ -71,14 +74,75 @@ The project is structured in the following folders.
 
 ## 2. Departure & Arrival Orbits
 
-Under the menu item `Missions \ Departure` it is possible to configure the **Departure Orbit**.
+Under the menu item `Missions \ Departure` it is possible to configure the **Departure Orbit**. The same discussion is valid for the **Arrival Orbit**. The orbit can be configured using one of the following representations:
+- **Cartesian** based on the *position vector* and the *velocity vector*
+- **Keplerian** based on the orbital elements
+    - *Semi-major axis*
+    - *Eccentricity*
+    - *Inclination*
+    - *Right Ascension of the Ascending Node*
+    - *Anomaly of the Perigee*
+    - *True Anomaly*
+- **Modified Keplerian** based on the following elements
+    - *Periapsis Radius*
+    - *Apoapsis Radius*
+    - *Inclination*
+    - *Right Ascension of the Ascending Node*
+    - *Anomaly of the Perigee*
+    - *True Anomaly*
 
-![Departure Orbit.](./images/image.png)
+![Departure Orbit.](./images/departure_orbit.png)
+
+The user can select the planet as central body. In addition, a preview of the **Orbit** and the **Ground Track** can be visioned by the available buttons.
+
+![Orbit Preview.](./images/orbit_preview.png)
+
+![Ground Track Preview.](./images/ground_track_preview.png)
 
 ## 3. Spacecraft Properties
 
+Under the menu item `Missions \ Spacecraft Properties` it is possible to configure the **Spacecraft Properties** in terms of
+
+- **Initial Mass**
+- **Specific Impulse** of the propulsive system
+- **Thrust** of the propulsive system
+
+![Spacecraft Properties.](./images/spacecraft_properties.png)
+
 ## 4. Missions
+
+Under the menu item `Missions \ Current Mission` it is possible to select the mission to analyze:
+- **Orbit Transfer** to simulate the cost in terms of $\Delta v$, $\Delta t$, and $\Delta m$ of the transfer between the departure and the arrival orbit.
+- **Interplanetary Transfer** to simulate the transfer between to planets of the Solar System.
 
 ### 4.1 Orbit Transfer
 
-### 4.2 Interplanetary Transfer
+Under the menu item `Missions \ Orbit Transfer` it is possible to configure the maneuvers for the transfer between the departure and the arrival orbits, among the following ones:
+- **Hohmann Transfer**
+- **Bi-Elliptic Hohmann Transfer**
+- **Plane Change Maneuver**
+- **Apse Line Rotation From Eta**
+
+After the transfer has been evaluated, the values of $\Delta v$, $\Delta t$, and $\Delta m$ for each transfer are calculated for a detailed analysis of the cost of the transfer.
+
+![Maneuvers.](./images/maneuvers.png)
+
+By clicking on the `Save` button, the transfer becomes visible in the main window.
+
+![Orbit Transfer.](./images/orbit_transfer.png)
+
+### 4.2 Interplanetary
+
+#### Pork Chop Plot
+
+Under the menu item `Missions \ Interplanetary \ Pork Chop Plot` it is possible to analyze the cost of the interplanetary transfer bewteen two planets of the Solar System, given a *Launch Window* and an *Arrival Window*. Once selected the parameters, by clicking on the `Generate` button the Pork Chop Plot is generated, and can be seen by clicking on the `Show` button.
+
+![Pork Chop Plot Design.](./images/pork_chop_plot_design.png)
+
+![Pork Chop Plot Design.](./images/pork_chop_plot.png)
+
+After the analysis of the Pork Chop Plot, under the menu item `Missions \ Interplanetary \ Interplanetary Transfer` the actual transfer can be simulated, by choosing the effective departure and arrival dates, and the departure and arrival orbits around the planets.
+
+![Orbit Transfer.](./images/interplanetary_transfer_design.png)
+
+![Orbit Transfer.](./images/interplanetary_transfer.png)
