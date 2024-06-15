@@ -141,6 +141,8 @@ Under the menu item `Missions \ Interplanetary \ Pork Chop Plot` it is possible 
 
 ![Pork Chop Plot Design.](./images/pork_chop_plot.png)
 
+#### Interplanetary Transfer
+
 After the analysis of the Pork Chop Plot, under the menu item `Missions \ Interplanetary \ Interplanetary Transfer` the actual transfer can be simulated, by choosing the effective departure and arrival dates, and the departure and arrival orbits around the planets.
 
 ![Orbit Transfer.](./images/interplanetary_transfer_design.png)
