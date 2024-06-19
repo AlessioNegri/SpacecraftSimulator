@@ -2,30 +2,11 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import "DialogInterplanetaryTransfer.js" as Script
+
 // ? The DialogInterplanetaryTransfer class manages the interplanetary transfer dialog.
 Dialog
 {
-    // ? Updates the parameters of the interplanetary transfer.
-    function saveParameters()
-    {
-        __MissionParameters.planet_dep          = _planet_dep_.currentIndex
-        __MissionParameters.planet_arr          = _planet_arr_.currentIndex
-        __MissionParameters.date_dep            = _date_dep_.displayText
-        __MissionParameters.date_arr            = _date_arr_.displayText
-        __MissionParameters.height_periapse_dep = _height_periapse_dep_.text
-        __MissionParameters.height_periapse_arr = _height_periapse_arr_.text
-        __MissionParameters.period_arr          = _period_arr_.text
-
-        __MissionParameters.saveInterplanetaryParameters()
-
-        close()
-    }
-
-    function updateProgressBar(value)
-    {
-        _progressBar_.value = value
-    }
-
     //!-----------------------------------------!//
     
     anchors.centerIn: parent
@@ -34,11 +15,6 @@ Dialog
     font.pointSize: 14
     width: 1100
     height: 700
-
-    Component.onCompleted:
-    {
-        __MissionParameters.updateProgressBar.connect(updateProgressBar)
-    }
 
     header: Item
     {
@@ -76,7 +52,7 @@ Dialog
                 Layout.alignment: Qt.AlignRight
                 Material.background: Material.Indigo
                 Material.foreground: "#FFFFFF"
-                onClicked: saveParameters()
+                onClicked: { Script.saveParameters(); close() }
             }
 
             Button
@@ -112,7 +88,7 @@ Dialog
                 font.pointSize: 12
                 implicitWidth: 200
                 model: [ "MERCURY", "VENUS", "EARTH", "MARS", "JUPITER", "SATURN", "URANUS", "NEPTUNE", "PLUTO" ]
-                currentIndex: __MissionParameters.planet_dep
+                currentIndex: __MissionInterplanetaryTransfer.dep_planet
             }
 
             Label { text: "" }
@@ -125,7 +101,7 @@ Dialog
                 font.pointSize: 12
                 implicitWidth: 200
                 model: [ "MERCURY", "VENUS", "EARTH", "MARS", "JUPITER", "SATURN", "URANUS", "NEPTUNE", "PLUTO" ]
-                currentIndex: __MissionParameters.planet_arr
+                currentIndex: __MissionInterplanetaryTransfer.arr_planet
             }
 
             Label { text: "" }
@@ -135,7 +111,7 @@ Dialog
             TextField
             {
                 id: _date_dep_
-                text: __MissionParameters.date_dep
+                text: __MissionInterplanetaryTransfer.dep_date
                 inputMask: "0000-00-00 00:00:00;0"
                 implicitWidth: 200
             }
@@ -147,7 +123,7 @@ Dialog
             TextField
             {
                 id: _date_arr_
-                text: __MissionParameters.date_arr
+                text: __MissionInterplanetaryTransfer.arr_date
                 inputMask: "0000-00-00 00:00:00;0"
                 implicitWidth: 200
             }
@@ -166,7 +142,7 @@ Dialog
             TextField
             {
                 id: _height_periapse_dep_
-                text: __MissionParameters.height_periapse_dep
+                text: __MissionInterplanetaryTransfer.dep_periapsis_height
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 implicitWidth: 200
             }
@@ -178,7 +154,7 @@ Dialog
             TextField
             {
                 id: _height_periapse_arr_
-                text: __MissionParameters.height_periapse_arr
+                text: __MissionInterplanetaryTransfer.arr_periapsis_height
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 implicitWidth: 200
             }
@@ -190,7 +166,7 @@ Dialog
             TextField
             {
                 id: _period_arr_
-                text: __MissionParameters.period_arr
+                text: __MissionInterplanetaryTransfer.arr_period
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 implicitWidth: 200
             }

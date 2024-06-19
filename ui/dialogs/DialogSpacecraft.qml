@@ -2,21 +2,11 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import "DialogSpacecraft.js" as Script
+
 // ? The DialogSpacecraft class manages the spacecraft dialog.
 Dialog
 {
-    // ? Updates the parameters of the spacecraft.
-    function saveParameters()
-    {
-        __MissionParameters.m_0     = _m_0_.text
-        __MissionParameters.I_sp    = _I_sp_.text
-        __MissionParameters.T       = _T_.text
-
-        __MissionParameters.saveSpacecraftProperties()
-
-        close()
-    }
-
     //!-----------------------------------------!//
 
     anchors.centerIn: parent
@@ -62,7 +52,7 @@ Dialog
                 Layout.alignment: Qt.AlignRight
                 Material.background: Material.Indigo
                 Material.foreground: "#FFFFFF"
-                onClicked: saveParameters()
+                onClicked: { Script.saveParameters(); close() }
             }
 
             Button
@@ -91,7 +81,7 @@ Dialog
         TextField
         {
             id: _m_0_
-            text: __MissionParameters.m_0
+            text: __Spacecraft.initial_mass
             validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
             implicitWidth: 200
         }
@@ -103,7 +93,7 @@ Dialog
         TextField
         {
             id: _I_sp_
-            text: __MissionParameters.I_sp
+            text: __Spacecraft.specific_impulse
             validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
             Layout.fillWidth: true
         }
@@ -115,7 +105,7 @@ Dialog
         TextField
         {
             id: _T_
-            text: __MissionParameters.T
+            text: __Spacecraft.thrust
             validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
             Layout.fillWidth: true
         }

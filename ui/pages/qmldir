@@ -1,4 +1,5 @@
 module Material.Extras
 
 PageInterplanetaryTransfer 1.0 PageInterplanetaryTransfer.qml
+PageOrbitalPerturbations 1.0 PageOrbitalPerturbations.qml
 PageOrbitTransfer 1.0 PageOrbitTransfer.qml

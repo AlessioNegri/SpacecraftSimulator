@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import "main.js" as Script
+
 import "dialogs"
 import "pages"
 
@@ -23,11 +25,11 @@ ApplicationWindow
 
     DialogAbout { id: _dlgAbout_ }
 
+    DialogSpacecraft { id: _dlgSpacecraft_ }
+
     DialogOrbit { id: _dlgOrbitDeparture_; title: "Departure Orbit"; p_Departure: true }
 
     DialogOrbit { id: _dlgOrbitArrival_; title: "Arrival Orbit"; p_Departure: false }
-
-    DialogSpacecraft { id: _dlgSpacecraft_ }
 
     DialogManeuvers { id: _dlgManeuvers_ }
 
@@ -43,11 +45,11 @@ ApplicationWindow
         {
             title: "File"
             
-            Action { text: "New..."; shortcut: "Ctrl+N" }
+            /*Action { text: "New..."; shortcut: "Ctrl+N" }*/
 
-            Action { text: "Open..."; shortcut: "Ctrl+O" }
+            /*Action { text: "Open..."; shortcut: "Ctrl+O" }*/
 
-            Action { text: "Save"; shortcut: "Ctrl+S" }
+            /*Action { text: "Save"; shortcut: "Ctrl+S" }*/
 
             MenuSeparator {}
 
@@ -60,59 +62,39 @@ ApplicationWindow
 
             Action
             {
-                text: "Departure Orbit"
-                onTriggered: { __MissionParameters.loadDepartureOrbit(); _dlgOrbitDeparture_.open() }
-            }
-
-            Action
-            {
-                text: "Arrival Orbit"
-                onTriggered: { __MissionParameters.loadArrivalOrbit(); _dlgOrbitArrival_.open() }
-            }
-
-            Action
-            {
                 text: "Spacecraft Properties"
-                onTriggered: { __MissionParameters.loadSpacecraftProperties(); _dlgSpacecraft_.open() }
+                onTriggered: { /*__MissionParameters.loadSpacecraftProperties();*/ _dlgSpacecraft_.open() }
             }
 
             Menu
             {
+                id: verticalMenu
                 title: "Current Mission"
                 width: 300
 
                 MenuItem
                 {
+                    id: _orbitTransferCheckBox_
                     text: "Orbit Transfer"
                     checkable: true
-                    checked: gp_CurrentMission === 0
-                    onTriggered:
-                    {
-                        gp_CurrentMission = 0
-
-                        _view_.setCurrentIndex(0)
-                    }
+                    checked: true
+                    onTriggered: Script.missionChanged(0)
                 }
                 
                 MenuItem
                 {
-                    text: "Relative Navigation"
+                    id: _orbitalPerturbationsCheckBox_
+                    text: "Orbital Perturbations"
                     checkable: true
-                    checked: gp_CurrentMission === 1
-                    onTriggered: gp_CurrentMission = 1
+                    onTriggered: Script.missionChanged(1)
                 }
                 
                 MenuItem
                 {
+                    id: _interplanetaryTransferCheckBox_
                     text: "Interplanetary Transfer"
                     checkable: true
-                    checked: gp_CurrentMission === 2
-                    onTriggered:
-                    {
-                        gp_CurrentMission = 2
-
-                        _view_.setCurrentIndex(1)
-                    }
+                    onTriggered: Script.missionChanged(2)
                 }
             }
 
@@ -123,10 +105,14 @@ ApplicationWindow
                 title: "Orbit Transfer"
                 enabled: gp_CurrentMission === 0
 
+                Action { text: "Departure Orbit"; onTriggered: { __MissionOrbitTransfer.fillDepartureOrbit(); _dlgOrbitDeparture_.open() } }
+
+                Action { text: "Arrival Orbit"; onTriggered: { __MissionOrbitTransfer.fillArrivalOrbit(); _dlgOrbitArrival_.open() } }
+
                 Action { text: "Maneuvers"; onTriggered: _dlgManeuvers_.open() }
             }
             
-            Action { text: "Relative Navigation"; enabled: gp_CurrentMission === 1 }
+            Action { text: "Orbital Perturbations"; enabled: gp_CurrentMission === 1 }
             
             Menu
             {
@@ -157,6 +143,8 @@ ApplicationWindow
         anchors.fill: parent
 
         PageOrbitTransfer { width: window.width; height: window.height }
+
+        PageOrbitalPerturbations { width: window.width; height: window.height }
 
         PageInterplanetaryTransfer { width: window.width; height: window.height }
     }

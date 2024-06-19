@@ -2,44 +2,11 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import "DialogPorkChopPlot.js" as Script
+
 // ? The DialogPorkChopPlot class manages the pork chop plot dialog.
 Dialog
 {
-    // ? Updates the parameters of the pork chop plot.
-    function saveParameters()
-    {
-        __MissionParameters.pcp_planet_dep          = _pcp_planet_dep_.currentIndex
-        __MissionParameters.pcp_planet_arr          = _pcp_planet_arr_.currentIndex
-        __MissionParameters.pcp_launch_window_beg   = _pcp_launch_window_beg_.displayText
-        __MissionParameters.pcp_launch_window_end   = _pcp_launch_window_end_.displayText
-        __MissionParameters.pcp_arrival_window_beg  = _pcp_arrival_window_beg_.displayText
-        __MissionParameters.pcp_arrival_window_end  = _pcp_arrival_window_end_.displayText
-        __MissionParameters.pcp_step                = _pcp_step_.text
-
-        __MissionParameters.savePorkChopPlotParameters()
-
-        close()
-    }
-
-    // ? Updates the parameters of the pork chop plot.
-    function updateParameters()
-    {
-        __MissionParameters.pcp_planet_dep          = _pcp_planet_dep_.currentIndex
-        __MissionParameters.pcp_planet_arr          = _pcp_planet_arr_.currentIndex
-        __MissionParameters.pcp_launch_window_beg   = _pcp_launch_window_beg_.displayText
-        __MissionParameters.pcp_launch_window_end   = _pcp_launch_window_end_.displayText
-        __MissionParameters.pcp_arrival_window_beg  = _pcp_arrival_window_beg_.displayText
-        __MissionParameters.pcp_arrival_window_end  = _pcp_arrival_window_end_.displayText
-        __MissionParameters.pcp_step                = _pcp_step_.text
-
-        __MissionParameters.calculatePorkChopPlot()
-    }
-
-    function updateProgressBar(value)
-    {
-        _progressBar_.value = value
-    }
-
     //!-----------------------------------------!//
     
     anchors.centerIn: parent
@@ -51,7 +18,7 @@ Dialog
 
     Component.onCompleted:
     {
-        __MissionParameters.updateProgressBar.connect(updateProgressBar)
+        __MissionInterplanetaryTransfer.updateProgressBar.connect(Script.updateProgressBar)
     }
 
     DialogFigure {
@@ -134,7 +101,7 @@ Dialog
                 Layout.alignment: Qt.AlignRight
                 Material.background: Material.Orange
                 Material.foreground: "#FFFFFF"
-                onClicked: updateParameters()
+                onClicked: Script.updateParameters()
             }
 
             Button
@@ -156,7 +123,7 @@ Dialog
                 Layout.alignment: Qt.AlignRight
                 Material.background: Material.Red
                 Material.foreground: "#FFFFFF"
-                onClicked: __MissionParameters.stopCalculatePorkChopPlot()
+                onClicked: __MissionInterplanetaryTransfer.stopCalculatePorkChopPlot()
             }
 
             Item { Layout.fillWidth: true }
@@ -169,7 +136,7 @@ Dialog
                 Layout.alignment: Qt.AlignRight
                 Material.background: Material.Indigo
                 Material.foreground: "#FFFFFF"
-                onClicked: saveParameters()
+                onClicked: Script.saveParameters()
             }
 
             Button
@@ -205,7 +172,7 @@ Dialog
                 font.pointSize: 12
                 implicitWidth: 200
                 model: [ "MERCURY", "VENUS", "EARTH", "MARS", "JUPITER", "SATURN", "URANUS", "NEPTUNE", "PLUTO" ]
-                currentIndex: __MissionParameters.pcp_planet_dep
+                currentIndex: __MissionInterplanetaryTransfer.pcp_planet_dep
             }
 
             Label { text: "" }
@@ -218,7 +185,7 @@ Dialog
                 font.pointSize: 12
                 implicitWidth: 200
                 model: [ "MERCURY", "VENUS", "EARTH", "MARS", "JUPITER", "SATURN", "URANUS", "NEPTUNE", "PLUTO" ]
-                currentIndex: __MissionParameters.pcp_planet_arr
+                currentIndex: __MissionInterplanetaryTransfer.pcp_planet_arr
             }
 
             Label { text: "" }
@@ -232,7 +199,7 @@ Dialog
                 TextField
                 {
                     id: _pcp_launch_window_beg_
-                    text: __MissionParameters.pcp_launch_window_beg
+                    text: __MissionInterplanetaryTransfer.pcp_launch_window_beg
                     inputMask: "0000-00-00;0"
                     implicitWidth: 150
                 }
@@ -240,7 +207,7 @@ Dialog
                 TextField
                 {
                     id: _pcp_launch_window_end_
-                    text: __MissionParameters.pcp_launch_window_end
+                    text: __MissionInterplanetaryTransfer.pcp_launch_window_end
                     inputMask: "0000-00-00;0"
                     implicitWidth: 150
                 }
@@ -257,7 +224,7 @@ Dialog
                 TextField
                 {
                     id: _pcp_arrival_window_beg_
-                    text: __MissionParameters.pcp_arrival_window_beg
+                    text: __MissionInterplanetaryTransfer.pcp_arrival_window_beg
                     inputMask: "0000-00-00;0"
                     implicitWidth: 150
                 }
@@ -265,7 +232,7 @@ Dialog
                 TextField
                 {
                     id: _pcp_arrival_window_end_
-                    text: __MissionParameters.pcp_arrival_window_end
+                    text: __MissionInterplanetaryTransfer.pcp_arrival_window_end
                     inputMask: "0000-00-00;0"
                     implicitWidth: 150
                 }
@@ -278,7 +245,7 @@ Dialog
             TextField
             {
                 id: _pcp_step_
-                text: __MissionParameters.pcp_step
+                text: __MissionInterplanetaryTransfer.pcp_step
                 validator: RegularExpressionValidator { regularExpression: /[0-9]+/ }
                 implicitWidth: 150
             }

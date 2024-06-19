@@ -21,3 +21,22 @@ def format(x : float, format : str = '1.000000', deg : bool = False) -> float:
     if deg: x = np.rad2deg(x)
     
     return float(Decimal.from_float(x).quantize(Decimal(format), rounding=ROUND_DOWN))
+
+def singleton(cls, *args, **kw):
+    """Decorator for singleton classes
+
+    Returns:
+        _type_: class instance
+    """
+    
+    instances = {}
+     
+    def _singleton(*args, **kw):
+         
+        if cls not in instances:
+            
+             instances[cls] = cls(*args, **kw)
+             
+        return instances[cls]
+    
+    return _singleton

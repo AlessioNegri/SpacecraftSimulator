@@ -17,13 +17,13 @@ Dialog
 
         // * Cycle
 
-        let len = __MissionParameters.maneuversCount()
+        let len = __MissionOrbitTransfer.maneuversCount()
 
         for (let i = 0; i < len; ++i)
         {
             // * Retrieve maneuver from backend
 
-            var maneuver = __MissionParameters.getManeuver(i)
+            var maneuver = __MissionOrbitTransfer.getManeuver(i)
 
             // * Create QML component
 
@@ -120,14 +120,14 @@ Dialog
     // ? Updates the maneuvers in the backend.
     function saveManeuvers()
     {
-        __MissionParameters.clearManeuvers()
+        __MissionOrbitTransfer.clearManeuvers()
 
         for (let i = 0; i < r_Maneuvers.length; ++i)
         {
-            __MissionParameters.addManeuver(r_Maneuvers[i].p_Type, r_Maneuvers[i].p_Option, r_Maneuvers[i].p_OptionValue)
+            __MissionOrbitTransfer.addManeuver(r_Maneuvers[i].p_Type, r_Maneuvers[i].p_Option, r_Maneuvers[i].p_OptionValue)
         }
 
-        __MissionParameters.saveManeuvers()
+        __MissionOrbitTransfer.saveManeuvers()
 
         close()
     }

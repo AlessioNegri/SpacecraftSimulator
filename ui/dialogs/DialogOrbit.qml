@@ -2,71 +2,13 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import "DialogOrbit.js" as Script
+
 // ? The DialogOrbit class manages the orbit dialog.
 Dialog
 {
     // ? Distinguishes between departure and arrival orbit.
     property bool p_Departure: true
-
-    // ? Updates the parameters and saves based on the \a save option.
-    function updateParameters(save)
-    {
-        __MissionParameters.body = _celestialBody_.currentIndex
-
-        switch (_selection_.currentIndex)
-        {
-            case 0: // * Cartesian
-
-                __MissionParameters.x   = _x_.text
-                __MissionParameters.y   = _y_.text
-                __MissionParameters.z   = _z_.text
-                __MissionParameters.v_x = _v_x_.text
-                __MissionParameters.v_y = _v_y_.text
-                __MissionParameters.v_z = _v_z_.text
-
-                break
-
-            case 1: // * Keplerian
-
-                __MissionParameters.a       = _a_.text
-                __MissionParameters.e       = _e_.text
-                __MissionParameters.i       = _i_.text
-                __MissionParameters.Omega   = _Omega_.text
-                __MissionParameters.omega   = _omega_.text
-                __MissionParameters.theta   = _theta_.text
-
-                break
-
-            case 2: // * Modified Keplerian
-
-                __MissionParameters.r_p     = _r_p_.text
-                __MissionParameters.r_a     = _r_a_.text
-                __MissionParameters.i       = _i_2_.text
-                __MissionParameters.Omega   = _Omega_2_.text
-                __MissionParameters.omega   = _omega_2_.text
-                __MissionParameters.theta   = _theta_2_.text
-
-                break
-            
-            default:
-
-                break
-        }
-
-        if (p_Departure)
-        {
-            save ? __MissionParameters.saveDepartureOrbit() : __MissionParameters.updateDepartureOrbit()
-        }
-        else
-        {
-            save ? __MissionParameters.saveArrivalOrbit() : __MissionParameters.updateArrivalOrbit()
-        }
-
-        if (save) close()
-    }
-
-    // ? Virtual Function called when the preview orbit button is clicked.
-    function f_PreviewOrbit() {}
 
     //!-----------------------------------------!//
 
@@ -118,7 +60,7 @@ Dialog
                 implicitWidth: 150
                 implicitHeight: 50
                 model: [ "SUN", "MERCURY", "VENUS", "EARTH", "MOON", "MARS", "JUPITER", "SATURN", "URANUS", "NEPTUNE", "PLUTO" ]
-                currentIndex: __MissionParameters.body
+                currentIndex: __Orbit.body
             }
 
             Item { width: 10 }
@@ -143,7 +85,7 @@ Dialog
                 implicitWidth: 200
                 implicitHeight: 50
                 model: [ "Cartesian", "Keplerian", "Modified Keplerian" ]
-                onCurrentIndexChanged: __MissionParameters.state = currentIndex
+                onCurrentIndexChanged: __Orbit.state = currentIndex
             }
 
             Item { Layout.fillWidth: true }
@@ -159,7 +101,7 @@ Dialog
 
                 onClicked:
                 {
-                    p_Departure ? __MissionParameters.evaluateDepartureOrbit() : __MissionParameters.evaluateArrivalOrbit()
+                    p_Departure ? __MissionOrbitTransfer.evaluateDepartureOrbit() : __MissionOrbitTransfer.evaluateArrivalOrbit()
                     
                     _orbitPreview_.open()
                 }
@@ -176,7 +118,7 @@ Dialog
                 
                 onClicked:
                 {
-                    p_Departure ? __MissionParameters.evaluateDepartureOrbit() : __MissionParameters.evaluateArrivalOrbit()
+                    p_Departure ? __MissionOrbitTransfer.evaluateDepartureOrbit() : __MissionOrbitTransfer.evaluateArrivalOrbit()
                     
                     _groundTrackPreview_.open()
                 }
@@ -192,7 +134,7 @@ Dialog
                 Layout.alignment: Qt.AlignRight
                 Material.background: Material.Indigo
                 Material.foreground: "#FFFFFF"
-                onClicked: updateParameters(false)
+                onClicked: Script.updateParameters(false)
             }
 
             Button
@@ -203,7 +145,7 @@ Dialog
                 Layout.alignment: Qt.AlignRight
                 Material.background: Material.Indigo
                 Material.foreground: "#FFFFFF"
-                onClicked: updateParameters(true)
+                onClicked: Script.updateParameters(true)
             }
 
             Button
@@ -245,7 +187,7 @@ Dialog
             TextField
             {
                 id: _x_
-                text: __MissionParameters.x
+                text: __Orbit.r_x
                 enabled: _selection_.currentIndex === 0
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 implicitWidth: 200
@@ -258,7 +200,7 @@ Dialog
             TextField
             {
                 id: _y_
-                text: __MissionParameters.y
+                text: __Orbit.r_y
                 enabled: _selection_.currentIndex === 0
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 Layout.fillWidth: true
@@ -271,7 +213,7 @@ Dialog
             TextField
             {
                 id: _z_
-                text: __MissionParameters.z
+                text: __Orbit.r_z
                 enabled: _selection_.currentIndex === 0
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 Layout.fillWidth: true
@@ -284,7 +226,7 @@ Dialog
             TextField
             {
                 id: _v_x_
-                text: __MissionParameters.v_x
+                text: __Orbit.v_x
                 enabled: _selection_.currentIndex === 0
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 Layout.fillWidth: true
@@ -297,7 +239,7 @@ Dialog
             TextField
             {
                 id: _v_y_
-                text: __MissionParameters.v_y
+                text: __Orbit.v_y
                 enabled: _selection_.currentIndex === 0
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 Layout.fillWidth: true
@@ -310,7 +252,7 @@ Dialog
             TextField
             {
                 id: _v_z_
-                text: __MissionParameters.v_z
+                text: __Orbit.v_z
                 enabled: _selection_.currentIndex === 0
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 Layout.fillWidth: true
@@ -347,7 +289,7 @@ Dialog
             TextField
             {
                 id: _a_
-                text: __MissionParameters.a
+                text: __Orbit.semi_major_axis
                 enabled: _selection_.currentIndex === 1
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 implicitWidth: 200
@@ -360,7 +302,7 @@ Dialog
             TextField
             {
                 id: _e_
-                text: __MissionParameters.e
+                text: __Orbit.eccentricity
                 enabled: _selection_.currentIndex === 1
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 Layout.fillWidth: true
@@ -373,7 +315,7 @@ Dialog
             TextField
             {
                 id: _i_
-                text: __MissionParameters.i
+                text: __Orbit.inclination
                 enabled: _selection_.currentIndex === 1
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 Layout.fillWidth: true
@@ -386,7 +328,7 @@ Dialog
             TextField
             {
                 id: _Omega_
-                text: __MissionParameters.Omega
+                text: __Orbit.right_ascension_ascending_node
                 enabled: _selection_.currentIndex === 1
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 Layout.fillWidth: true
@@ -399,7 +341,7 @@ Dialog
             TextField
             {
                 id: _omega_
-                text: __MissionParameters.omega
+                text: __Orbit.periapsis_anomaly
                 enabled: _selection_.currentIndex === 1
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 Layout.fillWidth: true
@@ -412,7 +354,7 @@ Dialog
             TextField
             {
                 id: _theta_
-                text: __MissionParameters.theta
+                text: __Orbit.true_anomaly
                 enabled: _selection_.currentIndex === 1
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 Layout.fillWidth: true
@@ -449,7 +391,7 @@ Dialog
             TextField
             {
                 id: _r_p_
-                text: __MissionParameters.r_p
+                text: __Orbit.periapsis_radius
                 enabled: _selection_.currentIndex === 2
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 implicitWidth: 200
@@ -462,7 +404,7 @@ Dialog
             TextField
             {
                 id: _r_a_
-                text: __MissionParameters.r_a
+                text: __Orbit.apoapsis_radius
                 enabled: _selection_.currentIndex === 2
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 Layout.fillWidth: true
@@ -475,7 +417,7 @@ Dialog
             TextField
             {
                 id: _i_2_
-                text: __MissionParameters.i
+                text: __Orbit.inclination
                 enabled: _selection_.currentIndex === 2
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 Layout.fillWidth: true
@@ -488,7 +430,7 @@ Dialog
             TextField
             {
                 id: _Omega_2_
-                text: __MissionParameters.Omega
+                text: __Orbit.right_ascension_ascending_node
                 enabled: _selection_.currentIndex === 2
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 Layout.fillWidth: true
@@ -501,7 +443,7 @@ Dialog
             TextField
             {
                 id: _omega_2_
-                text: __MissionParameters.omega
+                text: __Orbit.periapsis_anomaly
                 enabled: _selection_.currentIndex === 2
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 Layout.fillWidth: true
@@ -514,7 +456,7 @@ Dialog
             TextField
             {
                 id: _theta_2_
-                text: __MissionParameters.theta
+                text: __Orbit.true_anomaly
                 enabled: _selection_.currentIndex === 2
                 validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
                 Layout.fillWidth: true
