@@ -43,14 +43,25 @@ class FigureCanvas(qtCore.QObject):
         self.toolbar    = None
         self.dof3       = False
         self.figsize    = (6.0, 4.0)
+        self.rows       = 1
+        self.cols       = 1
+        self.multiplot  = False
 
-    def updateWithCanvas(self, canvas : FigureCanvasQtQuickAgg, parent : qtQuick.QQuickItem, dof3 : bool = False, figsize : tuple = (6.0, 4.0)) -> None:
+    def updateWithCanvas(self,
+                         canvas : FigureCanvasQtQuickAgg,
+                         parent : qtQuick.QQuickItem,
+                         dof3 : bool = False,
+                         rows : int = 1,
+                         cols : int = 1,
+                         figsize : tuple = (6.0, 4.0)) -> None:
         """Initializes the canvas for the figure
 
         Args:
             canvas (FigureCanvasQtQuickAgg): Backend figure canvas
             parent (qtQuick.QQuickItem): Parent qml object
             dof3 (bool, optional): True for 3D figures. Defaults to False.
+            rows (int, optional): Subplots configuration along row. Defaults to 1.
+            cols (int, optional): Subplots configuration along column. Defaults to 1.
             figsize (tuple, optional): Width and hegight in inches of the figure. Defaults to (6.0, 4.0).
         """
         
@@ -58,16 +69,34 @@ class FigureCanvas(qtCore.QObject):
         
         self.canvas     = canvas
         self.figure     = canvas.figure
-        self.axes       = self.figure.add_subplot(111) if not dof3 else self.figure.add_subplot(111, projection='3d')
         self.toolbar    = NavigationToolbar2QtQuick(canvas=canvas)
         self.dof3       = dof3
         self.figsize    = figsize
+        self.rows       = rows
+        self.cols       = cols
         
-        self.axes.grid(True)
+        if rows != 1 or cols != 1:
+            
+            self.multiplot = True
+            
+            self.axes = self.figure.subplots(nrows=rows, ncols=cols)
+            
+            for r in range(0, rows):
+                
+                for c in range(0, cols):
+                    
+                    self.axes[r][c].grid(True)
+            
+        else:
+            
+            self.axes = self.figure.add_subplot(111) if not dof3 else self.figure.add_subplot(111, projection='3d')
+            
+            self.axes.grid(True)
+        
+            self.figure.subplots_adjust(top=1.00, bottom=0.15, left=0.10, right=0.95)
         
         self.figure.set_figwidth(figsize[0])
         self.figure.set_figheight(figsize[1])
-        self.figure.subplots_adjust(top=1.00, bottom=0.15, left=0.10, right=0.95)
         
         #if dof3: self.figure.tight_layout()
         
@@ -79,7 +108,17 @@ class FigureCanvas(qtCore.QObject):
         """Resets the figure canvas
         """
         
-        self.axes.cla()
+        if self.multiplot:
+            
+            for r in range(0, self.rows):
+                
+                for c in range(0, self.cols):
+                    
+                    self.axes[r][c].cla()
+            
+        else:
+            
+            self.axes.cla()
     
     def redrawCanvas(self) -> None:
         """Redraws the figure canvas
@@ -97,9 +136,21 @@ class FigureCanvas(qtCore.QObject):
             event (qtCore.QEvent): Event
         """
         
-        if event.inaxes == self.axes:
+        if self.multiplot:
             
-            self.coord = f'({event.xdata:.2f}, {event.ydata:.2f})'
+            for r in range(0, self.rows):
+                
+                for c in range(0, self.cols):
+                    
+                    if event.inaxes == self.axes[r][c]:
+            
+                        self.coord = f'({event.xdata:.2f}, {event.ydata:.2f})'
+            
+        else:
+            
+            if event.inaxes == self.axes:
+            
+                self.coord = f'({event.xdata:.2f}, {event.ydata:.2f})'
  
     @qtCore.Slot()
     def pan(self, *args):

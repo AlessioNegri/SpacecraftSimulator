@@ -8,12 +8,11 @@ import "../components"
 Page
 {
     background: Rectangle { color: "transparent" }
-    /*
+    
     Figure {
-        p_ObjectName: "OrbitTransferFigure"
-        r_Model: __OrbitTransferFigure
+        p_ObjectName: "OrbitPropagationFigure"
+        r_Model: __OrbitPropagationFigure
         anchors.fill: parent
         anchors.margins: 16
     }
-    */
 }

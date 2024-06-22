@@ -7,6 +7,7 @@ sys.path.append(os.path.dirname(__file__))
 
 from Spacecraft import Spacecraft
 from MissionOrbitTransfer import MissionOrbitTransfer
+from MissionOrbitPropagation import MissionOrbitPropagation
 from MissionInterplanetaryTransfer import MissionInterplanetaryTransfer
 
 class MissionParameters(qtCore.QObject):
@@ -31,6 +32,8 @@ class MissionParameters(qtCore.QObject):
         self.mission_orbit_transfer.loadDepartureOrbit()
         self.mission_orbit_transfer.loadArrivalOrbit()
         
+        self.mission_orbit_propagation = MissionOrbitPropagation(engine)
+        
         self.mission_interplanetary_transfer = MissionInterplanetaryTransfer(engine)
         
     # ! PUBLIC
@@ -43,5 +46,7 @@ class MissionParameters(qtCore.QObject):
         """
         
         self.mission_orbit_transfer.setUpdateWithCanvas(engine)
+        
+        self.mission_orbit_propagation.setUpdateWithCanvas(engine)
         
         self.mission_interplanetary_transfer.setUpdateWithCanvas(engine)

@@ -10,10 +10,14 @@ Spacecraft Dynamics And Missions Simulator
     - References
         - Books
         - GitHub Repositories
-2. Departure & Arrival Orbits
-3. Spacecraft Properties
-4. Missions
+2. Spacecraft Properties
+3. Missions
     - Orbit Transfer
+        - Departure Orbit
+        - Arrival Orbit
+        - Maneuvers
+    - Orbit Propagation
+        - Orbital Perturbations
     - Interplanetary
         - Pork Chop Plot
         - Interplanetary Transfer
@@ -41,6 +45,7 @@ The project is structured in the following folders.
 - `img`: icons and images used in the GUI
 - `lib`: list of external libraries
     - `lib\matplotlib_backend_qtquick`: library for integrating *matplotlib* in *QML*
+    - `lib\pyextrema`: library implementing Matlab extrema function
 - `src`: back-end of the application
 - `tools`: algorithms
     - `tools\texture`: list of images for different astronomical objects
@@ -72,9 +77,31 @@ The project is structured in the following folders.
 > **matplotlib_backend_qtquick**
 > - `URL` https://github.com/jmitrevs/matplotlib_backend_qtquick
 
-## 2. Departure & Arrival Orbits
+> **pyextrema**
+> - `URL` https://github.com/manmadan03/pyextrema
 
-Under the menu item `Missions \ Departure` it is possible to configure the **Departure Orbit**. The same discussion is valid for the **Arrival Orbit**. The orbit can be configured using one of the following representations:
+## 2. Spacecraft Properties
+
+Under the menu item `Missions \ Spacecraft Properties` it is possible to configure the **Spacecraft Properties** in terms of
+
+- **Initial Mass**
+- **Specific Impulse** of the propulsive system
+- **Thrust** of the propulsive system
+
+![Spacecraft Properties.](./images/spacecraft_properties.png)
+
+## 3. Missions
+
+Under the menu item `Missions \ Current Mission` it is possible to select the mission to analyze:
+- **Orbit Transfer** to simulate the cost in terms of $\Delta v$, $\Delta t$, and $\Delta m$ of the transfer between a departure and an arrival orbit.
+- **Orbit Propagation** to simulate the propagation of an orbit around Earth due to perturbations.
+- **Interplanetary Transfer** to simulate the transfer between two planets of the Solar System.
+
+### 3.1 Orbit Transfer
+
+#### Departure & Arrival Orbits
+
+Under the menu item `Missions \ Orbit Transfer \ Departure Orbit` it is possible to configure the **Departure Orbit**. The same discussion is valid for the **Arrival Orbit**. The orbit can be configured using one of the following representations:
 - **Cartesian** based on the *position vector* and the *velocity vector*
 - **Keplerian** based on the orbital elements
     - *Semi-major axis*
@@ -99,25 +126,9 @@ The user can select the planet as central body. In addition, a preview of the **
 
 ![Ground Track Preview.](./images/ground_track_preview.png)
 
-## 3. Spacecraft Properties
+#### Maneuvers
 
-Under the menu item `Missions \ Spacecraft Properties` it is possible to configure the **Spacecraft Properties** in terms of
-
-- **Initial Mass**
-- **Specific Impulse** of the propulsive system
-- **Thrust** of the propulsive system
-
-![Spacecraft Properties.](./images/spacecraft_properties.png)
-
-## 4. Missions
-
-Under the menu item `Missions \ Current Mission` it is possible to select the mission to analyze:
-- **Orbit Transfer** to simulate the cost in terms of $\Delta v$, $\Delta t$, and $\Delta m$ of the transfer between the departure and the arrival orbit.
-- **Interplanetary Transfer** to simulate the transfer between to planets of the Solar System.
-
-### 4.1 Orbit Transfer
-
-Under the menu item `Missions \ Orbit Transfer` it is possible to configure the maneuvers for the transfer between the departure and the arrival orbits, among the following ones:
+Under the menu item `Missions \ Orbit Transfer \ Maneuvers` it is possible to configure the maneuvers for the transfer between the departure and the arrival orbits, among the following ones:
 - **Hohmann Transfer**
 - **Bi-Elliptic Hohmann Transfer**
 - **Plane Change Maneuver**
@@ -131,7 +142,21 @@ By clicking on the `Save` button, the transfer becomes visible in the main windo
 
 ![Orbit Transfer.](./images/orbit_transfer.png)
 
-### 4.2 Interplanetary
+### 3.2 Orbit Propagation
+
+Under the menu item `Missions \ Orbit Propagation \ Orbital Perturbations` it is possible to analyze the effects of the following perturbations on an orbit around Earth in a range of dates:
+- **Drag**: the user shall give the value of the *Ballistic Coefficient*
+- **Gravitational**
+- **Solar Radiation Pressure**: the user shall give the value of the *Ballistic Coefficient*
+- **Third Body**: the user shall select the third body between *Moon* and *Sun*
+
+![Orbital Perturbations.](./images/orbital_perturbations.png)
+
+By clicking on the `Save` button, the propagation of the orbit becomes visible in the main window in terms of the evolution of the orbital elements with respect to the initial values.
+
+![Orbital Propagation.](./images/orbit_propagation.png)
+
+### 3.3 Interplanetary
 
 #### Pork Chop Plot
 

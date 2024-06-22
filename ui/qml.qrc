@@ -17,6 +17,8 @@
         <file>dialogs/DialogManeuvers.qml</file>
         <file>dialogs/DialogOrbit.js</file>
         <file>dialogs/DialogOrbit.qml</file>
+        <file>dialogs/DialogOrbitalPerturbations.js</file>
+        <file>dialogs/DialogOrbitalPerturbations.qml</file>
         <file>dialogs/DialogPorkChopPlot.js</file>
         <file>dialogs/DialogPorkChopPlot.qml</file>
         <file>dialogs/DialogSpacecraft.js</file>
@@ -24,7 +26,7 @@
 
         <file>pages/qmldir</file>
         <file>pages/PageInterplanetaryTransfer.qml</file>
-        <file>pages/PageOrbitalPerturbations.qml</file>
+        <file>pages/PageOrbitPropagation.qml</file>
         <file>pages/PageOrbitTransfer.qml</file>
     </qresource>
 

@@ -33,6 +33,8 @@ ApplicationWindow
 
     DialogManeuvers { id: _dlgManeuvers_ }
 
+    DialogOrbitalPerturbations { id: _dlgOrbitalPerturbations_ }
+
     DialogPorkChopPlot { id: _dlgPorkChopPlot_ }
 
     DialogInterplanetaryTransfer { id: _dlgInterplanetaryTransfer_ }
@@ -83,8 +85,8 @@ ApplicationWindow
                 
                 MenuItem
                 {
-                    id: _orbitalPerturbationsCheckBox_
-                    text: "Orbital Perturbations"
+                    id: _orbitPropagationCheckBox_
+                    text: "Orbit Propagation"
                     checkable: true
                     onTriggered: Script.missionChanged(1)
                 }
@@ -112,7 +114,13 @@ ApplicationWindow
                 Action { text: "Maneuvers"; onTriggered: _dlgManeuvers_.open() }
             }
             
-            Action { text: "Orbital Perturbations"; enabled: gp_CurrentMission === 1 }
+            Menu
+            {
+                title: "Orbit Propagation"
+                enabled: gp_CurrentMission === 1
+
+                Action { text: "Orbital Perturbations"; onTriggered: { _dlgOrbitalPerturbations_.open() } }
+            }
             
             Menu
             {
@@ -144,7 +152,7 @@ ApplicationWindow
 
         PageOrbitTransfer { width: window.width; height: window.height }
 
-        PageOrbitalPerturbations { width: window.width; height: window.height }
+        PageOrbitPropagation { width: window.width; height: window.height }
 
         PageInterplanetaryTransfer { width: window.width; height: window.height }
     }
