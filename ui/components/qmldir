@@ -1,4 +1,7 @@
 module Material.Extras
 
+DialogFooter 1.0 DialogFooter.qml
+DialogHeader 1.0 DialogHeader.qml
+DialogParameter 1.0 DialogParameter.qml
 Figure 1.0 Figure.qml
 Maneuver 1.0 Maneuver.qml

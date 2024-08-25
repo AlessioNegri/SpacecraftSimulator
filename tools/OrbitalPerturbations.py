@@ -3,7 +3,7 @@ import sys
 
 sys.path.append(os.path.dirname(__file__))
 
-from lib.pyextrema import extrema
+#from lib.pyextrema.extrema import extrema
 
 from stdafx import *
 from LagrangeCoefficients import *

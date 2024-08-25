@@ -2,114 +2,191 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import "../components"
+
 import "DialogSpacecraft.js" as Script
 
 // ? The DialogSpacecraft class manages the spacecraft dialog.
 Dialog
 {
-    //!-----------------------------------------!//
+    // !-----------------------------------------! //
 
+    id: root
     anchors.centerIn: parent
     modal: true
     closePolicy: Popup.NoAutoClose
-    font.pointSize: 14
+    font.pointSize: 12
     width: 1100
     height: 700
 
-    header: Item
-    {
-        width: parent.width
-        height: 75
+    onVisibleChanged: if (visible) Script.restoreParameters()
 
-        Text
+    header: DialogHeader
+    {
+        p_Title: "Spacecraft Properties"
+    }
+
+    footer: DialogFooter
+    {
+        function f_Close()
         {
-            text: "Spacecraft Properties"
-            padding: 20
-            font.pointSize: 24
-            font.bold: true
-            color: Material.color(Material.Indigo)
+            close()
+        }
+
+        function f_Save()
+        {
+            Script.saveParameters()
+            
+            close()
         }
     }
 
-    footer: Item
+    contentItem: Rectangle
     {
-        width: parent.width
-        height: 70
-        
-        RowLayout
+        border.width: 2
+        border.color: Material.color(Material.Orange)
+        radius: 5
+        color: "transparent"
+
+        TabBar
+        {
+            id: _tab_bar_
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            background: Rectangle { color: "#33FF9800" }
+            
+            TabButton { text: "Propulsion"; font.bold: true }
+            TabButton { text: "Aerodynamics"; font.bold: true }
+            TabButton { text: "Atmospheric Entry"; font.bold: true }
+        }
+
+        StackLayout
         {
             width: parent.width
+            currentIndex: _tab_bar_.currentIndex
+            anchors.top: _tab_bar_.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.margins: 20
 
-            Item { width: 10 }
+            // - Propulsion 
 
-            Item { Layout.fillWidth: true }
-
-            Button
+            Item
             {
-                text: "Save"
-                font.pointSize: 12
-                font.bold: true
-                Layout.alignment: Qt.AlignRight
-                Material.background: Material.Indigo
-                Material.foreground: "#FFFFFF"
-                onClicked: { Script.saveParameters(); close() }
+                anchors.fill: parent
+
+                GridLayout
+                {
+                    columns: 3
+                    columnSpacing: 50
+                    rowSpacing: 25
+                    width: parent.width
+
+                    DialogParameter
+                    {
+                        id: _initial_mass_
+                        placeholderText: "Initial Mass [kg]"
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                    }
+
+                    DialogParameter
+                    {
+                        id: _specific_impulse_
+                        placeholderText: "Specific Impulse [s]"
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                    }
+
+                    DialogParameter
+                    {
+                        id: _thrust_
+                        placeholderText: "Thrust [N]"
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                    }
+                }
             }
 
-            Button
+             // - Aerodynamics 
+
+            Item
             {
-                text: "Close"
-                font.pointSize: 12
-                font.bold: true
-                Layout.alignment: Qt.AlignRight
-                Material.background: Material.Grey
-                Material.foreground: "#FFFFFF"
-                onClicked: close()
+                anchors.fill: parent
+
+                GridLayout
+                {
+                    columns: 3
+                    columnSpacing: 50
+                    rowSpacing: 25
+                    width: parent.width
+
+                    DialogParameter
+                    {
+                        id: _lift_coefficient_
+                        placeholderText: "Lift Coefficient"
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                    }
+
+                    DialogParameter
+                    {
+                        id: _drag_coefficient_
+                        placeholderText: "Drag Coefficient"
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                    }
+
+                    DialogParameter
+                    {
+                        id: _reference_surface_
+                        placeholderText: "Reference Surface [m^2]"
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                    }
+                }
             }
 
-            Item { width: 10 }
+            // - Atmospheric Entry 
+
+            Item
+            {
+                anchors.fill: parent
+
+                GridLayout
+                {
+                    columns: 3
+                    columnSpacing: 50
+                    rowSpacing: 25
+                    width: parent.width
+
+                    DialogParameter
+                    {
+                        id: _node_radius_
+                        placeholderText: "Nose Radius [m]"
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                    }
+
+                    DialogParameter
+                    {
+                        id: _parachute_drag_coefficient_
+                        placeholderText: "Parachute Drag Coeffient"
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                    }
+
+                    DialogParameter
+                    {
+                        id: _parachute_reference_surface_
+                        placeholderText: "Parachute Reference Surface [m^2]"
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                    }
+                }
+            }
         }
-    }
-
-    GridLayout
-    {
-        columns: 3
-        columnSpacing: 20
-        rowSpacing: 20
-
-        Label { text: "Initial Mass"; Layout.alignment: Qt.AlignHCenter }
-        
-        TextField
-        {
-            id: _m_0_
-            text: __Spacecraft.initial_mass
-            validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
-            implicitWidth: 200
-        }
-
-        Label { text: "[kg]" }
-        
-        Label { text: "Specific Impulse"; Layout.alignment: Qt.AlignHCenter }
-
-        TextField
-        {
-            id: _I_sp_
-            text: __Spacecraft.specific_impulse
-            validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
-            Layout.fillWidth: true
-        }
-
-        Label { text: "[s]" }
-
-        Label { text: "Thrust"; Layout.alignment: Qt.AlignHCenter }
-
-        TextField
-        {
-            id: _T_
-            text: __Spacecraft.thrust
-            validator: RegularExpressionValidator { regularExpression: /[+-]?([0-9]*[.])?[0-9]+/ }
-            Layout.fillWidth: true
-        }
-
-        Label { text: "[N]" }
     }
 }

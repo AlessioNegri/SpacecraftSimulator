@@ -65,7 +65,7 @@ class FigureCanvas(qtCore.QObject):
             figsize (tuple, optional): Width and hegight in inches of the figure. Defaults to (6.0, 4.0).
         """
         
-        figsize=(parent.width() // 100, parent.height() // 100)
+        figsize=(parent.width() // 100, (parent.height() - 50) // 100)
         
         self.canvas     = canvas
         self.figure     = canvas.figure
@@ -86,17 +86,21 @@ class FigureCanvas(qtCore.QObject):
                 for c in range(0, cols):
                     
                     self.axes[r][c].grid(True)
+                    self.axes[r][c].set_facecolor('#1C1B1F')# #424242
             
         else:
             
             self.axes = self.figure.add_subplot(111) if not dof3 else self.figure.add_subplot(111, projection='3d')
             
             self.axes.grid(True)
+            self.axes.set_facecolor('#1C1B1F')
         
-            self.figure.subplots_adjust(top=1.00, bottom=0.15, left=0.10, right=0.95)
+            #self.figure.subplots_adjust(top=1.00, bottom=0.15, left=0.10, right=0.95)
         
+        self.figure.set_layout_engine('constrained')
         self.figure.set_figwidth(figsize[0])
         self.figure.set_figheight(figsize[1])
+        self.figure.patch.set_facecolor('#1C1B1F')
         
         #if dof3: self.figure.tight_layout()
         
@@ -127,6 +131,26 @@ class FigureCanvas(qtCore.QObject):
         self.canvas.draw_idle()
             
     # ! SLOTS
+    
+    @qtCore.Slot(float, float)
+    def resize_figure(self, width : float, height : float) -> None:
+        """Resizes the figure
+
+        Args:
+            event (qtCore.QEvent): Event
+        """
+        
+        if self.figure == None: return
+        
+        figsize=(width // 100, (height - 50) // 100)
+        
+        self.figsize = figsize
+        
+        self.figure.set_figwidth(figsize[0])
+        self.figure.set_figheight(figsize[1])
+        
+        self.canvas.draw_idle()
+ 
     
     @qtCore.Slot()
     def on_motion(self, event : qtGui.QMouseEvent):

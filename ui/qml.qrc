@@ -6,6 +6,9 @@
         <file>main.js</file>
 
         <file>components/qmldir</file>
+        <file>components/DialogFooter.qml</file>
+        <file>components/DialogHeader.qml</file>
+        <file>components/DialogParameter.qml</file>
         <file>components/Figure.qml</file>
         <file>components/Maneuver.qml</file>
 
@@ -25,6 +28,7 @@
         <file>dialogs/DialogSpacecraft.qml</file>
 
         <file>pages/qmldir</file>
+        <file>pages/PageAtmosphericEntry.qml</file>
         <file>pages/PageInterplanetaryTransfer.qml</file>
         <file>pages/PageOrbitPropagation.qml</file>
         <file>pages/PageOrbitTransfer.qml</file>
@@ -41,6 +45,7 @@
         <file>../img/icon.ico</file>
         <file>../img/icon.png</file>
         <file>../img/pan_tool.svg</file>
+        <file>../img/play_arrow.svg</file>
         <file>../img/warning.svg</file>
         <file>../img/zoom_in.svg</file>
     </qresource>

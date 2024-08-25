@@ -8,4 +8,5 @@ function missionChanged(mission)
     _orbitTransferCheckBox_.checked             = mission === 0
     _orbitPropagationCheckBox_.checked          = mission === 1
     _interplanetaryTransferCheckBox_.checked    = mission === 2
+    _atmosphericEntryCheckBox_.checked          = mission === 3
 }

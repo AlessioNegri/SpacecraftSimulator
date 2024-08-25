@@ -9,6 +9,7 @@ from Spacecraft import Spacecraft
 from MissionOrbitTransfer import MissionOrbitTransfer
 from MissionOrbitPropagation import MissionOrbitPropagation
 from MissionInterplanetaryTransfer import MissionInterplanetaryTransfer
+from MissionAtmosphericEntry import MissionAtmosphericEntry
 
 class MissionParameters(qtCore.QObject):
     """Class that manages the mission parameters
@@ -36,6 +37,8 @@ class MissionParameters(qtCore.QObject):
         
         self.mission_interplanetary_transfer = MissionInterplanetaryTransfer(engine)
         
+        self.mission_atmospheric_entry = MissionAtmosphericEntry(engine)
+        
     # ! PUBLIC
     
     def setUpdateWithCanvas(self, engine : qtQml.QQmlApplicationEngine) -> None:
@@ -50,3 +53,5 @@ class MissionParameters(qtCore.QObject):
         self.mission_orbit_propagation.setUpdateWithCanvas(engine)
         
         self.mission_interplanetary_transfer.setUpdateWithCanvas(engine)
+        
+        self.mission_atmospheric_entry.setUpdateWithCanvas(engine)

@@ -12,7 +12,7 @@ ApplicationWindow
     // ? Current mission selected.
     property int gp_CurrentMission: 0
 
-    //!-----------------------------------------!//
+    // !-----------------------------------------! //
 
     id: window
     title: "Spacecraft Simulator"
@@ -43,15 +43,11 @@ ApplicationWindow
 
     menuBar: MenuBar
     {
+        id: _menu_bar_
+
         Menu
         {
             title: "File"
-            
-            /*Action { text: "New..."; shortcut: "Ctrl+N" }*/
-
-            /*Action { text: "Open..."; shortcut: "Ctrl+O" }*/
-
-            /*Action { text: "Save"; shortcut: "Ctrl+S" }*/
 
             MenuSeparator {}
 
@@ -98,6 +94,14 @@ ApplicationWindow
                     checkable: true
                     onTriggered: Script.missionChanged(2)
                 }
+
+                MenuItem
+                {
+                    id: _atmosphericEntryCheckBox_
+                    text: "Atmospheric Entry"
+                    checkable: true
+                    onTriggered: Script.missionChanged(3)
+                }
             }
 
             MenuSeparator {}
@@ -131,6 +135,12 @@ ApplicationWindow
 
                 Action { text: "Interplanetary Transfer"; onTriggered: _dlgInterplanetaryTransfer_.open() }
             }
+
+            Menu
+            {
+                title: "Atmospheric Entry"
+                enabled: gp_CurrentMission === 3
+            }
         }
         
         Menu
@@ -150,19 +160,21 @@ ApplicationWindow
         interactive: false
         anchors.fill: parent
 
-        PageOrbitTransfer { width: window.width; height: window.height }
+        PageOrbitTransfer { width: window.width; height: window.height - _menu_bar_.height }
 
-        PageOrbitPropagation { width: window.width; height: window.height }
+        PageOrbitPropagation { width: window.width; height: window.height - _menu_bar_.height }
 
-        PageInterplanetaryTransfer { width: window.width; height: window.height }
+        PageInterplanetaryTransfer { width: window.width; height: window.height - _menu_bar_.height }
+
+        PageAtmosphericEntry { width: window.width; height: window.height - _menu_bar_.height }
     }
 
-    PageIndicator
+    /*PageIndicator
     {
-        id: indicator
+        id: _indicator_
         count: _view_.count
         currentIndex: _view_.currentIndex
         anchors.bottom: _view_.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-    }
+    }*/
 }

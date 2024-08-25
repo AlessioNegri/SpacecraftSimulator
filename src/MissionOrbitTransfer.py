@@ -92,7 +92,7 @@ class MissionOrbitTransfer(qtCore.QObject):
         self.arr_figure_ground_track.updateWithCanvas(win.findChild(qtCore.QObject, "ArrivalGroundTrackFigure"), win.findChild(qtCore.QObject, "ArrivalGroundTrackFigureParent"), figsize=(8, 6))
         self.tra_figure_orbit.updateWithCanvas(win.findChild(qtCore.QObject, "OrbitTransferFigure"), win.findChild(qtCore.QObject, "OrbitTransferFigureParent"), dof3=True)
         
-        self.tra_figure_orbit.figure.tight_layout()
+        #self.tra_figure_orbit.figure.tight_layout()
         self.tra_figure_orbit.axes.set_aspect('equal', adjustable='box')
     
     # ! SLOTS
