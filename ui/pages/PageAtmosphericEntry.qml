@@ -39,13 +39,20 @@ Page
 
                 Button
                 {
+                    text: "Run"
+                    icon.source: "/images/img/play_arrow.svg"
                     font.pointSize: 10
                     font.bold: true
-                    icon.source: "/images/img/play_arrow.svg"
-                    Material.background: Material.Red
+                    Material.background: "#4CAF50"
                     Material.foreground: "#FFFFFF"
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                     onClicked: __MissionAtmosphericEntry.simulate()
+
+                    HoverHandler
+                    {
+                        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                        cursorShape: Qt.PointingHandCursor
+                    }
                 }
 
                 Item { width: 10 }

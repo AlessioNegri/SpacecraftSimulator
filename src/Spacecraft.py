@@ -3,27 +3,12 @@ import PySide6.QtQml as qtQml
 
 from Utility import format, singleton
 
-"""
-m_0_changed     = qtCore.Signal()
-def get_m_0(self):      return format(self._m_0)
-def set_m_0(self, m_0 : float):     self._m_0 = m_0; self.m_0_changed.emit()
-m_0     = qtCore.Property(float, get_m_0, set_m_0, notify=m_0_changed)
-
----
-
-@qtCore.Property(float)
-def initial_mass(self): return self._initial_mass
-
-@initial_mass.setter
-def initial_mass(self, val : float): self._initial_mass = val
-"""
-
 @singleton
 class Spacecraft(qtCore.QObject):
     
     """This class describes the properties and parameters of a Spacecraft"""
     
-    # ! PROPERTIES
+    # - PROPERTIES
     
     # ? Initial Mass [kg]
     
@@ -81,13 +66,13 @@ class Spacecraft(qtCore.QObject):
     @reference_surface.setter
     def reference_surface(self, val : float): self._reference_surface = val
     
-    # ? Nose Radius [m]
+    # ? Capsule Nose Radius [m]
     
     @qtCore.Property(float)
-    def nose_radius(self): return format(self._nose_radius)
+    def capsule_nose_radius(self): return format(self._capsule_nose_radius)
 
-    @nose_radius.setter
-    def nose_radius(self, val : float): self._nose_radius = val
+    @capsule_nose_radius.setter
+    def capsule_nose_radius(self, val : float): self._capsule_nose_radius = val
     
     # ? Parachute Drag Coefficient []
     
@@ -97,13 +82,45 @@ class Spacecraft(qtCore.QObject):
     @parachute_drag_coefficient.setter
     def parachute_drag_coefficient(self, val : float): self._parachute_drag_coefficient = val
     
-    # ? Reference Surface [m^2]
+    # ? Parachute Reference Surface [m^2]
     
     @qtCore.Property(float)
     def parachute_reference_surface(self): return format(self._parachute_reference_surface)
 
     @parachute_reference_surface.setter
     def parachute_reference_surface(self, val : float): self._parachute_reference_surface = val
+    
+    # ? Capsule Mass [kg]
+    
+    @qtCore.Property(float)
+    def capsule_mass(self): return format(self._capsule_mass)
+
+    @capsule_mass.setter
+    def capsule_mass(self, val : float): self._capsule_mass = val
+    
+    # ? Capsule Lift Coefficient []
+    
+    @qtCore.Property(float)
+    def capsule_lift_coefficient(self): return format(self._capsule_lift_coefficient)
+
+    @capsule_lift_coefficient.setter
+    def capsule_lift_coefficient(self, val : float): self._capsule_lift_coefficient = val
+    
+    # ? Capsule Drag Coefficient []
+    
+    @qtCore.Property(float)
+    def capsule_drag_coefficient(self): return format(self._capsule_drag_coefficient)
+
+    @capsule_drag_coefficient.setter
+    def capsule_drag_coefficient(self, val : float): self._capsule_drag_coefficient = val
+    
+    # ? Capsule Reference Surface []
+    
+    @qtCore.Property(float)
+    def capsule_reference_surface(self): return format(self._capsule_reference_surface)
+
+    @capsule_reference_surface.setter
+    def capsule_reference_surface(self, val : float): self._capsule_reference_surface = val
     
     # ! CONSTRUCTOR
     
@@ -126,9 +143,13 @@ class Spacecraft(qtCore.QObject):
         self._lift_coefficient              : float = 0.0       # * Lift Coefficient            [ ]
         self._drag_coefficient              : float = 1.0       # * Drag Coefficient            [ ]
         self._reference_surface             : float = 1.0       # * Reference Surface           [ m^2 ]
-        self._nose_radius                   : float = 0.3       # * Nose Radius                 [ m ]
+        self._capsule_nose_radius           : float = 0.3       # * Capsule Nose Radius         [ m ]
         self._parachute_drag_coefficient    : float = 1.4       # * Parachute Drag Coefficient  [ ]
-        self._parachute_reference_surface   : float = 70        # * Parachute Reference Surface [ ]
+        self._parachute_reference_surface   : float = 70        # * Parachute Reference Surface [ m^2 ]
+        self._capsule_mass                  : float = 26.27     # * Capsule Mass                [ kg ]
+        self._capsule_drag_coefficient      : float = 1.096     # * Capsule Drag Coefficient    [ ]
+        self._capsule_lift_coefficient      : float = 0.0       # * Capsule Lift Coefficient    [ ]
+        self._capsule_reference_surface     : float = 0.341     # * Capsule Reference Surface   [ m^2 ]
     
     # ! METHODS
     

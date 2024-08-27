@@ -1,6 +1,7 @@
 module Material.Extras
 
 DialogAbout 1.0 DialogAbout.qml
+DialogAtmosphericEntryConditions 1.0 DialogAtmosphericEntryConditions.qml
 DialogFigure 1.0 DialogFigure.qml
 DialogInterplanetaryTransfer 1.0 DialogInterplanetaryTransfer.qml
 DialogManeuvers 1.0 DialogManeuvers.qml

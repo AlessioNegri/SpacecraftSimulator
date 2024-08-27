@@ -17,12 +17,7 @@ from AstronomicalData import AstronomicalData, CelestialBody
 
 sys.path.append(os.path.dirname(__file__))
 
-#sbn.set_style('dark')
-sbn.set_style("darkgrid")  # adds seaborn style to charts, eg. grid
-plt.style.use("dark_background")  # inverts colors to dark theme
-
 class AtmosphericEntry:
-    
     """Implements the atmospheric entry equations"""
     
     # ? MEMBERS
@@ -42,6 +37,8 @@ class AtmosphericEntry:
     C_D_P   = 1.4                                                           # * Parachute Drag Coefficient  [ ]
     S_P     = 70.0                                                          # * Parachute Reference Surface [ ]
     
+    use_parachute = False                                                   # * Check for parachute usage
+    
     # ? INTERNAL MEMBERS
     
     _parachute_deployed     = False                                         # * Check when the parachute is deployed
@@ -52,8 +49,7 @@ class AtmosphericEntry:
     
     @classmethod
     def setCapsuleParameters(cls, F : float, I_sp : float, csi : float, C_L : float, C_D : float, S : float) -> None:
-        
-        """Set the parameters for the atmospheric entry
+        """Sets the parameters for the atmospheric entry
 
         Args:
             F (float): Thrust [ kg * m / s^2 ]
@@ -70,12 +66,25 @@ class AtmosphericEntry:
         cls.C_L     = C_L
         cls.C_D     = C_D
         cls.S       = S
+        
+    @classmethod
+    def setParachuteParameters(cls, use_parachute : bool, C_D_P : float, S_P : float) -> None:
+        """Sets the parameters for the parachute
+
+        Args:
+            use_parachute (bool): True for using the parachute
+            C_D_P (float): Parachute Drag Coefficient [ ]
+            S_P (float): Parachute Reference Surface [ m^2 ]
+        """
+        
+        cls.use_parachute   = use_parachute
+        cls.C_D_P           = C_D_P
+        cls.S_P             = S_P
     
     # ! SECTION 6.1
     
     @classmethod
     def entry_eom(cls, t : float, X : np.ndarray) -> np.ndarray:
-        
         """Atmospheric entry equations of motion\n
         
         (1) dV/dt     = ( F cos(csi) ) / m - D / m - ( k sin(gamma) ) / r^2\n
@@ -96,32 +105,37 @@ class AtmosphericEntry:
         
         V, gamma, r, x, m = X
         
-        #print(-(r - cls.R_E) / cls.H)
         rho = 1.5 * np.exp(-(r - cls.R_E) / cls.H) # * [kg / m^3]
         
         L = 0.5 * rho * (V * 1e3)**2 * cls.C_L * cls.S * 1e-3 # * [kg * km / s^2]
         
         D = 0.5 * rho * (V * 1e3)**2 * cls.C_D * cls.S * 1e-3 # * [kg * km / s^2]
         
-        D_P = 0.5 * rho * (V * 1e3)**2 * 1.4 * 70 * 1e-3 # * [kg * km / s^2]
+        D_P = 0.5 * rho * (V * 1e3)**2 * cls.C_D_P * cls.S_P * 1e-3 # * [kg * km / s^2]
         
-        if not cls._parachute_deployed:
+        if cls.use_parachute:
             
-            D_P = 0
-        
-            if (r - cls.R_E) <= 5:
+            if not cls._parachute_deployed:
                 
-                cls._parachute_deployed     = True
-                cls._parachute_deployed_t_0 = t
-                cls._parachute_opening_time = 3
-        
+                D_P = 0
+            
+                if (r - cls.R_E) <= 5:
+                    
+                    cls._parachute_deployed     = True
+                    cls._parachute_deployed_t_0 = t
+                    cls._parachute_opening_time = 3
+            
+            else:
+                
+                dt = t - cls._parachute_deployed_t_0
+                
+                D_P = D_P * dt / cls._parachute_opening_time if dt <= cls._parachute_opening_time else D_P
+                
+                if dt < 0: D_P = 0
+                
         else:
             
-            dt = t - cls._parachute_deployed_t_0
-            
-            D_P = D_P * dt / cls._parachute_opening_time if dt <= cls._parachute_opening_time else D_P
-            
-            if dt < 0: D_P = 0
+            D_P = 0
         
         # - Equations 
         

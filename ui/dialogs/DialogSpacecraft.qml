@@ -14,10 +14,10 @@ Dialog
     id: root
     anchors.centerIn: parent
     modal: true
+    width: window.width * 0.8
+    height: window.height * 0.8
     closePolicy: Popup.NoAutoClose
     font.pointSize: 12
-    width: 1100
-    height: 700
 
     onVisibleChanged: if (visible) Script.restoreParameters()
 
@@ -164,8 +164,8 @@ Dialog
 
                     DialogParameter
                     {
-                        id: _node_radius_
-                        placeholderText: "Nose Radius [m]"
+                        id: _capsule_node_radius_
+                        placeholderText: "Capsule Nose Radius [m]"
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
                     }
@@ -182,6 +182,38 @@ Dialog
                     {
                         id: _parachute_reference_surface_
                         placeholderText: "Parachute Reference Surface [m^2]"
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                    }
+
+                    DialogParameter
+                    {
+                        id: _capsule_mass_
+                        placeholderText: "Capsule Mass [kg]"
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                    }
+
+                    DialogParameter
+                    {
+                        id: _capsule_drag_coefficient_
+                        placeholderText: "Capsule Drag Coefficient"
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                    }
+
+                    DialogParameter
+                    {
+                        id: _capsule_lift_coefficient_
+                        placeholderText: "Capsule Lift Coefficient"
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                    }
+
+                    DialogParameter
+                    {
+                        id: _capsule_reference_surface_
+                        placeholderText: "Capsule Reference Surface [m^2]"
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
                     }

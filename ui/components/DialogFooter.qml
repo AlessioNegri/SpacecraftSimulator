@@ -4,6 +4,9 @@ import QtQuick.Layouts
 
 Item
 {
+    // ? True for showing the save button.
+    property bool p_ShowSaveButton: true
+
     // ? Override to implement the "Close" button action.
     function f_Close() {}
 
@@ -51,6 +54,7 @@ Item
             Button
             {
                 text: "Save"
+                visible: p_ShowSaveButton
                 font.pointSize: 10
                 font.bold: true
                 Layout.alignment: Qt.AlignRight

@@ -54,4 +54,4 @@ class MissionParameters(qtCore.QObject):
         
         self.mission_interplanetary_transfer.setUpdateWithCanvas(engine)
         
-        self.mission_atmospheric_entry.setUpdateWithCanvas(engine)
+        self.mission_atmospheric_entry.set_update_with_canvas(engine)

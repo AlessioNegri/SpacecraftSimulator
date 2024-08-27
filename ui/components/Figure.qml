@@ -45,37 +45,59 @@ Rectangle
 
             Button
             {
+                text: "Restore"
                 icon.source: "/images/img/home.svg"
-                Material.background: Material.Indigo
+                Material.background: "#FF5722"
                 Material.foreground: "#FFFFFF"
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                 onClicked: r_Model.home()
+
+                HoverHandler
+                {
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                    cursorShape: Qt.PointingHandCursor
+                }
             }
 
             Button
             {
+                text: "Back"
                 icon.source: "/images/img/arrow_back.svg"
-                Material.background: Material.Indigo
+                Material.background: "#FF5722"
                 Material.foreground: "#FFFFFF"
                 Layout.alignment: Qt.AlignHCenter
                 onClicked: r_Model.back()
+
+                HoverHandler
+                {
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                    cursorShape: Qt.PointingHandCursor
+                }
             }
 
             Button
             {
+                text: "Next"
                 icon.source: "/images/img/arrow_forward.svg"
-                Material.background: Material.Indigo
+                Material.background: "#FF5722"
                 Material.foreground: "#FFFFFF"
                 Layout.alignment: Qt.AlignHCenter
                 onClicked: r_Model.forward()
+
+                HoverHandler
+                {
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                    cursorShape: Qt.PointingHandCursor
+                }
             }
 
             Button
             {
                 id: _departure_pan_
                 checkable: true
+                text: "Pan"
                 icon.source: "/images/img/pan_tool.svg"
-                Material.background: _departure_pan_.checked ? Material.DeepOrange : Material.Indigo
+                Material.background: _departure_pan_.checked ? "#3F51B5" : "#FF5722"
                 Material.foreground: "#FFFFFF"
                 Material.accent: "#FFFFFF"
                 Layout.alignment: Qt.AlignHCenter
@@ -86,14 +108,21 @@ Rectangle
 
                     r_Model.pan()
                 }
+
+                HoverHandler
+                {
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                    cursorShape: Qt.PointingHandCursor
+                }
             }
 
             Button
             {
                 id: _departure_zoom_
                 checkable: true
+                text: "Zoom"
                 icon.source: "/images/img/zoom_in.svg"
-                Material.background: _departure_zoom_.checked ? Material.DeepOrange : Material.Indigo
+                Material.background: _departure_zoom_.checked ? "#3F51B5" : "#FF5722"
                 Material.foreground: "#FFFFFF"
                 Material.accent: "#FFFFFF"
                 Layout.alignment: Qt.AlignHCenter
@@ -104,13 +133,19 @@ Rectangle
 
                     r_Model.zoom()
                 }
+
+                HoverHandler
+                {
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                    cursorShape: Qt.PointingHandCursor
+                }
             }
 
             Item { Layout.fillWidth: true }
 
             TextInput
             {
-                text: r_Model.coord
+                text: "Coordinates: " + r_Model.coord
                 color: "#FFFFFF"
                 font.pointSize: 12
                 font.bold: true

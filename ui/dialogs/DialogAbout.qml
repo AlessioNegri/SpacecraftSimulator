@@ -2,9 +2,12 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import "../components"
+
 // ? The DialogAbout class manages the about dialog.
 Dialog
 {
+    id: root
     title: "About - Spacecraft Simulator"
     anchors.centerIn: parent
     modal: true
@@ -13,48 +16,22 @@ Dialog
     width: 700
     height: 400
 
-    header: Item
+    header: DialogHeader
     {
-        width: parent.width
-        height: 75
-
-        Text
-        {
-            text: title
-            padding: 20
-            font.pointSize: 24
-            font.bold: true
-            color: Material.color(Material.Indigo)
-        }
+        p_Title: "About - Spacecraft Simulator"
     }
 
-    footer: Item
+    footer: DialogFooter
     {
-        width: parent.width
-        height: 60
+        p_ShowSaveButton: false
         
-        RowLayout
+        function f_Close()
         {
-            width: parent.width
-
-            Item { Layout.fillWidth: true }
-
-            Button
-            {
-                text: "Ok"
-                font.pointSize: 12
-                font.bold: true
-                Layout.alignment: Qt.AlignRight
-                Material.background: Material.Indigo
-                Material.foreground: "#FFFFFF"
-                onClicked: close()
-            }
-
-            Item { width: 10 }
+            close()
         }
     }
 
-    Item
+    contentItem: Item
     {
         Row
         {

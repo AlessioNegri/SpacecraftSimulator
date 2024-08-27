@@ -39,6 +39,8 @@ ApplicationWindow
 
     DialogInterplanetaryTransfer { id: _dlgInterplanetaryTransfer_ }
 
+    DialogAtmosphericEntryConditions { id: _dlgAtmosphericEntryConditions_ }
+
     // ? Menu Bar
 
     menuBar: MenuBar
@@ -140,6 +142,8 @@ ApplicationWindow
             {
                 title: "Atmospheric Entry"
                 enabled: gp_CurrentMission === 3
+
+                Action { text: "Entry Conditions"; onTriggered: _dlgAtmosphericEntryConditions_.open() }
             }
         }
         

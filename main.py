@@ -29,6 +29,21 @@ import ui.qml_rc
 
 from lib.matplotlib_backend_qtquick.backend_qtquickagg import FigureCanvasQtQuickAgg
 
+from qbstyles import mpl_style
+
+mpl_style(dark=True)
+
+import mplcyberpunk
+
+import matplotlib.pyplot as plt
+
+#plt.style.use("cyberpunk")
+
+#import seaborn as sbn
+
+#sbn.set_style("darkgrid")
+#plt.style.use("dark_background")
+
 # ! Sources
 
 from src.MissionParameters import MissionParameters

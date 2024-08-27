@@ -14,6 +14,8 @@
 
         <file>dialogs/qmldir</file>
         <file>dialogs/DialogAbout.qml</file>
+        <file>dialogs/DialogAtmosphericEntryConditions.js</file>
+        <file>dialogs/DialogAtmosphericEntryConditions.qml</file>
         <file>dialogs/DialogFigure.qml</file>
         <file>dialogs/DialogInterplanetaryTransfer.js</file>
         <file>dialogs/DialogInterplanetaryTransfer.qml</file>
