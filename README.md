@@ -1,34 +1,20 @@
 # SpacecraftSimulator
 
-Spacecraft Dynamics And Missions Simulator
+**Spacecraft Dynamics And Missions Simulator**
 
-## Table Of Contents
-
-1. Introduction
-    - Languages & Libraries
-    - Project's Structure
-    - References
-        - Books
-        - GitHub Repositories
-2. Spacecraft Properties
-3. Missions
-    - Orbit Transfer
-        - Departure Orbit
-        - Arrival Orbit
-        - Maneuvers
-    - Orbit Propagation
-        - Orbital Perturbations
-    - Interplanetary
-        - Pork Chop Plot
-        - Interplanetary Transfer
+<p align="center"><img src="./images/about.png" width="50%"></p>
 
 ## 1. Introduction
 
-The `Spacecraft Simulator` application has the objective to implement all the algorithms used in **Orbital Mechanics** and integrating them inside a GUI application to simplify the ananlysis.
+The `Spacecraft Simulator` application has the objective to implement the algorithms used in **Orbital Mechanics** and **Entry Mechanics**, integrating them inside a GUI application to simplify the analysis.
+
+I decided to adopt the *Python* language to develop all the algorithms due to the high variety of libraries for scientific applications.
+
+For the Graphical User Interface (GUI) I decided to rely on the *QML* language (part of the *Qt* environment) due to its flexibility and the nice and modern fill it can reach.
 
 ### 1.1 Languages & Libraries
 
-The application is developed in `Python 3.11.2` and uses the following libraries:
+The application is developed in `Python 3.11.2` and uses the following main libraries:
 
 - `numpy 1.24.2` for linear algebra and matrix manipulation
 - `matplotlib 3.7.1` for data visualization
@@ -53,8 +39,11 @@ The project is structured in the following folders.
     - `ui\components`: list of components used in the GUI
     - `ui\dialogs`: list of dialogs
     - `ui\pages`: list of pages
+    - `main.qml`: root file of the QtQuick / QML project
+    - `qml.qrc`: resource file for the QtQuick / QML project
+    - `qtquickcontrols2.conf`: configuration file for the QtQuick / QML project
 - `generate.bat`: batch file used to compile the file *qml.qrc* in Python
-- `main.py`: root file of the project
+- `main.py`: root file of the Python project
 
 ### 1.3 References
 
@@ -66,6 +55,14 @@ The project is structured in the following folders.
 > - `Series`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Aerospace Engineering
 > - `Year`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2013
 > - `Publisher`&nbsp;Elsevier Science
+> - `URL`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;https://books.google.it/books?id=2U9Z8k0TlTYC
+
+> **Manned Spacecraft: Design Principles**
+> - `Authors`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pasquale M. Sforza
+> - `ISBN`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9780128044254
+> - `Series`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Aerospace Engineering
+> - `Year`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2016
+> - `Publisher`&nbsp;Butterworth-Heinenmann
 > - `URL`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;https://books.google.it/books?id=2U9Z8k0TlTYC
 
 <!-- | Title  | Authors | ISBN | Series | Year | Publisher | URL |
@@ -80,15 +77,38 @@ The project is structured in the following folders.
 > **pyextrema**
 > - `URL` https://github.com/manmadan03/pyextrema
 
+> **qbstyles**
+> - `URL` https://github.com/mckinsey/qbstyles
+
+> **mplcyberpunk**
+> - `URL` https://github.com/dhaitz/mplcyberpunk
+
 ## 2. Spacecraft Properties
 
-Under the menu item `Missions \ Spacecraft Properties` it is possible to configure the **Spacecraft Properties** in terms of
+Under the menu item `Missions \ Spacecraft Properties` it is possible to configure the **Spacecraft Properties**.
+
+In the **Propulsion** section you can set:
 
 - **Initial Mass**
-- **Specific Impulse** of the propulsive system
-- **Thrust** of the propulsive system
+- **Specific Impulse**
+- **Thrust**
 
-![Spacecraft Properties.](./images/spacecraft_properties.png)
+<p align="center"><img src="./images/spacecraft_properties_propulsion.png" width="100%"></p>
+
+In the **Aerodynamics** section you can set:
+
+- **Lift Coefficient**
+- **Drag Coefficient**
+- **Reference Surface**
+
+<p align="center"><img src="./images/spacecraft_properties_aerodynamics.png" width="100%"></p>
+
+In the **Atmospheric Entry** section you can set:
+
+- **Capsule** (Nose Radius - Mass - Drag / Lift Coefficients - Reference Surface)
+- **Parachute** (Drag Coefficient - Reference Surface)
+
+<p align="center"><img src="./images/spacecraft_properties_atmospheric_entry.png" width="100%"></p>
 
 ## 3. Missions
 
@@ -96,10 +116,13 @@ Under the menu item `Missions \ Current Mission` it is possible to select the mi
 - **Orbit Transfer** to simulate the cost in terms of $\Delta v$, $\Delta t$, and $\Delta m$ of the transfer between a departure and an arrival orbit.
 - **Orbit Propagation** to simulate the propagation of an orbit around Earth due to perturbations.
 - **Interplanetary Transfer** to simulate the transfer between two planets of the Solar System.
+- **Atmospheric Entry** to simulate the re-entry of a capsule with the addition of a parachute if required.
 
-### 3.1 Orbit Transfer
+All these missions will be discussed in detail in the following sections.
 
-#### Departure & Arrival Orbits
+## 4 Orbit Transfer
+
+### 4.1 Departure & Arrival Orbits
 
 Under the menu item `Missions \ Orbit Transfer \ Departure Orbit` it is possible to configure the **Departure Orbit**. The same discussion is valid for the **Arrival Orbit**. The orbit can be configured using one of the following representations:
 - **Cartesian** based on the *position vector* and the *velocity vector*
@@ -126,7 +149,7 @@ The user can select the planet as central body. In addition, a preview of the **
 
 ![Ground Track Preview.](./images/ground_track_preview.png)
 
-#### Maneuvers
+### 4.2 Maneuvers
 
 Under the menu item `Missions \ Orbit Transfer \ Maneuvers` it is possible to configure the maneuvers for the transfer between the departure and the arrival orbits, among the following ones:
 - **Hohmann Transfer**
@@ -142,7 +165,7 @@ By clicking on the `Save` button, the transfer becomes visible in the main windo
 
 ![Orbit Transfer.](./images/orbit_transfer.png)
 
-### 3.2 Orbit Propagation
+## 5 Orbit Propagation
 
 Under the menu item `Missions \ Orbit Propagation \ Orbital Perturbations` it is possible to analyze the effects of the following perturbations on an orbit around Earth in a range of dates:
 - **Drag**: the user shall give the value of the *Ballistic Coefficient*
@@ -156,9 +179,9 @@ By clicking on the `Save` button, the propagation of the orbit becomes visible i
 
 ![Orbital Propagation.](./images/orbit_propagation.png)
 
-### 3.3 Interplanetary
+## 6 Interplanetary Transfer
 
-#### Pork Chop Plot
+### 6.1 Pork Chop Plot
 
 Under the menu item `Missions \ Interplanetary \ Pork Chop Plot` it is possible to analyze the cost of the interplanetary transfer bewteen two planets of the Solar System, given a *Launch Window* and an *Arrival Window*. Once selected the parameters, by clicking on the `Generate` button the Pork Chop Plot is generated, and can be seen by clicking on the `Show` button.
 
@@ -166,10 +189,43 @@ Under the menu item `Missions \ Interplanetary \ Pork Chop Plot` it is possible 
 
 ![Pork Chop Plot Design.](./images/pork_chop_plot.png)
 
-#### Interplanetary Transfer
+### 6.2 Interplanetary Transfer
 
 After the analysis of the Pork Chop Plot, under the menu item `Missions \ Interplanetary \ Interplanetary Transfer` the actual transfer can be simulated, by choosing the effective departure and arrival dates, and the departure and arrival orbits around the planets.
 
 ![Orbit Transfer.](./images/interplanetary_transfer_design.png)
 
 ![Orbit Transfer.](./images/interplanetary_transfer.png)
+
+## 7 Atmospheric Entry
+
+The **Atmospheric Entry** problem studies what happens when an object (e.g. capsule carrying extraterrestrial meterial) re-enters on Earth.
+
+### 7.1 Entry Conditions
+
+Under the menu item `Missions \ Atmospheric Entry \ Entry Conditions` it is possible to set up the parameters needed to simulate a capsule re-entry: some of the data are also present in the *Spacecraft Properties* dialog.
+
+- **Entry Velocity**
+- **Entry Flight Path Angle**
+- **Entry Altitude**
+- **Final Integration Time**
+- **Use Parachute** to simulate the parachute deployment
+
+Under the results section the user can analyze the **Impact Velocity** at ground.
+
+Click the `Save` button to update the parameters.
+
+<p align="center"><img src="./images/entry_conditions.png" width="100%"></p>
+
+### 7.2 Simulation
+
+After you have decided the *Entry Conditions*, by clicking on the `Run` button, the simulation is executed and the results shown on the charts below. Each chart represents a peculiar parameter of the analysis:
+
+- **Velocity vs Time**
+- **Acceleration g's vs Time**
+- **Altitude vs Downrange Distance**
+- **Fight Path Angle vs Time**
+- **Stagnation Point Convective Heat Flux vs Time**
+- **Altitude vs Velocity**
+
+<p align="center"><img src="./images/atmospheric_entry.png" width="100%"></p>
