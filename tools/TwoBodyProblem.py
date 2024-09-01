@@ -1,57 +1,77 @@
+""" TwoBodyProblem.py: Solves the 2BP """
+
+__author__      = "Alessio Negri"
+__license__     = "LGPL v3"
+__maintainer__  = "Alessio Negri"
+__book__        = "Orbital Mechanics for Engineering Students"
+__chapter__     = "2 - The Two-Body Problem"
+__chapter__     = "6 - Orbital Maneuvers"
+
 import os
 import sys
 
-#sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import mpl_toolkits.mplot3d.art3d as art3d
+
+from dataclasses import dataclass
+from scipy.integrate import solve_ivp
+
 sys.path.append(os.path.dirname(__file__))
 
-from stdafx import *
-from Time import *
-#from ThreeDimensionalOrbit import *
+from AstronomicalData import AstronomicalData, CelestialBody
+from Time import Time, DirectionType
+
+# --- STRUCT 
 
 @dataclass
-class ORBITAL_PARAMETERS:
-    h           : float = 0.0 # ? Specific Angular Momentum [km^2 / s]
-    epsilon     : float = 0.0 # ? Specific Mechanical Energy [km^2 / s^2]
-    e           : float = 0.0 # ? Eccentricity []
-    T           : float = 0.0 # ? Orbital Period [s]
-    r_a         : float = 0.0 # ? Apoapsis Radius [km]
-    r_p         : float = 0.0 # ? Periapsis Radius [km]
-    a           : float = 0.0 # ? Semi-Major Axis [km]
-    b           : float = 0.0 # ? Semi-Minor Axis [km]
-    v_esc       : float = 0.0 # ? Escape Velocity [km / s]
-    theta_inf   : float = 0.0 # ? Infinite True Anomaly [rad]
-    beta        : float = 0.0 # ? Hyperbola Asymptote Angle [rad]
-    delta       : float = 0.0 # ? Turn Angle [rad]
-    Delta       : float = 0.0 # ? Aiming Radius [km]
-    v_inf       : float = 0.0 # ? Hyperbolic Excess Speed [km / s]
-    C_3         : float = 0.0 # ? Characteristic Energy [km^2 / s^2]
+class OrbitalParameters:
+    """Parameters of an orbit"""
+    
+    h           : float = 0.0 # * Specific Angular Momentum     [ km^2 / s ]
+    epsilon     : float = 0.0 # * Specific Mechanical Energy    [ km^2 / s^2 ]
+    e           : float = 0.0 # * Eccentricity                  [ ]
+    T           : float = 0.0 # * Orbital Period                [ s ]
+    r_a         : float = 0.0 # * Apoapsis Radius               [ km ]
+    r_p         : float = 0.0 # * Periapsis Radius              [ km ]
+    a           : float = 0.0 # * Semi-Major Axis               [ km ]
+    b           : float = 0.0 # * Semi-Minor Axis               [ km ]
+    v_esc       : float = 0.0 # * Escape Velocity               [ km / s ]
+    theta_inf   : float = 0.0 # * Infinite True Anomaly         [ rad ]
+    beta        : float = 0.0 # * Hyperbola Asymptote Angle     [ rad ]
+    delta       : float = 0.0 # * Turn Angle                    [ rad ]
+    Delta       : float = 0.0 # * Aiming Radius                 [ km ]
+    v_inf       : float = 0.0 # * Hyperbolic Excess Speed       [ km / s ]
+    C_3         : float = 0.0 # * Characteristic Energy         [ km^2 / s^2 ]
 
-# ! CHAPTER 2 - The Two-Body Problem
-# ! CHAPTER 6 - Orbital Maneuvers
+# --- CLASS 
+
 class TwoBodyProblem:
+    """Implements all the algorithms to solve the Two Body Problem"""
     
-    g_0 = AstronomicalData.Gravity(CelestialBody.EARTH, True)
+    # --- ASTRONOMICAL CONSTANTS 
     
-    mu = AstronomicalData.GravitationalParameter(CelestialBody.EARTH)
+    g_0 = AstronomicalData.gravity(CelestialBody.EARTH, True)
+    mu  = AstronomicalData.gravitational_parameter(CelestialBody.EARTH)
     
-    def __init__(self) -> None: pass
+    # --- METHODS 
     
     @classmethod
-    def setCelestialBody(cls, celestialBody : CelestialBody) -> None:
+    def set_celestial_body(cls, celestialBody : CelestialBody) -> None:
         """Sets the current celectial body
 
         Args:
             celestialBody (CelestialBody): Celestial body
         """
         
-        cls.g_0 = AstronomicalData.Gravity(celestialBody, True)
-        
-        cls.mu = AstronomicalData.GravitationalParameter(celestialBody)
+        cls.g_0 = AstronomicalData.gravity(celestialBody, True)
+        cls.mu  = AstronomicalData.gravitational_parameter(celestialBody)
         
     # ! SECTION 2.3
     
     @classmethod
-    def relativeMotionEquations(cls, t : float, X : np.ndarray) -> np.ndarray:
+    def relative_eom(cls, t : float, X : np.ndarray) -> np.ndarray:
         """Equations of relative motion
 
         Args:
@@ -79,7 +99,7 @@ class TwoBodyProblem:
     
     # ! ALGORITHM 2.2
     @classmethod
-    def integrateRelativeMotion(cls, y_0 : np.ndarray, t_0 : float = 0.0, t_f : float = 0.0, show : bool = False) -> dict:
+    def simulate_relative_motion(cls, y_0 : np.ndarray, t_0 : float = 0.0, t_f : float = 0.0, show : bool = False) -> dict:
         """Integrates the Ordinary Differential Equations for the relative motion
 
         Args:
@@ -92,9 +112,9 @@ class TwoBodyProblem:
             dict: { t: time, y: state[n_states, n_points] }
         """
         
-        # * 1.
+        # >>> 1.
         
-        parameters = cls.calculateOrbitalParameters(y_0[:3], y_0[3:])
+        parameters = cls.calculate_orbital_parameters(y_0[:3], y_0[3:])
         
         if t_f == 0.0 and t_0 >= 0.0:
             
@@ -102,19 +122,19 @@ class TwoBodyProblem:
         
         if parameters.e >= 1.0:
             
-            t_f = Time.calculateHyperbolicOrbit(DirectionType.MEAN_ANOMALY_TO_TIME, h=parameters.h, e=parameters.e, theta=parameters.theta_inf * 0.999)
+            t_f = Time.calculate_hyperbolic_orbit(DirectionType.MEAN_ANOMALY_TO_TIME, h=parameters.h, e=parameters.e, theta=parameters.theta_inf * 0.999)
         
-        if t_f < t_0: raise CustomException('Invalid integration time')
+        if t_f < t_0: raise Exception('Invalid integration time')
         
-        integrationResult = solve_ivp(fun=cls.relativeMotionEquations, t_span=[t_0, t_f], y0=y_0, method='RK45', args=(), rtol=1e-8, atol=1e-8)
+        integrationResult = solve_ivp(fun=cls.relative_eom, t_span=[t_0, t_f], y0=y_0, method='RK45', args=(), rtol=1e-8, atol=1e-8)
         
-        if not integrationResult['success']: CustomException(integrationResult['message'])
+        if not integrationResult['success']: Exception(integrationResult['message'])
         
         x = integrationResult['y'][0, :]
         y = integrationResult['y'][1, :]
         z = integrationResult['y'][2, :]
         
-        # * 2.
+        # >>> 2.
         
         if show:
             
@@ -122,13 +142,13 @@ class TwoBodyProblem:
             
             ax = plt.axes(projection='3d')
             
-            # * Max Values
+            # ? Max Values
             
             xMax = 1.25 * max(np.absolute(x))
             yMax = 1.25 * max(np.absolute(y))
             zMax = 1.25 * max(np.absolute(z))
             
-            # * Plane
+            # ? Plane
             
             p = mpatches.Rectangle((-xMax, -yMax), 2 * xMax, 2 * yMax, fc=(0,0,0,0.1), ec=(0,0,0,1), lw=2)
             
@@ -136,25 +156,25 @@ class TwoBodyProblem:
             
             art3d.pathpatch_2d_to_3d(p, z=0, zdir='z')
             
-            # * Axes
+            # ? Axes
             
             ax.plot([0, xMax], [0, 0], [0, 0], 'k--')
             ax.plot([0, 0], [0, yMax], [0, 0], 'k--')
             ax.plot([0, 0], [0, 0], [0, zMax], 'k--')
             
-            # * Earth
+            # ? Earth
             
             ax.scatter(0, 0, 0, s=1000, c='c')
             
-            # * Orbit
+            # ? Orbit
             
             ax.plot(x, y, z, label='Orbit')
             
-            # * Start
+            # ? Start
             
             ax.scatter(x[0], y[0], z[0], s=200, c='g', label='Start')
             
-            # * Finish
+            # ? Finish
             
             ax.scatter(x[-1], y[-1], z[-1], s=200, c='r', label='Finish')
             
@@ -171,7 +191,7 @@ class TwoBodyProblem:
     # ! SECTION 2.4 - 2.9
     
     @classmethod
-    def calculateOrbitalParameters(cls, r : np.ndarray, v : np.ndarray, show : bool = False) -> ORBITAL_PARAMETERS:
+    def calculate_orbital_parameters(cls, r : np.ndarray, v : np.ndarray, show : bool = False) -> OrbitalParameters:
         """Calculates the orbital parameters
 
         Args:
@@ -183,31 +203,31 @@ class TwoBodyProblem:
             ORBITAL_PARAMETERS: Orbital parameters
         """
         
-        parameters = ORBITAL_PARAMETERS()
+        parameters = OrbitalParameters()
         
-        # * Angular Momentum
+        # >>> Angular Momentum
         
         h = np.cross(r, v)
         
-        parameters.h = linalg.norm(h)
+        parameters.h = np.linalg.norm(h)
         
-        # * Energy
+        # >>> Energy
         
-        parameters.epsilon = linalg.norm(v)**2 / 2 - cls.mu / linalg.norm(r)
+        parameters.epsilon = np.linalg.norm(v)**2 / 2 - cls.mu / np.linalg.norm(r)
         
-        # * Eccentricity
+        # >>> Eccentricity
         
-        parameters.e = np.sqrt((2 * linalg.norm(h)**2 * parameters.epsilon) / (cls.mu **2) + 1)
+        parameters.e = np.sqrt((2 * np.linalg.norm(h)**2 * parameters.epsilon) / (cls.mu **2) + 1)
         
-        # * Select Orbit Type
+        # >>> Select Orbit Type
         
         if parameters.e == 0: # ? CIRCULAR
             
-            parameters.r_p  = linalg.norm(r)                                                # * Pericenter radius
-            parameters.r_a  = linalg.norm(r)                                                # * Apocenter radius
-            parameters.a    = linalg.norm(r)                                                # * Semi-major axis
-            parameters.b    = linalg.norm(r)                                                # * Semi-latus rectum
-            parameters.T    = (2 * np.pi) /  np.sqrt(cls.mu) * linalg.norm(r) ** (3 / 2)    # * Period
+            parameters.r_p  = np.linalg.norm(r)                                                # * Pericenter radius
+            parameters.r_a  = np.linalg.norm(r)                                                # * Apocenter radius
+            parameters.a    = np.linalg.norm(r)                                                # * Semi-major axis
+            parameters.b    = np.linalg.norm(r)                                                # * Semi-latus rectum
+            parameters.T    = (2 * np.pi) /  np.sqrt(cls.mu) * np.linalg.norm(r) ** (3 / 2)    # * Period
             
             if show:
                 
@@ -303,7 +323,7 @@ class TwoBodyProblem:
     # ! SECTION 6.10
     
     @classmethod
-    def relativeMotionEquationsThrust(cls, t : float, X : np.ndarray, T : float, I_sp : float) -> np.ndarray:
+    def thrust_relative_eom(cls, t : float, X : np.ndarray, T : float, I_sp : float) -> np.ndarray:
         """Equations of relative motion with thrust
 
         Args:
@@ -335,7 +355,7 @@ class TwoBodyProblem:
         return dX_dt
     
     @classmethod
-    def integrateRelativeMotionThrust(cls, y_0 : np.ndarray, T : float, I_sp : float, t_0 : float = 0.0, t_f : float = 0.0):
+    def simulate_relative_motion_with_thrust(cls, y_0 : np.ndarray, T : float, I_sp : float, t_0 : float = 0.0, t_f : float = 0.0):
         """Integrates the Ordinary Differential Equations for the relative motion with Thrust
 
         Args:
@@ -349,24 +369,24 @@ class TwoBodyProblem:
             dict: { t: time, y: state[n_states, n_points] }
         """
         
-        T = T * 1e-3 # ? [kg * km / s^2]
+        T = T * 1e-3 # * [kg * km / s^2]
         
-        if t_f < t_0: raise CustomException('Invalid integration time')
+        if t_f < t_0: raise Exception('Invalid integration time')
         
-        cls.calculateOrbitalParameters(y_0[:3], y_0[3:6])
+        cls.calculate_orbital_parameters(y_0[:3], y_0[3:6])
         
         if t_f == 0.0: t_f = cls.parameters.T
         
-        integrationResult = solve_ivp(fun=cls.relativeMotionEquationsThrust, t_span=[t_0, t_f], y0=y_0, method='RK45', args=(T, I_sp), rtol=1e-8, atol=1e-8)
+        integrationResult = solve_ivp(fun=cls.thrust_relative_eom, t_span=[t_0, t_f], y0=y_0, method='RK45', args=(T, I_sp), rtol=1e-8, atol=1e-8)
         
-        if not integrationResult['success']: CustomException(integrationResult['message'])
+        if not integrationResult['success']: Exception(integrationResult['message'])
         
         return dict(t=integrationResult['t'], y=integrationResult['y'])
     
 if __name__  == '__main__':
     
     print('EXAMPLE 2.3\n')
-    TwoBodyProblem.integrateRelativeMotion(np.array([8000, 0, 6000, 0, 7, 0]), show=True)
+    TwoBodyProblem.simulate_relative_motion(np.array([8000, 0, 6000, 0, 7, 0]), show=True)
     print('-' * 40, '\n')
     
     # r, v = ThreeDimensionalOrbit.PF2GEF(ORBITAL_ELEMENTS(0, 0.33333, 0, 0, 0, 0, 12000))
@@ -384,7 +404,7 @@ if __name__  == '__main__':
     # plt.show()
     
     print('EXAMPLE 6.15\n')
-    result = TwoBodyProblem.integrateRelativeMotionThrust(np.array([6858, 0, 0, 0, 7.7102, 0, 2000]), 10e3, 300, 0, 261.112700)
+    result = TwoBodyProblem.simulate_relative_motion_with_thrust(np.array([6858, 0, 0, 0, 7.7102, 0, 2000]), 10e3, 300, 0, 261.112700)
     print('r = ', result['y'][:3, -1])
     print('v = ', result['y'][3:6, -1])
     print('m = ', result['y'][6, -1])

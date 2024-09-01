@@ -2,11 +2,12 @@ import PySide6.QtCore as qtCore
 import PySide6.QtQml as qtQml
 import numpy as np
 
+from datetime import datetime
+
 from Utility import format
 from FigureCanvas import FigureCanvas
 from Orbit import Orbit
 
-from tools.stdafx import datetime
 from tools.AstronomicalData import CelestialBody
 from tools.OrbitalPerturbations import OrbitalPerturbations
 from tools.OrbitDetermination import OrbitDetermination
@@ -201,7 +202,7 @@ class MissionOrbitPropagation(qtCore.QObject):
         
         # * Orbit propagation
         
-        self.figure_orbit_propagation = FigureCanvas()
+        self.figure_orbit_propagation = FigureCanvas(rows=2, cols=3)
         
         # * Context properties
         
@@ -218,7 +219,7 @@ class MissionOrbitPropagation(qtCore.QObject):
         
         win = engine.rootObjects()[0]
         
-        self.figure_orbit_propagation.updateWithCanvas(win.findChild(qtCore.QObject, "OrbitPropagationFigure"), win.findChild(qtCore.QObject, "OrbitPropagationFigureParent"), rows=2, cols=3)
+        self.figure_orbit_propagation.update_with_canvas(win.findChild(qtCore.QObject, "OrbitPropagationFigure"), win.findChild(qtCore.QObject, "OrbitPropagationFigureParent"))
     
      # ! SLOTS
      
@@ -234,17 +235,17 @@ class MissionOrbitPropagation(qtCore.QObject):
         """Saves the orbital perturbations parameters
         """
         
-        OrbitalPerturbations.setCelestialBody(CelestialBody.EARTH)
+        OrbitalPerturbations.set_celestial_body(CelestialBody.EARTH)
         
         y_0 = np.array([self._angular_momentum, self._eccentricity, self._true_anomaly, self._right_ascension_ascending_node, self._inclination, self._periapsis_anomaly])
         
         start_date = datetime.strptime(self._start_date, '%Y-%m-%d %H:%M:%S')
         end_date = datetime.strptime(self._end_date, '%Y-%m-%d %H:%M:%S')
         
-        JD_0 = OrbitDetermination.JulianDay(start_date.year, start_date.month, start_date.day, start_date.hour, start_date.minute, start_date.second)
-        JD_f = OrbitDetermination.JulianDay(end_date.year, end_date.month, end_date.day, end_date.hour, end_date.minute, end_date.second)
+        JD_0 = OrbitDetermination.julian_day(start_date.year, start_date.month, start_date.day, start_date.hour, start_date.minute, start_date.second)
+        JD_f = OrbitDetermination.julian_day(end_date.year, end_date.month, end_date.day, end_date.hour, end_date.minute, end_date.second)
         
-        y = OrbitalPerturbations.integrateGaussVariationalEquations(y_0,
+        y = OrbitalPerturbations.simulate_gauss_variational_equations(y_0,
                                                                     drag=self._drag,
                                                                     gravitational=self._gravitational,
                                                                     SRP=self._srp,
@@ -266,7 +267,7 @@ class MissionOrbitPropagation(qtCore.QObject):
             y (np.ndarray): Integration vector [t, a, e, i, Omega, omega, h]
         """
         
-        self.figure_orbit_propagation.resetCanvas()
+        self.figure_orbit_propagation.reset_canvas()
         
         self.figure_orbit_propagation.figure.suptitle('Orbital Perturbations', fontsize=16)
         
@@ -297,4 +298,4 @@ class MissionOrbitPropagation(qtCore.QObject):
         self.figure_orbit_propagation.axes[1][2].set_xlabel('Time [days]')
         self.figure_orbit_propagation.axes[1][2].grid(True)
 
-        self.figure_orbit_propagation.redrawCanvas()
+        self.figure_orbit_propagation.redraw_canvas()

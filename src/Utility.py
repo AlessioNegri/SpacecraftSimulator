@@ -1,10 +1,12 @@
-import os
-import sys
+""" Utility.py: List of utility functions """
+
+__author__      = "Alessio Negri"
+__license__     = "LGPL v3"
+__maintainer__  = "Alessio Negri"
+
 import numpy as np
 
 from decimal import Decimal, ROUND_DOWN
-
-sys.path.append(os.path.dirname(__file__))
 
 def format(x : float, format : str = '1.000000', deg : bool = False) -> float:
     """Formats a float with a given precision
@@ -26,7 +28,7 @@ def singleton(cls, *args, **kw):
     """Decorator for singleton classes
 
     Returns:
-        _type_: class instance
+        : class instance
     """
     
     instances = {}

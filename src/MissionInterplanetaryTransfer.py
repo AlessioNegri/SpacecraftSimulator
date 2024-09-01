@@ -1,12 +1,19 @@
 import PySide6.QtCore as qtCore
 import PySide6.QtQml as qtQml
+import numpy as np
+
+from datetime import datetime, timedelta
 
 from Utility import format
 from FigureCanvas import FigureCanvas
 from Spacecraft import Spacecraft
 from PorkChopPlot import PorkChopPlot
 
-from tools.InterplanetaryTrajectories import *
+from tools.AstronomicalData import AstronomicalData, CelestialBody, Planet, index_from_planet, planet_from_index, celestial_body_from_planet
+from tools.TwoBodyProblem import TwoBodyProblem
+from tools.ThreeDimensionalOrbit import ThreeDimensionalOrbit, DirectionType, OrbitalElements
+from tools.Time import Time
+from tools.InterplanetaryTrajectories import InterplanetaryTrajectories, ManeuverResult
 
 class MissionInterplanetaryTransfer(qtCore.QObject):
     
@@ -179,8 +186,8 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         
         # * Pork Chop Plot
         
-        self._pcp_planet_dep                = indexFromPlanet(Planet.EARTH)
-        self._pcp_planet_arr                = indexFromPlanet(Planet.NEPTUNE)
+        self._pcp_planet_dep                = index_from_planet(Planet.EARTH)
+        self._pcp_planet_arr                = index_from_planet(Planet.NEPTUNE)
         self._pcp_launch_window_beg         = '2020-01-01'
         self._pcp_launch_window_end         = '2021-01-01'
         self._pcp_arrival_window_beg        = '2031-01-01'
@@ -189,19 +196,19 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         self.figure_pork_chop_plot          = FigureCanvas()
         self.pork_chop_plot                 = PorkChopPlot()
         
-        self.pork_chop_plot.statusChanged.connect(self.updateStatus)
+        self.pork_chop_plot.status_changed.connect(self.updateStatus)
         self.pork_chop_plot.finished.connect(self.operationCompleted)
         
         # * Interplanetary Leg
         
-        self._dep_planet                    = indexFromPlanet(Planet.EARTH)
-        self._arr_planet                    = indexFromPlanet(Planet.MARS)
+        self._dep_planet                    = index_from_planet(Planet.EARTH)
+        self._arr_planet                    = index_from_planet(Planet.MARS)
         self._dep_date                      = '1996-11-07 00:00:00'
         self._arr_date                      = '1997-09-12 00:00:00'
         self._dep_periapsis_height          = 180
         self._arr_periapsis_height          = 300
         self._arr_period                    = 48
-        self.figure_interplanetary_transfer = FigureCanvas()
+        self.figure_interplanetary_transfer = FigureCanvas(dof3=True)
         
         # * Context properties
         
@@ -219,8 +226,8 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         
         win = engine.rootObjects()[0]
         
-        self.figure_pork_chop_plot.updateWithCanvas(win.findChild(qtCore.QObject, "PorkChopPlotFigure"), win.findChild(qtCore.QObject, "PorkChopPlotFigureParent"))
-        self.figure_interplanetary_transfer.updateWithCanvas(win.findChild(qtCore.QObject, "InterplanetaryTransferFigure"), win.findChild(qtCore.QObject, "InterplanetaryTransferFigureParent"), dof3=True)
+        self.figure_pork_chop_plot.update_with_canvas(win.findChild(qtCore.QObject, "PorkChopPlotFigure"), win.findChild(qtCore.QObject, "PorkChopPlotFigureParent"))
+        self.figure_interplanetary_transfer.update_with_canvas(win.findChild(qtCore.QObject, "InterplanetaryTransferFigure"), win.findChild(qtCore.QObject, "InterplanetaryTransferFigureParent"))
         
         self.figure_interplanetary_transfer.figure.tight_layout()
         self.figure_interplanetary_transfer.axes.set_aspect('equal', adjustable='box')
@@ -248,16 +255,16 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         """Calculates the Pork Chop Plot
         """
         
-        self.pork_chop_plot.departurePlanet = celestialBodyFromPlanet(planetFromIndex(self._pcp_planet_dep))
+        self.pork_chop_plot.departure_planet = celestial_body_from_planet(planet_from_index(self._pcp_planet_dep))
         
-        self.pork_chop_plot.arrivalPlanet = celestialBodyFromPlanet(planetFromIndex(self._pcp_planet_arr))
+        self.pork_chop_plot.arrival_planet = celestial_body_from_planet(planet_from_index(self._pcp_planet_arr))
         
-        self.pork_chop_plot.launchWindow = [
+        self.pork_chop_plot.launch_window = [
             datetime.strptime(self._pcp_launch_window_beg, '%Y-%m-%d'),
             datetime.strptime(self._pcp_launch_window_end, '%Y-%m-%d')
         ]
         
-        self.pork_chop_plot.arrivalWindow = [
+        self.pork_chop_plot.arrival_window = [
             datetime.strptime(self._pcp_arrival_window_beg, '%Y-%m-%d'),
             datetime.strptime(self._pcp_arrival_window_end, '%Y-%m-%d')
         ]
@@ -305,20 +312,20 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         """Saves the interplanetary parameters
         """
         
-        depPlanet = celestialBodyFromPlanet(planetFromIndex(self._dep_planet))
-        arrPlanet = celestialBodyFromPlanet(planetFromIndex(self._arr_planet))
+        depPlanet = celestial_body_from_planet(planet_from_index(self._dep_planet))
+        arrPlanet = celestial_body_from_planet(planet_from_index(self._arr_planet))
         
         depDate = datetime.strptime(self._dep_date, '%Y-%m-%d %H:%M:%S')
         arrDate = datetime.strptime(self._arr_date, '%Y-%m-%d %H:%M:%S')
         
-        r_p_D = AstronomicalData.EquatiorialRadius(depPlanet) + self._dep_periapsis_height
-        r_p_A = AstronomicalData.EquatiorialRadius(arrPlanet) + self._arr_periapsis_height
+        r_p_D = AstronomicalData.equatiorial_radius(depPlanet) + self._dep_periapsis_height
+        r_p_A = AstronomicalData.equatiorial_radius(arrPlanet) + self._arr_periapsis_height
         
         T = self._arr_period * 3600
         
         if self._arr_periapsis_height == 0: r_p_A = 0
         
-        maneuver_1, maneuver_2, lambert_oe, theta_2 = InterplanetaryTrajectories.OptimalTransfer(depPlanet, arrPlanet, depDate, arrDate, r_p_D, r_p_A, T, self.spacecraft._initial_mass)
+        maneuver_1, maneuver_2, lambert_oe, theta_2 = InterplanetaryTrajectories.optimal_transfer(depPlanet, arrPlanet, depDate, arrDate, r_p_D, r_p_A, T, self.spacecraft._initial_mass)
 
         self.plotInterplanetaryTransfer(maneuver_1, maneuver_2, lambert_oe, theta_2)
     
@@ -330,7 +337,7 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         """Plots the Pork Chop Plot
         """
         
-        self.figure_pork_chop_plot.resetCanvas()
+        self.figure_pork_chop_plot.reset_canvas()
         
         # if (len(self.figure_pork_chop_plot.figure.axes) > 1):
             
@@ -365,13 +372,13 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         self.figure_pork_chop_plot.axes.set_xlabel('Launch Window')
         self.figure_pork_chop_plot.axes.set_ylabel('Arrival Window')
         
-        self.figure_pork_chop_plot.redrawCanvas()
+        self.figure_pork_chop_plot.redraw_canvas()
         
         self.porkChopPlotFinished.emit()
     
     # ? Interplanetary Leg
     
-    def plotInterplanetaryTransfer(self, maneuver_1 : MANEUVER_RESULT, maneuver_2 : MANEUVER_RESULT, lambert_oe : ORBITAL_ELEMENTS, theta_2 : float) -> None:
+    def plotInterplanetaryTransfer(self, maneuver_1 : ManeuverResult, maneuver_2 : ManeuverResult, lambert_oe : OrbitalElements, theta_2 : float) -> None:
         """Plots the interplanetary leg
 
         Args:
@@ -381,24 +388,24 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
             theta_2 (float): Second true anomaly of the lambert arc [rad]
         """
         
-        self.figure_interplanetary_transfer.resetCanvas()
+        self.figure_interplanetary_transfer.reset_canvas()
         
         # * Integrate
         
-        ThreeDimensionalOrbit.setCelestialBody(CelestialBody.SUN)
-        TwoBodyProblem.setCelestialBody(CelestialBody.SUN)
-        Time.setCelestialBody(CelestialBody.SUN)
+        ThreeDimensionalOrbit.set_celestial_body(CelestialBody.SUN)
+        TwoBodyProblem.set_celestial_body(CelestialBody.SUN)
+        Time.set_celestial_body(CelestialBody.SUN)
         
-        r, v = ThreeDimensionalOrbit.PF2GEF(lambert_oe)
+        r, v = ThreeDimensionalOrbit.pf_2_gef(lambert_oe)
         
-        parameters = TwoBodyProblem.calculateOrbitalParameters(r, v)
+        parameters = TwoBodyProblem.calculate_orbital_parameters(r, v)
         
-        t_0 = Time.calculateEllipticalOrbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=parameters.T, e=parameters.e, theta=lambert_oe.theta)
-        t_f = Time.calculateEllipticalOrbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=parameters.T, e=parameters.e, theta=theta_2)
+        t_0 = Time.calculate_elliptical_orbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=parameters.T, e=parameters.e, theta=lambert_oe.theta)
+        t_f = Time.calculate_elliptical_orbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=parameters.T, e=parameters.e, theta=theta_2)
         
         if theta_2 != 0.0 and t_0 > t_f: t_f += parameters.T
         
-        result = TwoBodyProblem.integrateRelativeMotion(np.hstack([r, v]), t_0, t_f)
+        result = TwoBodyProblem.simulate_relative_motion(np.hstack([r, v]), t_0, t_f)
         
         # * Planet 1
         
@@ -407,18 +414,18 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         
         start = datetime.strptime(self._dep_date, '%Y-%m-%d %H:%M:%S')
         
-        depPlanet = celestialBodyFromPlanet(planetFromIndex(self._dep_planet))
-        arrPlanet = celestialBodyFromPlanet(planetFromIndex(self._arr_planet))
+        depPlanet = celestial_body_from_planet(planet_from_index(self._dep_planet))
+        arrPlanet = celestial_body_from_planet(planet_from_index(self._arr_planet))
         
         for dt in np.linspace(0, np.abs(t_f - t_0), 1000):
             
-            r, v = InterplanetaryTrajectories.Ephemeris(depPlanet, start + timedelta(0, dt))
+            r, v = InterplanetaryTrajectories.ephemeris(depPlanet, start + timedelta(0, dt))
             
             r_1_x.append(r[0])
             r_1_y.append(r[1])
             r_1_z.append(r[2])
             
-            r, v = InterplanetaryTrajectories.Ephemeris(arrPlanet, start + timedelta(0, dt))
+            r, v = InterplanetaryTrajectories.ephemeris(arrPlanet, start + timedelta(0, dt))
             
             r_2_x.append(r[0])
             r_2_y.append(r[1])
@@ -443,4 +450,4 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         self.figure_interplanetary_transfer.axes.set_zlabel('$z$ [km]')
         self.figure_interplanetary_transfer.axes.legend(bbox_to_anchor=(-0.5, 0.5), loc='center left')
         
-        self.figure_interplanetary_transfer.redrawCanvas()
+        self.figure_interplanetary_transfer.redraw_canvas()

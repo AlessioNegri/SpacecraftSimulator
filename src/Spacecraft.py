@@ -1,3 +1,9 @@
+""" Spacecraft.py: Spacecraft object for QML """
+
+__author__      = "Alessio Negri"
+__license__     = "LGPL v3"
+__maintainer__  = "Alessio Negri"
+
 import PySide6.QtCore as qtCore
 import PySide6.QtQml as qtQml
 
@@ -5,10 +11,9 @@ from Utility import format, singleton
 
 @singleton
 class Spacecraft(qtCore.QObject):
-    
     """This class describes the properties and parameters of a Spacecraft"""
     
-    # - PROPERTIES
+    # --- PROPERTIES 
     
     # ? Initial Mass [kg]
     
@@ -122,10 +127,9 @@ class Spacecraft(qtCore.QObject):
     @capsule_reference_surface.setter
     def capsule_reference_surface(self, val : float): self._capsule_reference_surface = val
     
-    # ! CONSTRUCTOR
+    # --- METHODS 
     
     def __init__(self, engine : qtQml.QQmlApplicationEngine) -> None:
-        
         """Constructor
 
         Args:
@@ -151,17 +155,13 @@ class Spacecraft(qtCore.QObject):
         self._capsule_lift_coefficient      : float = 0.0       # * Capsule Lift Coefficient    [ ]
         self._capsule_reference_surface     : float = 0.341     # * Capsule Reference Surface   [ m^2 ]
     
-    # ! METHODS
-    
     def reset(self) -> None:
-        
         """Resets the spacecraft parameters
         """
         
         self._mass = self._initial_mass
     
     def update_mass(self, consumed_mass : float) -> None:
-        
         """Updates the current mass subtracting the consumed one
 
         Args:

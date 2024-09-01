@@ -1,13 +1,22 @@
 import PySide6.QtCore as qtCore
 import PySide6.QtQml as qtQml
+import numpy as np
+import matplotlib.patches as mpatches
+import mpl_toolkits.mplot3d.art3d as art3d
+
+from enum import IntEnum
+from PIL import Image
 
 from FigureCanvas import FigureCanvas
 from Spacecraft import Spacecraft
 from Orbit import Orbit
 from Maneuver import Maneuver, ManeuverType
 
-from tools.ThreeDimensionalOrbit import *
-from tools.OrbitalManeuvers import *
+from tools.AstronomicalData import AstronomicalData, CelestialBody, index_from_celestial_body, celestial_body_from_index
+from tools.TwoBodyProblem import TwoBodyProblem, OrbitalParameters
+from tools.ThreeDimensionalOrbit import ThreeDimensionalOrbit, OrbitalElements
+from tools.Time import Time, DirectionType
+from tools.OrbitalManeuvers import OrbitalManeuvers, HohmannDirection
 
 class StateType(IntEnum):
     
@@ -40,9 +49,9 @@ class MissionOrbitTransfer(qtCore.QObject):
         self.dep_state                  = StateType.CARTESIAN
         self.dep_r                      = np.array([-8173.55640, -3064.65060, -2840.15350], dtype=float)
         self.dep_v                      = np.array([-3.07330000, 5.94440000, -1.54740000], dtype=float)
-        self.dep_orbital_parameters     = ORBITAL_PARAMETERS()
-        self.dep_orbital_elements       = ORBITAL_ELEMENTS()
-        self.dep_figure_orbit           = FigureCanvas()
+        self.dep_orbital_parameters     = OrbitalParameters()
+        self.dep_orbital_elements       = OrbitalElements()
+        self.dep_figure_orbit           = FigureCanvas(dof3=True)
         self.dep_figure_ground_track    = FigureCanvas()
         
         # * Arrival orbit
@@ -51,16 +60,16 @@ class MissionOrbitTransfer(qtCore.QObject):
         self.arr_state                  = StateType.CARTESIAN
         self.arr_r                      = np.array([4571.13653, 32940.33361, -14208.95231], dtype=float)
         self.arr_v                      = np.array([-3.06192709, 1.01383552, 0.41402772], dtype=float)
-        self.arr_orbital_parameters     = ORBITAL_PARAMETERS()
-        self.arr_orbital_elements       = ORBITAL_ELEMENTS()
-        self.arr_figure_orbit           = FigureCanvas()
+        self.arr_orbital_parameters     = OrbitalParameters()
+        self.arr_orbital_elements       = OrbitalElements()
+        self.arr_figure_orbit           = FigureCanvas(dof3=True)
         self.arr_figure_ground_track    = FigureCanvas()
         
         # * Tranfer orbit
         
-        self.tra_orbital_parameters     = ORBITAL_PARAMETERS()
-        self.tra_orbital_elements       = ORBITAL_ELEMENTS()
-        self.tra_figure_orbit           = FigureCanvas()
+        self.tra_orbital_parameters     = OrbitalParameters()
+        self.tra_orbital_elements       = OrbitalElements()
+        self.tra_figure_orbit           = FigureCanvas(dof3=True)
         self.maneuvers                  = list()
         
         # * Context properties
@@ -86,11 +95,11 @@ class MissionOrbitTransfer(qtCore.QObject):
         
         win = engine.rootObjects()[0]
         
-        self.dep_figure_orbit.updateWithCanvas(win.findChild(qtCore.QObject, "DepartureOrbitFigure"), win.findChild(qtCore.QObject, "DepartureOrbitFigureParent"), dof3=True, figsize=(8, 6))
-        self.dep_figure_ground_track.updateWithCanvas(win.findChild(qtCore.QObject, "DepartureGroundTrackFigure"), win.findChild(qtCore.QObject, "DepartureGroundTrackFigureParent"), figsize=(4, 2))
-        self.arr_figure_orbit.updateWithCanvas(win.findChild(qtCore.QObject, "ArrivalOrbitFigure"), win.findChild(qtCore.QObject, "ArrivalOrbitFigureParent"), dof3=True, figsize=(8, 6))
-        self.arr_figure_ground_track.updateWithCanvas(win.findChild(qtCore.QObject, "ArrivalGroundTrackFigure"), win.findChild(qtCore.QObject, "ArrivalGroundTrackFigureParent"), figsize=(8, 6))
-        self.tra_figure_orbit.updateWithCanvas(win.findChild(qtCore.QObject, "OrbitTransferFigure"), win.findChild(qtCore.QObject, "OrbitTransferFigureParent"), dof3=True)
+        self.dep_figure_orbit.update_with_canvas(win.findChild(qtCore.QObject, "DepartureOrbitFigure"), win.findChild(qtCore.QObject, "DepartureOrbitFigureParent"))
+        self.dep_figure_ground_track.update_with_canvas(win.findChild(qtCore.QObject, "DepartureGroundTrackFigure"), win.findChild(qtCore.QObject, "DepartureGroundTrackFigureParent"))
+        self.arr_figure_orbit.update_with_canvas(win.findChild(qtCore.QObject, "ArrivalOrbitFigure"), win.findChild(qtCore.QObject, "ArrivalOrbitFigureParent"))
+        self.arr_figure_ground_track.update_with_canvas(win.findChild(qtCore.QObject, "ArrivalGroundTrackFigure"), win.findChild(qtCore.QObject, "ArrivalGroundTrackFigureParent"))
+        self.tra_figure_orbit.update_with_canvas(win.findChild(qtCore.QObject, "OrbitTransferFigure"), win.findChild(qtCore.QObject, "OrbitTransferFigureParent"))
         
         #self.tra_figure_orbit.figure.tight_layout()
         self.tra_figure_orbit.axes.set_aspect('equal', adjustable='box')
@@ -104,24 +113,24 @@ class MissionOrbitTransfer(qtCore.QObject):
         """Loads the departure orbit parameters
         """
         
-        ThreeDimensionalOrbit.setCelestialBody(self.dep_body)
+        ThreeDimensionalOrbit.set_celestial_body(self.dep_body)
         
-        TwoBodyProblem.setCelestialBody(self.dep_body)
+        TwoBodyProblem.set_celestial_body(self.dep_body)
         
-        self.dep_orbital_elements = ThreeDimensionalOrbit.calculateOrbitalElements(self.dep_r, self.dep_v)
+        self.dep_orbital_elements = ThreeDimensionalOrbit.calculate_orbital_elements(self.dep_r, self.dep_v)
         
-        self.dep_orbital_parameters = TwoBodyProblem.calculateOrbitalParameters(self.dep_r, self.dep_v)
+        self.dep_orbital_parameters = TwoBodyProblem.calculate_orbital_parameters(self.dep_r, self.dep_v)
         
     @qtCore.Slot()
     def fillDepartureOrbit(self) -> None:
         """Fills the GUI with the departure orbit parameters
         """
         
-        self.orbit.updateCentralBody(indexFromCelestialBody(self.dep_body))
-        self.orbit.updateState(self.dep_state)
-        self.orbit.updateCartesianParameters(self.dep_r, self.dep_v)
-        self.orbit.updateKeplerianParameters(self.dep_orbital_elements)
-        self.orbit.updateModifiedKeplerianParameters(self.dep_orbital_elements, self.dep_orbital_parameters)
+        self.orbit.update_central_body(index_from_celestial_body(self.dep_body))
+        self.orbit.update_state(self.dep_state)
+        self.orbit.update_cartesian_parameters(self.dep_r, self.dep_v)
+        self.orbit.update_keplerian_parameters(self.dep_orbital_elements)
+        self.orbit.update_modified_keplerian_parameters(self.dep_orbital_elements, self.dep_orbital_parameters)
     
     @qtCore.Slot()
     def updateDepartureOrbit(self) -> None:
@@ -130,13 +139,13 @@ class MissionOrbitTransfer(qtCore.QObject):
         
         # * Configuration
         
-        self.dep_body = celestialBodyFromIndex(self.orbit._body)
+        self.dep_body = celestial_body_from_index(self.orbit._body)
         
         self.dep_state = self.orbit._state
         
-        ThreeDimensionalOrbit.setCelestialBody(self.dep_body)
+        ThreeDimensionalOrbit.set_celestial_body(self.dep_body)
         
-        TwoBodyProblem.setCelestialBody(self.dep_body)
+        TwoBodyProblem.set_celestial_body(self.dep_body)
         
         # * Evaluation
         
@@ -147,31 +156,31 @@ class MissionOrbitTransfer(qtCore.QObject):
                 self.dep_r = np.array([self.orbit._r_x, self.orbit._r_y, self.orbit._r_z])
                 self.dep_v = np.array([self.orbit._v_x, self.orbit._v_y, self.orbit._v_z])
         
-                self.dep_orbital_elements = ThreeDimensionalOrbit.calculateOrbitalElements(self.dep_r, self.dep_v)
+                self.dep_orbital_elements = ThreeDimensionalOrbit.calculate_orbital_elements(self.dep_r, self.dep_v)
                 
-                self.dep_orbital_parameters = TwoBodyProblem.calculateOrbitalParameters(self.dep_r, self.dep_v)
+                self.dep_orbital_parameters = TwoBodyProblem.calculate_orbital_parameters(self.dep_r, self.dep_v)
                 
-                self.orbit.updateKeplerianParameters(self.dep_orbital_elements)
-                self.orbit.updateModifiedKeplerianParameters(self.dep_orbital_elements, self.dep_orbital_parameters)
+                self.orbit.update_keplerian_parameters(self.dep_orbital_elements)
+                self.orbit.update_modified_keplerian_parameters(self.dep_orbital_elements, self.dep_orbital_parameters)
             
             case StateType.KEPLERIAN:
                 
-                self.dep_orbital_elements = self.orbit.getKeplerianParameters()
+                self.dep_orbital_elements = self.orbit.get_keplerian_parameters()
                 
-                self.dep_r, self.dep_v = ThreeDimensionalOrbit.PF2GEF(self.dep_orbital_elements)
+                self.dep_r, self.dep_v = ThreeDimensionalOrbit.pf_2_gef(self.dep_orbital_elements)
                 
-                self.dep_orbital_parameters = TwoBodyProblem.calculateOrbitalParameters(self.dep_r, self.dep_v)
+                self.dep_orbital_parameters = TwoBodyProblem.calculate_orbital_parameters(self.dep_r, self.dep_v)
                 
-                self.orbit.updateCartesianParameters(self.dep_r, self.dep_v)
-                self.orbit.updateModifiedKeplerianParameters(self.dep_orbital_elements, self.dep_orbital_parameters)
+                self.orbit.update_cartesian_parameters(self.dep_r, self.dep_v)
+                self.orbit.update_modified_keplerian_parameters(self.dep_orbital_elements, self.dep_orbital_parameters)
             
             case StateType.MODIFIED_KEPLERIAN:
                 
-                self.orbit.updateKeplerianParametersFromRadii()
+                self.orbit.update_keplerian_parameters_from_radii()
                 
-                self.dep_r, self.dep_v = ThreeDimensionalOrbit.PF2GEF(self.orbit.getKeplerianParameters())
+                self.dep_r, self.dep_v = ThreeDimensionalOrbit.pf_2_gef(self.orbit.get_keplerian_parameters())
                 
-                self.orbit.updateCartesianParameters(self.dep_r, self.dep_v)
+                self.orbit.update_cartesian_parameters(self.dep_r, self.dep_v)
             
             case _:
                 
@@ -182,18 +191,18 @@ class MissionOrbitTransfer(qtCore.QObject):
         """Integrates the equations of the departure orbit and the ground track
         """
         
-        ThreeDimensionalOrbit.setCelestialBody(self.dep_body)
-        TwoBodyProblem.setCelestialBody(self.dep_body)
+        ThreeDimensionalOrbit.set_celestial_body(self.dep_body)
+        TwoBodyProblem.set_celestial_body(self.dep_body)
         
-        result = TwoBodyProblem.integrateRelativeMotion(np.hstack([self.dep_r, self.dep_v]))
+        result = TwoBodyProblem.simulate_relative_motion(np.hstack([self.dep_r, self.dep_v]))
         
         self.plotOrbit(self.dep_figure_orbit, self.dep_body, result)
         
-        ra, dec = ThreeDimensionalOrbit.calculateGroundTrack(self.dep_orbital_elements, 60)
+        ra, dec = ThreeDimensionalOrbit.calculate_ground_track(self.dep_orbital_elements, 60)
         
         if len(ra) == 0 or len(dec) == 0:
             
-            ra_0, dec_0 = ThreeDimensionalOrbit.calculateRaDec(self.dep_r)
+            ra_0, dec_0 = ThreeDimensionalOrbit.calculate_ra_dec(self.dep_r)
             
             ra  = [ra_0]
             dec = [dec_0]
@@ -216,24 +225,24 @@ class MissionOrbitTransfer(qtCore.QObject):
         """Loads the arrival orbit parameters
         """
         
-        ThreeDimensionalOrbit.setCelestialBody(self.arr_body)
+        ThreeDimensionalOrbit.set_celestial_body(self.arr_body)
         
-        TwoBodyProblem.setCelestialBody(self.arr_body)
+        TwoBodyProblem.set_celestial_body(self.arr_body)
         
-        self.arr_orbital_elements = ThreeDimensionalOrbit.calculateOrbitalElements(self.arr_r, self.arr_v)
+        self.arr_orbital_elements = ThreeDimensionalOrbit.calculate_orbital_elements(self.arr_r, self.arr_v)
         
-        self.arr_orbital_parameters = TwoBodyProblem.calculateOrbitalParameters(self.arr_r, self.arr_v)
+        self.arr_orbital_parameters = TwoBodyProblem.calculate_orbital_parameters(self.arr_r, self.arr_v)
     
     @qtCore.Slot()
     def fillArrivalOrbit(self) -> None:
         """Fills the GUI with the arrival orbit parameters
         """
         
-        self.orbit.updateCentralBody(indexFromCelestialBody(self.arr_body))
-        self.orbit.updateState(self.arr_state)
-        self.orbit.updateCartesianParameters(self.arr_r, self.arr_v)
-        self.orbit.updateKeplerianParameters(self.arr_orbital_elements)
-        self.orbit.updateModifiedKeplerianParameters(self.arr_orbital_elements, self.arr_orbital_parameters)
+        self.orbit.update_central_body(index_from_celestial_body(self.arr_body))
+        self.orbit.update_state(self.arr_state)
+        self.orbit.update_cartesian_parameters(self.arr_r, self.arr_v)
+        self.orbit.update_keplerian_parameters(self.arr_orbital_elements)
+        self.orbit.update_modified_keplerian_parameters(self.arr_orbital_elements, self.arr_orbital_parameters)
         
     @qtCore.Slot()
     def updateArrivalOrbit(self) -> None:
@@ -242,13 +251,13 @@ class MissionOrbitTransfer(qtCore.QObject):
         
         # * Configuration
         
-        self.arr_body = celestialBodyFromIndex(self.orbit._body)
+        self.arr_body = celestial_body_from_index(self.orbit._body)
         
         self.arr_state = self.orbit._state
         
-        ThreeDimensionalOrbit.setCelestialBody(self.arr_body)
+        ThreeDimensionalOrbit.set_celestial_body(self.arr_body)
         
-        TwoBodyProblem.setCelestialBody(self.arr_body)
+        TwoBodyProblem.set_celestial_body(self.arr_body)
         
         # * Evaluation
         
@@ -259,31 +268,31 @@ class MissionOrbitTransfer(qtCore.QObject):
                 self.arr_r = np.array([self.orbit._r_x, self.orbit._r_y, self.orbit._r_z])
                 self.arr_v = np.array([self.orbit._v_x, self.orbit._v_y, self.orbit._v_z])
         
-                self.arr_orbital_elements = ThreeDimensionalOrbit.calculateOrbitalElements(self.arr_r, self.arr_v)
+                self.arr_orbital_elements = ThreeDimensionalOrbit.calculate_orbital_elements(self.arr_r, self.arr_v)
                 
-                self.arr_orbital_parameters = TwoBodyProblem.calculateOrbitalParameters(self.arr_r, self.arr_v)
+                self.arr_orbital_parameters = TwoBodyProblem.calculate_orbital_parameters(self.arr_r, self.arr_v)
                 
-                self.orbit.updateKeplerianParameters(self.arr_orbital_elements)
-                self.orbit.updateModifiedKeplerianParameters(self.arr_orbital_elements, self.arr_orbital_parameters)
+                self.orbit.update_keplerian_parameters(self.arr_orbital_elements)
+                self.orbit.update_modified_keplerian_parameters(self.arr_orbital_elements, self.arr_orbital_parameters)
             
             case StateType.KEPLERIAN:
                 
-                self.arr_orbital_elements = self.orbit.getKeplerianParameters()
+                self.arr_orbital_elements = self.orbit.get_keplerian_parameters()
                 
-                self.arr_r, self.arr_v = ThreeDimensionalOrbit.PF2GEF(self.arr_orbital_elements)
+                self.arr_r, self.arr_v = ThreeDimensionalOrbit.pf_2_gef(self.arr_orbital_elements)
                 
-                self.arr_orbital_parameters = TwoBodyProblem.calculateOrbitalParameters(self.arr_r, self.arr_v)
+                self.arr_orbital_parameters = TwoBodyProblem.calculate_orbital_parameters(self.arr_r, self.arr_v)
                 
-                self.orbit.updateCartesianParameters(self.arr_r, self.arr_v)
-                self.orbit.updateModifiedKeplerianParameters(self.arr_orbital_elements, self.arr_orbital_parameters)
+                self.orbit.update_cartesian_parameters(self.arr_r, self.arr_v)
+                self.orbit.update_modified_keplerian_parameters(self.arr_orbital_elements, self.arr_orbital_parameters)
             
             case StateType.MODIFIED_KEPLERIAN:
                 
-                self.orbit.updateKeplerianParametersFromRadii()
+                self.orbit.update_keplerian_parameters_from_radii()
                 
-                self.arr_r, self.arr_v = ThreeDimensionalOrbit.PF2GEF(self.orbit.getKeplerianParameters())
+                self.arr_r, self.arr_v = ThreeDimensionalOrbit.pf_2_gef(self.orbit.get_keplerian_parameters())
                 
-                self.orbit.updateCartesianParameters(self.arr_r, self.arr_v)
+                self.orbit.update_cartesian_parameters(self.arr_r, self.arr_v)
             
             case _:
                 
@@ -294,18 +303,18 @@ class MissionOrbitTransfer(qtCore.QObject):
         """Integrates the equations of the arrival orbit and the ground track
         """
         
-        ThreeDimensionalOrbit.setCelestialBody(self.arr_body)
-        TwoBodyProblem.setCelestialBody(self.arr_body)
+        ThreeDimensionalOrbit.set_celestial_body(self.arr_body)
+        TwoBodyProblem.set_celestial_body(self.arr_body)
         
-        result = TwoBodyProblem.integrateRelativeMotion(np.hstack([self.arr_r, self.arr_v]))
+        result = TwoBodyProblem.simulate_relative_motion(np.hstack([self.arr_r, self.arr_v]))
         
         self.plotOrbit(self.arr_figure_orbit, self.arr_body, result)
         
-        ra, dec = ThreeDimensionalOrbit.calculateGroundTrack(self.arr_orbital_elements, 60)
+        ra, dec = ThreeDimensionalOrbit.calculate_ground_track(self.arr_orbital_elements, 60)
         
         if len(ra) == 0 or len(dec) == 0:
             
-            ra_0, dec_0 = ThreeDimensionalOrbit.calculateRaDec(self.arr_r)
+            ra_0, dec_0 = ThreeDimensionalOrbit.calculate_ra_dec(self.arr_r)
             
             ra  = [ra_0]
             dec = [dec_0]
@@ -387,7 +396,7 @@ class MissionOrbitTransfer(qtCore.QObject):
             result (dict): Dictionary of the integration result { 't': time, 'y': state vector  }
         """
         
-        orbitFigure.resetCanvas()
+        orbitFigure.reset_canvas()
         
         # * Max Values
         
@@ -415,9 +424,9 @@ class MissionOrbitTransfer(qtCore.QObject):
         
         u, v = np.mgrid[0 : 2*np.pi : 40j, 0 : np.pi : 20j]
         
-        x = AstronomicalData.EquatiorialRadius(celestialBody) * np.cos(u) * np.sin(v)
-        y = AstronomicalData.EquatiorialRadius(celestialBody) * np.sin(u) * np.sin(v)
-        z = AstronomicalData.EquatiorialRadius(celestialBody) * np.cos(v)
+        x = AstronomicalData.equatiorial_radius(celestialBody) * np.cos(u) * np.sin(v)
+        y = AstronomicalData.equatiorial_radius(celestialBody) * np.sin(u) * np.sin(v)
+        z = AstronomicalData.equatiorial_radius(celestialBody) * np.cos(v)
         
         orbitFigure.axes.plot_wireframe(x, y, z, color="r")
         
@@ -431,7 +440,7 @@ class MissionOrbitTransfer(qtCore.QObject):
         orbitFigure.axes.set_ylabel('$y$ [km]')
         orbitFigure.axes.set_zlabel('$z$ [km]')
         
-        orbitFigure.redrawCanvas()
+        orbitFigure.redraw_canvas()
     
     def plotGroundTrack(self, orbitFigure : FigureCanvas, celestialBody : CelestialBody, ra : list, dec : list) -> None:
         """Plots the ground track of the orbit
@@ -443,9 +452,9 @@ class MissionOrbitTransfer(qtCore.QObject):
             dec (list): Declination
         """
         
-        orbitFigure.resetCanvas()
+        orbitFigure.reset_canvas()
         
-        texture = AstronomicalData.Texture(celestialBody)
+        texture = AstronomicalData.texture(celestialBody)
         
         img = np.asarray(Image.open(texture).transpose(Image.FLIP_TOP_BOTTOM))
         
@@ -458,26 +467,26 @@ class MissionOrbitTransfer(qtCore.QObject):
         #orbitFigure.axes.set_xlim([0, 360])
         #orbitFigure.axes.set_ylim([-90, 90])
         
-        orbitFigure.redrawCanvas()
+        orbitFigure.redraw_canvas()
     
     def plotOrbitTransfer(self) -> None:
         """Plots the orbit transfer
         """
         
-        ThreeDimensionalOrbit.setCelestialBody(self.dep_body)
-        Time.setCelestialBody(self.dep_body)
+        ThreeDimensionalOrbit.set_celestial_body(self.dep_body)
+        Time.set_celestial_body(self.dep_body)
         
         # * Integrate departure/arrival orbits
         
-        TwoBodyProblem.setCelestialBody(self.dep_body)
+        TwoBodyProblem.set_celestial_body(self.dep_body)
         
-        result_dep = TwoBodyProblem.integrateRelativeMotion(np.hstack([self.dep_r, self.dep_v]))
-        result_arr = TwoBodyProblem.integrateRelativeMotion(np.hstack([self.arr_r, self.arr_v]))
+        result_dep = TwoBodyProblem.simulate_relative_motion(np.hstack([self.dep_r, self.dep_v]))
+        result_arr = TwoBodyProblem.simulate_relative_motion(np.hstack([self.arr_r, self.arr_v]))
         
         # * Integrate maneuvers
         
-        OrbitalManeuvers.setCelestialBody(self.dep_body)
-        OrbitalManeuvers.setSpecificImpulse(self.spacecraft._specific_impulse)
+        OrbitalManeuvers.set_celestial_body(self.dep_body)
+        OrbitalManeuvers.set_specific_impulse(self.spacecraft._specific_impulse)
         
         result_tra = dict(y=np.zeros(shape=(6,1)))
         
@@ -504,21 +513,21 @@ class MissionOrbitTransfer(qtCore.QObject):
         
         # * Final orbit
         
-        r, v = ThreeDimensionalOrbit.PF2GEF(self.tra_orbital_elements)
+        r, v = ThreeDimensionalOrbit.pf_2_gef(self.tra_orbital_elements)
         
-        result_fin = TwoBodyProblem.integrateRelativeMotion(np.hstack([r, v]))
+        result_fin = TwoBodyProblem.simulate_relative_motion(np.hstack([r, v]))
         
         # * Reset canvas
         
-        self.tra_figure_orbit.resetCanvas()
+        self.tra_figure_orbit.reset_canvas()
         
         # * Celestial Body
         
         u, v = np.mgrid[0 : 2*np.pi : 40j, 0 : np.pi : 20j]
         
-        x = AstronomicalData.EquatiorialRadius(self.dep_body) * np.cos(u) * np.sin(v)
-        y = AstronomicalData.EquatiorialRadius(self.dep_body) * np.sin(u) * np.sin(v)
-        z = AstronomicalData.EquatiorialRadius(self.dep_body) * np.cos(v)
+        x = AstronomicalData.equatiorial_radius(self.dep_body) * np.cos(u) * np.sin(v)
+        y = AstronomicalData.equatiorial_radius(self.dep_body) * np.sin(u) * np.sin(v)
+        z = AstronomicalData.equatiorial_radius(self.dep_body) * np.cos(v)
         
         self.tra_figure_orbit.axes.plot_wireframe(x, y, z, color='#808080', alpha=0.5)
         
@@ -541,7 +550,7 @@ class MissionOrbitTransfer(qtCore.QObject):
         
         # * Redraw canvas
         
-        self.tra_figure_orbit.redrawCanvas()
+        self.tra_figure_orbit.redraw_canvas()
     
     def evaluateManeuver(self, maneuver : Maneuver, first : bool = False) -> dict:
         """Evaluates and integrates the maneuver from the list
@@ -564,18 +573,18 @@ class MissionOrbitTransfer(qtCore.QObject):
         
         # * Choose maneuver
         
-        match maneuver.getType():
+        match maneuver.type:
             
             case ManeuverType.HOHMANN:
                 
                 # * Angles
                 
-                theta_0 = 0 if maneuver.getOption() == HohmannDirection.PER2APO else np.pi
-                theta_f = np.pi if maneuver.getOption() == HohmannDirection.PER2APO else 0
+                theta_0 = 0 if maneuver.option == HohmannDirection.PER2APO else np.pi
+                theta_f = np.pi if maneuver.option == HohmannDirection.PER2APO else 0
                 
                 # * Maneuver
                 
-                maneuverResult = OrbitalManeuvers.HohmannTransfer(self.tra_orbital_parameters.r_p, self.tra_orbital_parameters.r_a, self.arr_orbital_parameters.r_p, self.arr_orbital_parameters.r_a, maneuver.getOption(), self.spacecraft._mass)
+                maneuverResult = OrbitalManeuvers.hohmann_transfer(self.tra_orbital_parameters.r_p, self.tra_orbital_parameters.r_a, self.arr_orbital_parameters.r_p, self.arr_orbital_parameters.r_a, maneuver.option, self.spacecraft._mass)
                 
                 maneuverResult.oe.i     = self.tra_orbital_elements.i
                 maneuverResult.oe.Omega = self.tra_orbital_elements.Omega
@@ -618,9 +627,9 @@ class MissionOrbitTransfer(qtCore.QObject):
                 
                 # * Budget
                 
-                maneuver.setDeltaVelocity(maneuverResult.dv)
-                maneuver.setDeltaTime(dt / 3600 + maneuverResult.dt / 3600)
-                maneuver.setDeltaMass(maneuverResult.dm)
+                maneuver.delta_velocity = maneuverResult.dv
+                maneuver.delta_time     = dt / 3600 + maneuverResult.dt / 3600
+                maneuver.delta_mass     = maneuverResult.dm
                 
                 self.spacecraft.update_mass(maneuverResult.dm)
                 
@@ -628,14 +637,14 @@ class MissionOrbitTransfer(qtCore.QObject):
                 
                 # * Angles
                 
-                theta_0_1 = 0 if maneuver.getOption() == HohmannDirection.PER2APO else np.pi
-                theta_f_1 = np.pi if maneuver.getOption() == HohmannDirection.PER2APO else 0
-                theta_0_2 = np.pi if maneuver.getOption() == HohmannDirection.PER2APO else 0
-                theta_f_2 = 0 if maneuver.getOption() == HohmannDirection.PER2APO else np.pi
+                theta_0_1 = 0 if maneuver.option == HohmannDirection.PER2APO else np.pi
+                theta_f_1 = np.pi if maneuver.option == HohmannDirection.PER2APO else 0
+                theta_0_2 = np.pi if maneuver.option == HohmannDirection.PER2APO else 0
+                theta_f_2 = 0 if maneuver.option == HohmannDirection.PER2APO else np.pi
                 
                 # * Maneuver - 1
                 
-                maneuverResult_1, maneuverResult_2 = OrbitalManeuvers.BiEllipticHohmannTransfer(self.tra_orbital_parameters.r_p, self.tra_orbital_parameters.r_a, self.arr_orbital_parameters.r_p, self.arr_orbital_parameters.r_a, maneuver.getOptionValue(), maneuver.getOption(), self.spacecraft._mass)
+                maneuverResult_1, maneuverResult_2 = OrbitalManeuvers.bi_elliptic_hohmann_transfer(self.tra_orbital_parameters.r_p, self.tra_orbital_parameters.r_a, self.arr_orbital_parameters.r_p, self.arr_orbital_parameters.r_a, maneuver.option_value, maneuver.option, self.spacecraft._mass)
                 
                 maneuverResult_1.oe.i       = self.tra_orbital_elements.i
                 maneuverResult_1.oe.Omega   = self.tra_orbital_elements.Omega
@@ -693,9 +702,9 @@ class MissionOrbitTransfer(qtCore.QObject):
                 
                 # * Budget
                 
-                maneuver.setDeltaVelocity(maneuverResult_1.dv + maneuverResult_2.dv)
-                maneuver.setDeltaTime(dt / 3600 + maneuverResult_1.dt / 3600 + maneuverResult_2.dt / 3600)
-                maneuver.setDeltaMass(maneuverResult_1.dm + maneuverResult_2.dm)
+                maneuver.delta_velocity = maneuverResult_1.dv + maneuverResult_2.dv
+                maneuver.delta_time     = dt / 3600 + maneuverResult_1.dt / 3600 + maneuverResult_2.dt / 3600
+                maneuver.delta_mass     = maneuverResult_1.dm + maneuverResult_2.dm
                 
                 self.spacecraft.update_mass(maneuverResult_1.dm + maneuverResult_2.dm)
             
@@ -703,7 +712,7 @@ class MissionOrbitTransfer(qtCore.QObject):
                 
                 # * Maneuver
                 
-                maneuverResult = OrbitalManeuvers.PlaneChangeManeuver2(self.tra_orbital_parameters.r_p, self.tra_orbital_parameters.r_a, self.tra_orbital_elements.Omega, self.tra_orbital_elements.omega, self.tra_orbital_elements.i, self.arr_orbital_elements.Omega, self.arr_orbital_elements.i, self.spacecraft._mass)
+                maneuverResult = OrbitalManeuvers.plane_change_maneuver_2(self.tra_orbital_parameters.r_p, self.tra_orbital_parameters.r_a, self.tra_orbital_elements.Omega, self.tra_orbital_elements.omega, self.tra_orbital_elements.i, self.arr_orbital_elements.Omega, self.arr_orbital_elements.i, self.spacecraft._mass)
                 
                 maneuverResult.oe.h = self.tra_orbital_elements.h
                 maneuverResult.oe.e = self.tra_orbital_elements.e
@@ -732,9 +741,9 @@ class MissionOrbitTransfer(qtCore.QObject):
                 
                 # * Budget
                 
-                maneuver.setDeltaVelocity(maneuverResult.dv)
-                maneuver.setDeltaTime(dt / 3600 + maneuverResult.dt / 3600)
-                maneuver.setDeltaMass(maneuverResult.dm)
+                maneuver.delta_velocity = maneuverResult.dv
+                maneuver.delta_time     = dt / 3600 + maneuverResult.dt / 3600
+                maneuver.delta_mass     = maneuverResult.dm
                 
                 self.spacecraft.update_mass(maneuverResult.dm)
             
@@ -742,7 +751,7 @@ class MissionOrbitTransfer(qtCore.QObject):
                 
                 # * Maneuver
                 
-                maneuverResult = OrbitalManeuvers.ApseLineRotationFromEta(self.tra_orbital_parameters.r_p, self.tra_orbital_parameters.r_a, self.tra_orbital_parameters.r_p, self.tra_orbital_parameters.r_a, self.arr_orbital_elements.omega - self.tra_orbital_elements.omega, secondIntersectionPoint=maneuver.getOption()==1, m=self.spacecraft._mass)
+                maneuverResult = OrbitalManeuvers.apse_line_rotation_from_eta(self.tra_orbital_parameters.r_p, self.tra_orbital_parameters.r_a, self.tra_orbital_parameters.r_p, self.tra_orbital_parameters.r_a, self.arr_orbital_elements.omega - self.tra_orbital_elements.omega, secondIntersectionPoint=maneuver.option==1, m=self.spacecraft._mass)
                 
                 # * Integrate
                 
@@ -765,9 +774,9 @@ class MissionOrbitTransfer(qtCore.QObject):
                 
                 # * Budget
                 
-                maneuver.setDeltaVelocity(maneuverResult.dv)
-                maneuver.setDeltaTime(dt / 3600 + maneuverResult.dt / 3600)
-                maneuver.setDeltaMass(maneuverResult.dm)
+                maneuver.delta_velocity = maneuverResult.dv
+                maneuver.delta_time     = dt / 3600 + maneuverResult.dt / 3600
+                maneuver.delta_mass     = maneuverResult.dm
                 
                 self.spacecraft.update_mass(maneuverResult.dm)
         
@@ -801,14 +810,14 @@ class MissionOrbitTransfer(qtCore.QObject):
         
         theta_0 = self.dep_orbital_elements.theta
         
-        t_0 = Time.calculateEllipticalOrbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=self.dep_orbital_parameters.T, e=self.dep_orbital_elements.e, theta=theta_0)
-        t_f = Time.calculateEllipticalOrbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=self.dep_orbital_parameters.T, e=self.dep_orbital_elements.e, theta=theta_f)
+        t_0 = Time.calculate_elliptical_orbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=self.dep_orbital_parameters.T, e=self.dep_orbital_elements.e, theta=theta_0)
+        t_f = Time.calculate_elliptical_orbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=self.dep_orbital_parameters.T, e=self.dep_orbital_elements.e, theta=theta_f)
         
         if theta_f != 0.0 and t_0 > t_f: t_f += self.dep_orbital_parameters.T
         
-        return TwoBodyProblem.integrateRelativeMotion(np.hstack([self.dep_r, self.dep_v]), t_0, t_f)
+        return TwoBodyProblem.simulate_relative_motion(np.hstack([self.dep_r, self.dep_v]), t_0, t_f)
     
-    def integrateManeuver(self, oe : ORBITAL_ELEMENTS, theta_0 : float, theta_f : float) -> dict:
+    def integrateManeuver(self, oe : OrbitalElements, theta_0 : float, theta_f : float) -> dict:
         """Integrates the trajectory from the intial True Anomaly to the final True Anomaly of the given Orbital Elements
 
         Args:
@@ -820,14 +829,14 @@ class MissionOrbitTransfer(qtCore.QObject):
             dict: Integration result
         """
         
-        r, v = ThreeDimensionalOrbit.PF2GEF(oe)
+        r, v = ThreeDimensionalOrbit.pf_2_gef(oe)
            
-        parameters = TwoBodyProblem.calculateOrbitalParameters(r, v)
+        parameters = TwoBodyProblem.calculate_orbital_parameters(r, v)
         
-        t_0 = Time.calculateEllipticalOrbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=parameters.T, e=oe.e, theta=theta_0)
-        t_f = Time.calculateEllipticalOrbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=parameters.T, e=oe.e, theta=theta_f)
+        t_0 = Time.calculate_elliptical_orbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=parameters.T, e=oe.e, theta=theta_0)
+        t_f = Time.calculate_elliptical_orbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=parameters.T, e=oe.e, theta=theta_f)
         
         if theta_f != 0.0 and t_0 > t_f: t_f += parameters.T
         
-        return TwoBodyProblem.integrateRelativeMotion(np.hstack([r, v]), t_0, t_f)
+        return TwoBodyProblem.simulate_relative_motion(np.hstack([r, v]), t_0, t_f)
     

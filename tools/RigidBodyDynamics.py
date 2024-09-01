@@ -1,15 +1,28 @@
+""" RigidBodyDynamics.py: Implements the algorithms for rigid body dynamics """
+
+__author__      = "Alessio Negri"
+__license__     = "LGPL v3"
+__maintainer__  = "Alessio Negri"
+__book__        = "Orbital Mechanics for Engineering Students"
+__chapter__     = "4 - Orbits in Three Dimensions"
+__chapter__     = "9 - Rigid Body Dynamics"
+
 import os
 import sys
+import numpy as np
+import matplotlib.pyplot as plt
+
+from scipy.integrate import solve_ivp
 
 sys.path.append(os.path.dirname(__file__))
 
-from stdafx import *
+from Common import wrap_to_2pi
+from AstronomicalData import CelestialBody
 
-# ! CHAPTER 9 - Rigid Body Dynamics
-# ! CHAPTER 4 - Orbits in Three Dimensions
 class RigidBodyDynamics:
+    """Contains the kinematics and dynamics models for rigid body dynamics"""
     
-    def __init__(self) -> None: pass
+    # --- METHODS 
     
     @classmethod
     def setCelestialBody(cls, celestialBody : CelestialBody) -> None:
@@ -24,7 +37,7 @@ class RigidBodyDynamics:
     # ! SECTION 9.6
     
     @classmethod
-    def EulerEquationsEulerAngles(cls, t : float, X : np.ndarray, J : np.ndarray, u : np.ndarray) -> np.ndarray:
+    def euler_angles_euler_eom(cls, t : float, X : np.ndarray, J : np.ndarray, u : np.ndarray) -> np.ndarray:
         """Eulers's Equations of rigid body dynamics with Euler Angles Kinematics
 
         Args:
@@ -43,13 +56,13 @@ class RigidBodyDynamics:
         
         dX_dt = np.zeros(shape=(6))
         
-        # * Dynamics
+        # >>> Dynamics
         
         dX_dt[0] = (J[2,2] - J[1,1]) / J[0,0] * omega_y * omega_z + u[0] / J[0,0]
         dX_dt[1] = (J[2,2] - J[0,0]) / J[1,1] * omega_z * omega_x + u[1] / J[1,1]
         dX_dt[2] = (J[0,0] - J[1,1]) / J[2,2] * omega_x * omega_y + u[2] / J[2,2]
         
-        # * Kinematics
+        # >>> Kinematics
         
         dX_dt[3] = 1 / np.sin(theta) * (omega_x * np.sin(psi) + omega_y * np.cos(psi))
         dX_dt[4] = omega_x * np.cos(psi) - omega_y * np.sin(psi)
@@ -58,7 +71,7 @@ class RigidBodyDynamics:
         return dX_dt
     
     @classmethod
-    def EulerEquationsYawPitchRollAngles(cls, t : float, X : np.ndarray, J : np.ndarray, u : np.ndarray) -> np.ndarray:
+    def yaw_pitch_roll_angles_euler_eom(cls, t : float, X : np.ndarray, J : np.ndarray, u : np.ndarray) -> np.ndarray:
         """Eulers's Equations of rigid body dynamics with YawPitchRoll Angles Kinematics
 
         Args:
@@ -77,13 +90,13 @@ class RigidBodyDynamics:
         
         dX_dt = np.zeros(shape=(6))
         
-        # * Dynamics
+        # >>> Dynamics
         
         dX_dt[0] = (J[2,2] - J[1,1]) / J[0,0] * omega_y * omega_z + u[0] / J[0,0]
         dX_dt[1] = (J[2,2] - J[0,0]) / J[1,1] * omega_z * omega_x + u[1] / J[1,1]
         dX_dt[2] = (J[0,0] - J[1,1]) / J[2,2] * omega_x * omega_y + u[2] / J[2,2]
         
-        # * Kinematics
+        # >>> Kinematics
         
         dX_dt[3] = 1 / np.cos(theta) * (omega_x * np.sin(psi) + omega_z * np.cos(psi))
         dX_dt[4] = omega_y * np.cos(psi) - omega_z * np.sin(psi)
@@ -92,7 +105,7 @@ class RigidBodyDynamics:
         return dX_dt
     
     @classmethod
-    def EulerEquationsQuaternions(cls, t : float, X : np.ndarray, J : np.ndarray, u : np.ndarray) -> np.ndarray:
+    def quaternions_euler_eom(cls, t : float, X : np.ndarray, J : np.ndarray, u : np.ndarray) -> np.ndarray:
         """Eulers's Equations of rigid body dynamics with Quaternions Kinematics
 
         Args:
@@ -114,13 +127,13 @@ class RigidBodyDynamics:
         
         dX_dt = np.zeros(shape=(7))
         
-        # * Dynamics
+        # >>> Dynamics
         
         dX_dt[0] = (J[2,2] - J[1,1]) / J[0,0] * omega_y * omega_z + u[0] / J[0,0]
         dX_dt[1] = (J[2,2] - J[0,0]) / J[1,1] * omega_z * omega_x + u[1] / J[1,1]
         dX_dt[2] = (J[0,0] - J[1,1]) / J[2,2] * omega_x * omega_y + u[2] / J[2,2]
         
-        # * Kinematics
+        # >>> Kinematics
         
         dX_dt[3] = 0.5 * np.dot(Omega[0,:], q)
         dX_dt[4] = 0.5 * np.dot(Omega[1,:], q)
@@ -130,7 +143,7 @@ class RigidBodyDynamics:
         return dX_dt
     
     @classmethod
-    def integrateAttitudeDynamics(cls, y_0 : np.ndarray, t_0 : float = 0.0, t_f : float = 0.0, show : bool = False) -> dict:
+    def simulate_attitude_dynamics(cls, y_0 : np.ndarray, t_0 : float = 0.0, t_f : float = 0.0, show : bool = False) -> dict:
         """Integrates the Ordinary Differential Equations for the attitude dynamics
 
         Args:
@@ -143,19 +156,19 @@ class RigidBodyDynamics:
             dict: { t: time, y: state[n_states, n_points] }
         """
         
-        # * 1.
+        # >>> 1.
         
-        if t_f < t_0: raise CustomException('Invalid integration time')
+        if t_f < t_0: raise Exception('Invalid integration time')
         
         J = np.array([[12e-4, 0, 0], [0, 12e-4, 0], [0, 0, 4.5e-4]])
         
         u = np.array([0, 0, 0])
         
-        integrationResult = solve_ivp(fun=cls.EulerEquationsEulerAngles, t_span=[t_0, t_f], y0=y_0, method='RK45', args=(J, u), rtol=1e-8, atol=1e-8)
+        integrationResult = solve_ivp(fun=cls.euler_angles_euler_eom, t_span=[t_0, t_f], y0=y_0, method='RK45', args=(J, u), rtol=1e-8, atol=1e-8)
         
-        if not integrationResult['success']: CustomException(integrationResult['message'])
+        if not integrationResult['success']: Exception(integrationResult['message'])
         
-        vfunc = np.vectorize(wrapTo2Pi)
+        vfunc = np.vectorize(wrap_to_2pi)
         
         t       = integrationResult['t']
         omega_x = integrationResult['y'][0, :]
@@ -165,7 +178,7 @@ class RigidBodyDynamics:
         theta   = np.rad2deg(vfunc(integrationResult['y'][4, :]))
         psi     = np.rad2deg(vfunc(integrationResult['y'][5, :]))
         
-        # * 2.
+        # >>> 2.
         
         if show:
             
@@ -189,7 +202,7 @@ class RigidBodyDynamics:
     
     # ! ALGORITHM 4.3
     @classmethod
-    def EulerAnglesFromDCM(cls, Q : np.ndarray) -> np.ndarray:
+    def euler_angles_from_dcm(cls, Q : np.ndarray) -> np.ndarray:
         """Direction Cosine Matrix --> Euler Angles
 
         Args:
@@ -199,28 +212,28 @@ class RigidBodyDynamics:
             np.ndarray: Euler Angles
         """
         
-        # * 1. Precession angle
+        # >>> 1. Precession angle
         
         phi = np.arctan2(Q[2,0], -Q[2,1])
         
         if phi < 0: phi += 2 * np.pi
         
-        # * 2. Nutation angle
+        # >>> 2. Nutation angle
         
         theta = np.arccos(Q[2,2])
         
-        # * 3. Spin angle
+        # >>> 3. Spin angle
         
         psi = np.arctan2(Q[0,2], Q[1,2])
         
         if psi < 0: psi += 2 * np.pi
         
-        # * 4. Euler angles
+        # >>> 4. Euler angles
         
         return np.array([phi, theta, psi])
     
     @classmethod
-    def DCMFromEulerAngles(cls, phi : float, theta : float, psi : float) -> np.ndarray:
+    def dcm_from_euler_angles(cls, phi : float, theta : float, psi : float) -> np.ndarray:
         """Euler Angles --> Direction Cosine Matrix
 
         Args:
@@ -252,7 +265,7 @@ class RigidBodyDynamics:
     
     # ! ALGORITHM 4.4
     @classmethod
-    def YawPitchRollAnglesFromDCM(cls, Q : np.ndarray) -> np.ndarray:
+    def yaw_pitch_roll_angles_from_dcm(cls, Q : np.ndarray) -> np.ndarray:
         """Direction Cosine Matrix --> Yaw-Pitch-Roll Angles
 
         Args:
@@ -262,28 +275,28 @@ class RigidBodyDynamics:
             np.ndarray: Yaw-Pitch-Roll Angles
         """
         
-        # * 1. Precession angle
+        # >>> 1. Precession angle
         
         phi = np.arctan2(Q[0,1], Q[0,0])
         
         if phi < 0: phi += 2 * np.pi
         
-        # * 2. Nutation angle
+        # >>> 2. Nutation angle
         
         theta = np.arcsin(-Q[0,2])
         
-        # * 3. Spin angle
+        # >>> 3. Spin angle
         
         psi = np.arctan2(Q[1,2], Q[2,2])
         
         if psi < 0: psi += 2 * np.pi
         
-        # * 4. Euler angles
+        # >>> 4. Euler angles
         
         return np.array([phi, theta, psi])
     
     @classmethod
-    def DCMFromYawPitchRollAngles(cls, phi : float, theta : float, psi : float) -> np.ndarray:
+    def dcm_from_yaw_pitch_roll_angles(cls, phi : float, theta : float, psi : float) -> np.ndarray:
         """Yaw-Pitch-Roll Angles --> Direction Cosine Matrix
 
         Args:
@@ -315,7 +328,7 @@ class RigidBodyDynamics:
     
     # ! ALGORITHM 9.1
     @classmethod
-    def DCMFromQuaternions(cls, q : np.ndarray) -> np.ndarray:
+    def dcm_from_quaternions(cls, q : np.ndarray) -> np.ndarray:
         """Quaternions --> Direction Cosine Matrix
 
         Args:
@@ -345,7 +358,7 @@ class RigidBodyDynamics:
     
     # ! ALGORITHM 9.2
     @classmethod
-    def QuaternionsFromDCM(cls, Q : np.ndarray) -> np.ndarray:
+    def quaternions_from_dcm(cls, Q : np.ndarray) -> np.ndarray:
         """Direction Cosine Matrix --> Quaternions
 
         Args:
@@ -355,7 +368,7 @@ class RigidBodyDynamics:
             np.ndarray: Quaternions
         """
         
-        # * 1. Symmetric Matrix
+        # >>> 1. Symmetric Matrix
         
         K_11 = Q[0,0] - Q[1,1] - Q[2,2]
         K_12 = Q[1,0] + Q[0,1]
@@ -379,9 +392,9 @@ class RigidBodyDynamics:
         
         K = 1/3 * np.array([[K_11, K_12, K_13, K_14], [K_21, K_22, K_23, K_24], [K_31, K_32, K_33, K_34], [K_41, K_42, K_43, K_44]])
         
-        # * 2. Eigenvalue Problem
+        # >>> 2. Eigenvalue Problem
         
-        l, v = linalg.eig(K)
+        l, v = np.linalg.eig(K)
         
         index = np.argmax(l)
         
@@ -392,25 +405,25 @@ class RigidBodyDynamics:
 if __name__ == '__main__':
     
     print('EXAMPLE 9.17\n')
-    print(np.rad2deg(RigidBodyDynamics.EulerAnglesFromDCM(np.array([[-0.32175, +0.89930, -0.29620],
+    print(np.rad2deg(RigidBodyDynamics.euler_angles_from_dcm(np.array([[-0.32175, +0.89930, -0.29620],
                                                                     [+0.57791, -0.061275, -0.81380],
                                                                     [-0.75000, -0.43301, -0.5000]]))))
-    print(RigidBodyDynamics.DCMFromEulerAngles(np.deg2rad(300), np.deg2rad(120), np.deg2rad(200)))
+    print(RigidBodyDynamics.dcm_from_euler_angles(np.deg2rad(300), np.deg2rad(120), np.deg2rad(200)))
     
-    print(np.rad2deg(RigidBodyDynamics.YawPitchRollAnglesFromDCM(np.array([[-0.32175, +0.89930, -0.29620],
+    print(np.rad2deg(RigidBodyDynamics.yaw_pitch_roll_angles_from_dcm(np.array([[-0.32175, +0.89930, -0.29620],
                                                                            [+0.57791, -0.061275, -0.81380],
                                                                            [-0.75000, -0.43301, -0.5000]]))))
-    print(RigidBodyDynamics.DCMFromYawPitchRollAngles(np.deg2rad(109.69), np.deg2rad(17.230), np.deg2rad(238.43)))
+    print(RigidBodyDynamics.dcm_from_yaw_pitch_roll_angles(np.deg2rad(109.69), np.deg2rad(17.230), np.deg2rad(238.43)))
     print('-' * 40, '\n')
     
     print('EXAMPLE 9.22\n')
-    print(RigidBodyDynamics.QuaternionsFromDCM(np.array([[+0, +0, -1],
+    print(RigidBodyDynamics.quaternions_from_dcm(np.array([[+0, +0, -1],
                                                          [+0.93969, +0.342020, +0],
                                                          [0.34202, -0.93969, +0]])))
-    print(RigidBodyDynamics.DCMFromQuaternions(np.array([0.40558, 0.57923, -0.40558, 0.57923])))
+    print(RigidBodyDynamics.dcm_from_quaternions(np.array([0.40558, 0.57923, -0.40558, 0.57923])))
     print('-' * 40, '\n')
     
     print('PROVA\n')
     y_0 = np.array([0.1, 0, 0, np.deg2rad(99), np.deg2rad(60), np.deg2rad(10)])
-    RigidBodyDynamics.integrateAttitudeDynamics(y_0, 0, 100, show=True)
+    RigidBodyDynamics.simulate_attitude_dynamics(y_0, 0, 100, show=True)
     print('-' * 40, '\n')

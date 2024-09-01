@@ -1,22 +1,29 @@
+""" MissionAtmosphericEntry.py: Implements the atmospheric entry mission """
+
+__author__      = "Alessio Negri"
+__license__     = "LGPL v3"
+__maintainer__  = "Alessio Negri"
+
 import PySide6.QtCore as qtCore
 import PySide6.QtQml as qtQml
 import numpy as np
-import matplotlib.pyplot as plt
-import FigureCanvas as fc
-import Utility as utl
 import mplcyberpunk
 
-from tools.AtmosphericEntry import AtmosphericEntry
+from Utility import format
+from FigureCanvas import FigureCanvas
 from Spacecraft import Spacecraft
 
+from tools.AtmosphericEntry import AtmosphericEntry
+
 class MissionAtmosphericEntry(qtCore.QObject):
+    """Manages the atmospheric entry mission"""
     
-    # - PROPERTIES 
+    # --- PROPERTIES 
     
     # ? Entry Velocity [km / s]
     
     @qtCore.Property(float)
-    def entry_velocity(self): return utl.format(self._entry_velocity)
+    def entry_velocity(self): return format(self._entry_velocity)
     
     @entry_velocity.setter
     def entry_velocity(self, val : float): self._entry_velocity = val
@@ -24,7 +31,7 @@ class MissionAtmosphericEntry(qtCore.QObject):
     # ? Entry Flight Path Angle [deg]
     
     @qtCore.Property(float)
-    def entry_flight_path_angle(self): return utl.format(self._entry_flight_path_angle)
+    def entry_flight_path_angle(self): return format(self._entry_flight_path_angle)
     
     @entry_flight_path_angle.setter
     def entry_flight_path_angle(self, val : float): self._entry_flight_path_angle = val
@@ -32,7 +39,7 @@ class MissionAtmosphericEntry(qtCore.QObject):
     # ? Entry Altitude [km]
     
     @qtCore.Property(float)
-    def entry_altitude(self): return utl.format(self._entry_altitude)
+    def entry_altitude(self): return format(self._entry_altitude)
     
     @entry_altitude.setter
     def entry_altitude(self, val : float): self._entry_altitude = val
@@ -40,7 +47,7 @@ class MissionAtmosphericEntry(qtCore.QObject):
     # ? Final Integration Time [min]
     
     @qtCore.Property(float)
-    def final_integration_time(self): return utl.format(self._final_integration_time)
+    def final_integration_time(self): return format(self._final_integration_time)
     
     @final_integration_time.setter
     def final_integration_time(self, val : float): self._final_integration_time = val
@@ -58,15 +65,14 @@ class MissionAtmosphericEntry(qtCore.QObject):
     impact_velocity_changed = qtCore.Signal()
     
     @qtCore.Property(float, notify=impact_velocity_changed)
-    def impact_velocity(self): return utl.format(self._impact_velocity)
+    def impact_velocity(self): return format(self._impact_velocity)
     
     @impact_velocity.setter
     def impact_velocity(self, val : float): self._impact_velocity = val; self.impact_velocity_changed.emit()
     
-    # - CONSTRUCTOR 
+    # --- METHODS 
     
     def __init__(self, engine : qtQml.QQmlApplicationEngine) -> None:
-        
         """Constructor
 
         Args:
@@ -79,27 +85,27 @@ class MissionAtmosphericEntry(qtCore.QObject):
         
         self.spacecraft = Spacecraft(engine)
         
-        # * Entry Condition
+        # ? Entry Condition
         
         self._entry_velocity            : float = 12.6161   # * Entry Velocity          [ km / s ]
         self._entry_flight_path_angle   : float = -9        # * Entry Flight Path Angle [ deg ]
         self._entry_altitude            : float = 120       # * Entry Altitude          [ km ]
         self._final_integration_time    : float = 60        # * Final Integration Time  [ min ]
-        self._use_parachute             : bool  = False     # * True for using the parachute
         self._impact_velocity           : float = 0         # * Impact Velocity         [ m / s ]
         
-        # * Figure Canvas
+        self._use_parachute             : bool  = False     # * True for using the parachute
         
-        self.figure = fc.FigureCanvas()
+        # ? Figure Canvas
         
-        # * Context properties
+        self.figure = FigureCanvas(rows=2, cols=3)
+        
+        # ? Context properties
         
         engine.rootContext().setContextProperty("__AtmosphericEntryFigure", self.figure)
     
-    # - PUBLIC 
+    # --- PUBLIC METHODS 
     
     def set_update_with_canvas(self, engine : qtQml.QQmlApplicationEngine) -> None:
-        
         """Connects all the QML figures with the backend model
 
         Args:
@@ -108,27 +114,26 @@ class MissionAtmosphericEntry(qtCore.QObject):
         
         win = engine.rootObjects()[0]
         
-        self.figure.updateWithCanvas(win.findChild(qtCore.QObject, "AtmosphericEntryFigure"), win.findChild(qtCore.QObject, "AtmosphericEntryFigureParent"), rows=2, cols=3)
+        self.figure.update_with_canvas(win.findChild(qtCore.QObject, "AtmosphericEntryFigure"), win.findChild(qtCore.QObject, "AtmosphericEntryFigureParent"))
         
         self.init_figure()
     
-    # - SLOTS 
+    # --- PUBLIC SLOTS 
     
     @qtCore.Slot()
     def simulate(self) -> None:
-        
         """Simulates the atmospheric entry mission
         """
         
-        # - Simulation 
+        # ? Simulation 
         
-        AtmosphericEntry.setCapsuleParameters(0, 300, 0, self.spacecraft._capsule_lift_coefficient, self.spacecraft._capsule_drag_coefficient, self.spacecraft._capsule_reference_surface)
+        AtmosphericEntry.set_capsule_parameters(0, 300, 0, self.spacecraft.capsule_lift_coefficient, self.spacecraft.capsule_drag_coefficient, self.spacecraft.capsule_reference_surface)
         
-        AtmosphericEntry.setParachuteParameters(self._use_parachute, self.spacecraft._parachute_drag_coefficient, self.spacecraft._parachute_reference_surface)
+        AtmosphericEntry.set_parachute_parameters(self.use_parachute, self.spacecraft.parachute_drag_coefficient, self.spacecraft.parachute_reference_surface)
         
-        y_0 = np.array([self._entry_velocity, np.deg2rad(self._entry_flight_path_angle), self._entry_altitude, 0, self.spacecraft._capsule_mass])
+        y_0 = np.array([self.entry_velocity, np.deg2rad(self.entry_flight_path_angle), self.entry_altitude, 0, self.spacecraft.capsule_mass])
         
-        result = AtmosphericEntry.integrateAtmosphericEntry(y_0, t_f=self._final_integration_time * 60)
+        result = AtmosphericEntry.simulate_atmospheric_entry(y_0, t_f=self.final_integration_time * 60)
         
         V       = result['y'][0, :]
         gamma   = result['y'][1, :]
@@ -137,18 +142,17 @@ class MissionAtmosphericEntry(qtCore.QObject):
         m       = result['y'][4, :]
         t       = result['t']
         
-        C       = (1.7415 * 1e-4 * 1 / np.sqrt(self.spacecraft._capsule_nose_radius))
+        C       = (1.7415 * 1e-4 * 1 / np.sqrt(self.spacecraft.capsule_nose_radius))
         q_t_c   = np.array([C * np.sqrt(1.225 * np.exp(-(r[i] - AtmosphericEntry.R_E) / AtmosphericEntry.H)) * (V[i] * 1e3)**3 for i in range(0, len(t))])
         a       = np.array([(V[i] - V[i - 1]) / (t[i] - t[i - 1]) for i in range(1, len(t))])
         
-        self._impact_velocity = V[-1] * 1e3
-        self.impact_velocity_changed.emit()
+        self.impact_velocity = V[-1] * 1e3
         
-        # - Plot 
+        # ? Plot 
         
         t = t / 60
         
-        self.figure.resetCanvas()
+        self.figure.reset_canvas()
         
         #self.figure.figure.suptitle(self.figure_title(V[-1] * 1e3))
         
@@ -177,39 +181,15 @@ class MissionAtmosphericEntry(qtCore.QObject):
         mplcyberpunk.make_lines_glow(self.figure.axes[1,1])
         mplcyberpunk.make_lines_glow(self.figure.axes[1,2])
         
-        self.figure.redrawCanvas()
+        self.figure.redraw_canvas()
     
-    # - PRIVATE 
-    
-    def figure_title(self, final_velocity : float = 0.0) -> str:
-        """Constructs the figure title
-
-        Args:
-            final_velocity (float, optional): Final velocity [km / s]. Defaults to 0.0.
-            
-        Returns:
-            str: Title
-        """
+    # --- PRIVATE METHODS 
         
-        title = ''
-        
-        title += f'$V_e = {self._entry_velocity}\;\;km/s$'
-        title += '\t\t\t'
-        title += f'$\gamma_e = {self._entry_flight_path_angle}\;\;°$'
-        title += '\t\t\t'
-        title += f'$z_e = {self._entry_altitude}\;\;km$'
-        title += '\t\t\t'
-        title += f'$R_N = {self.spacecraft._capsule_nose_radius}\;\;m$'
-        title += '\t\t\t'
-        title += f'$V_f = %.2f$' % final_velocity
-        
-        return title
-    
     def init_figure(self) -> None:
         """Initializes the figure canvas
         """
         
-        self.figure.resetCanvas()
+        self.figure.reset_canvas()
         
         #self.figure.figure.suptitle(self.figure_title())
             
@@ -231,4 +211,4 @@ class MissionAtmosphericEntry(qtCore.QObject):
         self.figure.axes[1,2].plot(0, 0, color='#80CBC4', label='Altitude [$km$] - Velocity [$km\;/\;s$]')
         self.figure.axes[1,2].legend()
         
-        self.figure.redrawCanvas()
+        self.figure.redraw_canvas()

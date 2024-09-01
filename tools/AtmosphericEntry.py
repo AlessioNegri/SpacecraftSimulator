@@ -3,28 +3,27 @@
 __author__      = "Alessio Negri"
 __license__     = "LGPL v3"
 __maintainer__  = "Alessio Negri"
-__book__        = "Manned Spacecraft (Design Principles)"
+__book__        = "Manned Spacecraft: Design Principles"
 __chapter__     = "6 - Atmospheric Entry Mechanics"
 
 import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sbn
 import scipy.integrate as ode
 
-from AstronomicalData import AstronomicalData, CelestialBody
-
 sys.path.append(os.path.dirname(__file__))
+
+from AstronomicalData import AstronomicalData, CelestialBody
 
 class AtmosphericEntry:
     """Implements the atmospheric entry equations"""
     
-    # ? MEMBERS
+    # --- MEMBERS 
     
-    g_E     = AstronomicalData.Gravity(CelestialBody.EARTH, km=True)        # * Sea Level Gravity           [ km / s^2 ]
-    R_E     = AstronomicalData.EquatiorialRadius(CelestialBody.EARTH)       # * Planet Equatiorial Radius   [ km ]
-    k       = AstronomicalData.GravitationalParameter(CelestialBody.EARTH)  # * Gravitational Parameter     [ km^3 / s^2 ]
+    g_E     = AstronomicalData.gravity(CelestialBody.EARTH, km=True)        # * Sea Level Gravity           [ km / s^2 ]
+    R_E     = AstronomicalData.equatiorial_radius(CelestialBody.EARTH)       # * Planet Equatiorial Radius   [ km ]
+    k       = AstronomicalData.gravitational_parameter(CelestialBody.EARTH)  # * Gravitational Parameter     [ km^3 / s^2 ]
     m       = 0.0                                                           # * Initial Mass                [ kg ]
     F       = 0.0                                                           # * Thrust                      [ kg * m / s^2 ]
     I_sp    = 300.0                                                         # * Specific Impulse            [ s ]
@@ -39,16 +38,16 @@ class AtmosphericEntry:
     
     use_parachute = False                                                   # * Check for parachute usage
     
-    # ? INTERNAL MEMBERS
+    # --- INTERNAL MEMBERS 
     
     _parachute_deployed     = False                                         # * Check when the parachute is deployed
     _parachute_deployed_t_0 = 0.0                                           # * Intitial Parachute Deploy               [ s ]
     _parachute_opening_time = 0.0                                           # * Parachute Deploy Time                   [ s ]
     
-    # ? METHODS
+    # --- METHODS 
     
     @classmethod
-    def setCapsuleParameters(cls, F : float, I_sp : float, csi : float, C_L : float, C_D : float, S : float) -> None:
+    def set_capsule_parameters(cls, F : float, I_sp : float, csi : float, C_L : float, C_D : float, S : float) -> None:
         """Sets the parameters for the atmospheric entry
 
         Args:
@@ -68,7 +67,7 @@ class AtmosphericEntry:
         cls.S       = S
         
     @classmethod
-    def setParachuteParameters(cls, use_parachute : bool, C_D_P : float, S_P : float) -> None:
+    def set_parachute_parameters(cls, use_parachute : bool, C_D_P : float, S_P : float) -> None:
         """Sets the parameters for the parachute
 
         Args:
@@ -101,7 +100,7 @@ class AtmosphericEntry:
             np.ndarray: Derivative of state
         """
         
-        # - Parameters 
+        # >>> Parameters
         
         V, gamma, r, x, m = X
         
@@ -137,7 +136,7 @@ class AtmosphericEntry:
             
             D_P = 0
         
-        # - Equations 
+        # >>> Equations
         
         dX_dt = np.zeros(shape=(5))
         
@@ -152,7 +151,7 @@ class AtmosphericEntry:
     # ! SECTION 6.4 - 6.5
     
     @classmethod
-    def integrateAtmosphericEntry(cls, y_0 : np.ndarray, t_0 : float = 0.0, t_f : float = 0.0, show : bool = False) -> dict:
+    def simulate_atmospheric_entry(cls, y_0 : np.ndarray, t_0 : float = 0.0, t_f : float = 0.0, show : bool = False) -> dict:
         
         """Integrates the Ordinary Differential Equations for the Atmospheric Entry
 
@@ -168,7 +167,7 @@ class AtmosphericEntry:
         
         if t_f < t_0: raise Exception('Invalid integration time: t_0 > t_f!')
             
-        # - 1. Integrate ODE 
+        # >>> 1. Integrate ODE 
     
         def terminal_condition(t : float, X : np.ndarray): return X[2] - cls.R_E
         
@@ -184,7 +183,7 @@ class AtmosphericEntry:
         
         if not integrationResult['success']: raise Exception(integrationResult['message'])
         
-        # - 2. Result 
+        # >>> 2. Result 
         
         V       = integrationResult['y'][0, :]
         gamma   = integrationResult['y'][1, :]
@@ -197,7 +196,7 @@ class AtmosphericEntry:
         q_t_c   = np.array([C * np.sqrt(1.225 * np.exp(-(r[i] - cls.R_E) / cls.H)) * (V[i] * 1e3)**3 for i in range(0, len(t))])
         a       = np.array([(V[i] - V[i - 1]) / (t[i] - t[i - 1]) for i in range(1, len(t))])
         
-        # - 3. Plot 
+        # >>> 3. Plot 
         
         if show:
             
@@ -240,8 +239,8 @@ class AtmosphericEntry:
 if __name__ == '__main__':
     
     print('EXAMPLE 6.1\n')
-    AtmosphericEntry.setCapsuleParameters(0, 300, 0, 0, 1.096, 0.341)
-    AtmosphericEntry.integrateAtmosphericEntry(np.array([12.6161, np.deg2rad(-9), 120, 0, 26.27]), t_f=3000, show=True)
+    AtmosphericEntry.set_capsule_parameters(0, 300, 0, 0, 1.096, 0.341)
+    AtmosphericEntry.simulate_atmospheric_entry(np.array([12.6161, np.deg2rad(-9), 120, 0, 26.27]), t_f=3000, show=True)
     print('-' * 40, '\n')
     
     plt.show()

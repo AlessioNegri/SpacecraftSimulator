@@ -1,23 +1,47 @@
-from stdafx import *
-from AstronomicalData import *
-from OrbitalManeuvers import *
-from OrbitDetermination import *
+""" InterplanetaryTrajectories.py: Implements the interplanetary trajectories equations """
+
+__author__      = "Alessio Negri"
+__license__     = "LGPL v3"
+__maintainer__  = "Alessio Negri"
+__book__        = "Orbital Mechanics for Engineering Students"
+__chapter__     = "8 - Interplanetary Trajectories"
+
+import os
+import sys
+import numpy as np
+import matplotlib.pyplot as plt
+
+from enum import IntEnum
+from datetime import datetime
+
+sys.path.append(os.path.dirname(__file__))
+
+from Common import wrap_to360deg, print_progress_bar, daterange, daterange_length
+from AstronomicalData import AstronomicalData, CelestialBody
+from Time import Time, DirectionType
+from ThreeDimensionalOrbit import ThreeDimensionalOrbit
+from OrbitalManeuvers import OrbitalManeuvers, ManeuverResult
+from OrbitDetermination import OrbitDetermination, OrbitalElements
+
+# --- STRUCT 
 
 class FlybySide(IntEnum):
+    """Type of fly-by"""
     
     DARK_SIDE   = 0
     SUNLIT_SIDE = 1
 
-# ! CHAPTER 8 - Interplanetary Trajectories
+# --- CLASS 
+
 class InterplanetaryTrajectories:
+    """Implements methods and functions to simulate interplanetary trajectories"""
     
-    
-    def __init__(self) -> None: pass
+    # --- METHODS 
     
     # ! SECTION 8.3
     
     @classmethod
-    def SynodicPeriod(cls, departurePlanet : CelestialBody, arrivalPlanet : CelestialBody) -> float:
+    def synodic_period(cls, departurePlanet : CelestialBody, arrivalPlanet : CelestialBody) -> float:
         """Calculates the Synodic Period for an interplanetary transfer
 
         Args:
@@ -28,19 +52,19 @@ class InterplanetaryTrajectories:
             float: Synodic period
         """
         
-        # * 1. Mean motions
+        # >>> 1. Mean motions
         
-        n_1 = 2 * np.pi / AstronomicalData.SiderealOrbitalPeriod(departurePlanet)
-        n_2 = 2 * np.pi / AstronomicalData.SiderealOrbitalPeriod(arrivalPlanet)
+        n_1 = 2 * np.pi / AstronomicalData.sidereal_orbital_period(departurePlanet)
+        n_2 = 2 * np.pi / AstronomicalData.sidereal_orbital_period(arrivalPlanet)
         
-        # * 2. Synodic period
+        # >>> 2. Synodic period
         
         T_syn = 2 * np.pi / np.abs(n_2 - n_1)
         
         return T_syn
     
     @classmethod
-    def WaitTime(cls, departurePlanet : CelestialBody, arrivalPlanet : CelestialBody) -> list:
+    def wait_time(cls, departurePlanet : CelestialBody, arrivalPlanet : CelestialBody) -> list:
         """Calculates the wait time for an interplanetary transfer
 
         Args:
@@ -51,29 +75,29 @@ class InterplanetaryTrajectories:
             list: [Wait time, initial phase angle, final phase angle
         """
         
-        # * 1. Transfer ellipse
+        # >>> 1. Transfer ellipse
         
-        mu_sun  = AstronomicalData.GravitationalParameter(CelestialBody.SUN)
-        R_1     = AstronomicalData.SemiMajorAxis(departurePlanet)
-        R_2     = AstronomicalData.SemiMajorAxis(arrivalPlanet)
-        n_1     = 2 * np.pi / AstronomicalData.SiderealOrbitalPeriod(departurePlanet)
-        n_2     = 2 * np.pi / AstronomicalData.SiderealOrbitalPeriod(arrivalPlanet)
+        mu_sun  = AstronomicalData.gravitational_parameter(CelestialBody.SUN)
+        R_1     = AstronomicalData.semi_major_axis(departurePlanet)
+        R_2     = AstronomicalData.semi_major_axis(arrivalPlanet)
+        n_1     = 2 * np.pi / AstronomicalData.sidereal_orbital_period(departurePlanet)
+        n_2     = 2 * np.pi / AstronomicalData.sidereal_orbital_period(arrivalPlanet)
         
         t_12 = np.pi / np.sqrt(mu_sun) * ((R_1 + R_2) / 2)**(3/2)
         
-        # * 2. Initial phase angle bewteen planets (departure trip)
+        # >>> 2. Initial phase angle bewteen planets (departure trip)
         
         phi_0 = np.pi - n_2 * t_12
         
-        # * 3. Final phase angle at planet arrival (departure trip)
+        # >>> 3. Final phase angle at planet arrival (departure trip)
         
         phi_f = np.pi - n_1 * t_12
         
-        # * 4. Initial phase angle bewteen planets (return trip)
+        # >>> 4. Initial phase angle bewteen planets (return trip)
         
         phi_0 = - phi_f
         
-        # * 5. Wait time
+        # >>> 5. Wait time
         
         t_wait = -1
         
@@ -90,7 +114,7 @@ class InterplanetaryTrajectories:
     # ! SECTION 8.6
     
     @classmethod
-    def Departure(cls, departurePlanet : CelestialBody, arrivalPlanet : CelestialBody, r_p : float, m : float) -> MANEUVER_RESULT:
+    def departure(cls, departurePlanet : CelestialBody, arrivalPlanet : CelestialBody, r_p : float, m : float) -> ManeuverResult:
         """Planetary departure hyperbola design
 
         Args:
@@ -103,16 +127,16 @@ class InterplanetaryTrajectories:
             MANEUVER_RESULT: [dv, dt, dm, Orbital Elements]
         """
         
-        # * 1. Hyperbolic excess speed
+        # >>> 1. Hyperbolic excess speed
         
-        mu_sun  = AstronomicalData.GravitationalParameter(CelestialBody.SUN)
-        mu_1    = AstronomicalData.GravitationalParameter(departurePlanet)
-        R_1     = AstronomicalData.SemiMajorAxis(departurePlanet)
-        R_2     = AstronomicalData.SemiMajorAxis(arrivalPlanet)
+        mu_sun  = AstronomicalData.gravitational_parameter(CelestialBody.SUN)
+        mu_1    = AstronomicalData.gravitational_parameter(departurePlanet)
+        R_1     = AstronomicalData.semi_major_axis(departurePlanet)
+        R_2     = AstronomicalData.semi_major_axis(arrivalPlanet)
         
         v_inf = np.sqrt(mu_sun / R_1) * (np.sqrt(2 * R_2 / (R_1 + R_2)) - 1)
         
-        # * 2. Hyperbola trajectory
+        # >>> 2. Hyperbola trajectory
         
         e = 1 + r_p * v_inf**2 / mu_1
         
@@ -122,28 +146,28 @@ class InterplanetaryTrajectories:
         
         beta = np.arccos(1 / e)
         
-        # * 3. Circular parking orbit
+        # >>> 3. Circular parking orbit
         
         v_c = np.sqrt(mu_1 / r_p)
         
-        # * 4. Maneuver
+        # >>> 4. Maneuver
         
-        result = MANEUVER_RESULT()
+        result = ManeuverResult()
         
         result.dv = np.abs(v_p - v_c)
         
         result.dt = 0.0
         
-        result.dm = OrbitalManeuvers.propellantMass(m, result.dv)
+        result.dm = OrbitalManeuvers.propellant_mass(m, result.dv)
         
-        result.oe = ORBITAL_ELEMENTS(h, e, 0, 0, 0, 0, 0)
+        result.oe = OrbitalElements(h, e, 0, 0, 0, 0, 0)
         
         return result
     
     # ! SECTION 8.8
     
     @classmethod
-    def Rendezvous(cls, departurePlanet : CelestialBody, arrivalPlanet : CelestialBody, r_p_A : float, T : float, m : float) -> MANEUVER_RESULT:
+    def rendezvous(cls, departurePlanet : CelestialBody, arrivalPlanet : CelestialBody, r_p_A : float, T : float, m : float) -> ManeuverResult:
         """Planetary arrival hyperbola design
 
         Args:
@@ -157,16 +181,16 @@ class InterplanetaryTrajectories:
             MANEUVER_RESULT: [dv, dt, dm, Orbital Elements]
         """
         
-        # * 1. Hyperbolic excess speed
+        # >>> 1. Hyperbolic excess speed
         
-        mu_sun  = AstronomicalData.GravitationalParameter(CelestialBody.SUN)
-        mu_2    = AstronomicalData.GravitationalParameter(arrivalPlanet)
-        R_1     = AstronomicalData.SemiMajorAxis(departurePlanet)
-        R_2     = AstronomicalData.SemiMajorAxis(arrivalPlanet)
+        mu_sun  = AstronomicalData.gravitational_parameter(CelestialBody.SUN)
+        mu_2    = AstronomicalData.gravitational_parameter(arrivalPlanet)
+        R_1     = AstronomicalData.semi_major_axis(departurePlanet)
+        R_2     = AstronomicalData.semi_major_axis(arrivalPlanet)
         
         v_inf = np.sqrt(mu_sun / R_2) * (1 - np.sqrt(2 * R_1 / (R_1 + R_2)))
         
-        # * 2. Rendezvous orbit from period (optimal periapse radius)
+        # >>> 2. Rendezvous orbit from period (optimal periapse radius)
         
         a = (T * np.sqrt(mu_2) / (2 * np.pi))**(2/3)
         
@@ -178,7 +202,7 @@ class InterplanetaryTrajectories:
         
         v_c = np.sqrt(mu_2 * (1 + e) / r_p)
         
-        # * 3. Hyperbola trajectory
+        # >>> 3. Hyperbola trajectory
         
         e_hyp = 1 + r_p * v_inf**2 / mu_2
         
@@ -192,24 +216,24 @@ class InterplanetaryTrajectories:
         
         v_p = h_hyp / r_p
         
-        # * 4. Maneuver
+        # >>> 4. Maneuver
         
-        result = MANEUVER_RESULT()
+        result = ManeuverResult()
         
         result.dv = np.abs(v_p - v_c)
         
         result.dt = 0.0
         
-        result.dm = OrbitalManeuvers.propellantMass(m, result.dv)
+        result.dm = OrbitalManeuvers.propellant_mass(m, result.dv)
         
-        result.oe = ORBITAL_ELEMENTS(h_hyp, e_hyp, 0, 0, 0, 0, 0)
+        result.oe = OrbitalElements(h_hyp, e_hyp, 0, 0, 0, 0, 0)
         
         return result
     
     # ! SECTION 8.9
     
     @classmethod
-    def Flyby(cls, departurePlanet : CelestialBody, arrivalPlanet : CelestialBody, r_p : float, theta_1 : float, m : float, side : FlybySide = FlybySide.DARK_SIDE) -> MANEUVER_RESULT:
+    def flyby(cls, departurePlanet : CelestialBody, arrivalPlanet : CelestialBody, r_p : float, theta_1 : float, m : float, side : FlybySide = FlybySide.DARK_SIDE) -> ManeuverResult:
         """Planetary flyby hyperbola design
 
         Args:
@@ -224,14 +248,14 @@ class InterplanetaryTrajectories:
             MANEUVER_RESULT: [dv, dt, dm, Orbital Elements]
         """
         
-        # * 0. Astronomical Data
+        # >>> 0. Astronomical Data
         
-        mu_sun  = AstronomicalData.GravitationalParameter(CelestialBody.SUN)
-        mu_2    = AstronomicalData.GravitationalParameter(arrivalPlanet)
-        R_1     = AstronomicalData.SemiMajorAxis(departurePlanet)
-        R_2     = AstronomicalData.SemiMajorAxis(arrivalPlanet)
+        mu_sun  = AstronomicalData.gravitational_parameter(CelestialBody.SUN)
+        mu_2    = AstronomicalData.gravitational_parameter(arrivalPlanet)
+        R_1     = AstronomicalData.semi_major_axis(departurePlanet)
+        R_2     = AstronomicalData.semi_major_axis(arrivalPlanet)
         
-        # * 1. Preflyby ellipse (orbit 1)
+        # >>> 1. Preflyby ellipse (orbit 1)
         
         e_1 = (R_1 - R_2) / (R_1 + R_2 * np.cos(theta_1))
         
@@ -245,7 +269,7 @@ class InterplanetaryTrajectories:
         
         V_1_v_m = np.sqrt(V_r_1**2 + V_t_1**2)
         
-        # * 2. Flyby hyperbola
+        # >>> 2. Flyby hyperbola
         
         V_1_v = np.array([V_t_1, -V_r_1])
         
@@ -253,7 +277,7 @@ class InterplanetaryTrajectories:
         
         v_inf_1 = V_1_v - V_2
         
-        v_inf_m = linalg.norm(v_inf_1)
+        v_inf_m = np.linalg.norm(v_inf_1)
         
         e = 1 + r_p * v_inf_m**2 / mu_2
         
@@ -271,7 +295,7 @@ class InterplanetaryTrajectories:
         
         phi_1 = np.arctan(v_inf_1[1] / v_inf_1[0])
         
-        # * 3. Approach
+        # >>> 3. Approach
         
         phi_2 = phi_1 + delta if side == FlybySide.DARK_SIDE else phi_1 - delta
         
@@ -283,7 +307,7 @@ class InterplanetaryTrajectories:
         
         V_r_2 = - V_2_v[1]
         
-        # * 4. Postflyby ellipse (orbit 2)
+        # >>> 4. Postflyby ellipse (orbit 2)
             
         h_2 = R_2 * V_t_2
         
@@ -296,17 +320,17 @@ class InterplanetaryTrajectories:
         
         R_p_2 = h_2**2 / mu_sun * 1 / (1 + e_2)
         
-        # * 5. Maneuver
+        # >>> 5. Maneuver
         
-        result = MANEUVER_RESULT()
+        result = ManeuverResult()
         
         result.dv = 0.0
         
         result.dt = 0.0
         
-        result.dm = OrbitalManeuvers.propellantMass(m, result.dv)
+        result.dm = OrbitalManeuvers.propellant_mass(m, result.dv)
         
-        result.oe = ORBITAL_ELEMENTS(h_2, e_2, 0, 0, 0, 0, 0)
+        result.oe = OrbitalElements(h_2, e_2, 0, 0, 0, 0, 0)
         
         return result
     
@@ -314,7 +338,7 @@ class InterplanetaryTrajectories:
     
     # ! ALGORITHM 8.1
     @classmethod
-    def Ephemeris(cls, planet : CelestialBody, date : datetime) -> list:
+    def ephemeris(cls, planet : CelestialBody, date : datetime) -> list:
         """Evaluates the ephemeris for a given planet and date
 
         Args:
@@ -325,64 +349,63 @@ class InterplanetaryTrajectories:
             list: [r_GEF, v_GEF]
         """
         
+        # >>> 0. Astronomical data
         
-        # * 0. Astronomical data
+        mu_sun = AstronomicalData.gravitational_parameter(CelestialBody.SUN)
         
-        mu_sun = AstronomicalData.GravitationalParameter(CelestialBody.SUN)
+        # >>> 1. Julian day number
         
-        # * 1. Julian day number
+        JD = OrbitDetermination.julian_day(date.year, date.month, date.day, date.hour, date.minute, date.second)
         
-        JD = OrbitDetermination.JulianDay(date.year, date.month, date.day, date.hour, date.minute, date.second)
-        
-        # * 2. Number of centuries since J2000
+        # >>> 2. Number of centuries since J2000
         
         T_0 = (JD - 2_451_545) / 36_525
         
-        # * 3. Orbital elements
+        # >>> 3. Orbital elements
         
-        oe, doe_dt = AstronomicalData.PlanetaryOrbitalElementsAndRates(planet)
+        oe, doe_dt = AstronomicalData.planetary_orbital_elements_and_rates(planet)
         
         a = (oe['a'] + doe_dt['a'] * T_0) * AstronomicalData.AU
         
         e = oe['e'] + doe_dt['e'] * T_0
         
-        i = wrapTo360Deg(oe['i'] + doe_dt['i'] * T_0)
+        i = wrap_to360deg(oe['i'] + doe_dt['i'] * T_0)
         
-        Omega = wrapTo360Deg(oe['Omega'] + doe_dt['Omega'] * T_0)
+        Omega = wrap_to360deg(oe['Omega'] + doe_dt['Omega'] * T_0)
         
-        bomega = wrapTo360Deg(oe['bomega'] + doe_dt['bomega'] * T_0)
+        bomega = wrap_to360deg(oe['bomega'] + doe_dt['bomega'] * T_0)
         
-        L = wrapTo360Deg(oe['L'] + doe_dt['L'] * T_0)
+        L = wrap_to360deg(oe['L'] + doe_dt['L'] * T_0)
         
         T = 2 * np.pi * np.sqrt(a**3 / mu_sun)
         
-        # * 4. Angular momentum
+        # >>> 4. Angular momentum
         
         h = np.sqrt(mu_sun * a * (1 - e**2))
         
-        # * 5. Argument of Perihelion and Mean Anomaly
+        # >>> 5. Argument of Perihelion and Mean Anomaly
         
         omega = bomega - Omega
         
         M = L - bomega
         
-        # * 6. True anomaly
+        # >>> 6. True anomaly
         
         t = np.deg2rad(M) * T / (2 * np.pi)
         
-        theta = Time.calculateEllipticalOrbit(DirectionType.TIME_TO_MEAN_ANOMALY, T=T, e=e, t=t)
+        theta = Time.calculate_elliptical_orbit(DirectionType.TIME_TO_MEAN_ANOMALY, T=T, e=e, t=t)
         
-        # * 7. State vector
+        # >>> 7. State vector
         
-        ThreeDimensionalOrbit.setCelestialBody(CelestialBody.SUN)
+        ThreeDimensionalOrbit.set_celestial_body(CelestialBody.SUN)
         
-        return ThreeDimensionalOrbit.PF2GEF(ORBITAL_ELEMENTS(h, e, np.deg2rad(i), np.deg2rad(Omega), np.deg2rad(omega), theta, a))
+        return ThreeDimensionalOrbit.pf_2_gef(OrbitalElements(h, e, np.deg2rad(i), np.deg2rad(Omega), np.deg2rad(omega), theta, a))
     
     # ! SECTION 8.11
     
     # ! ALGORITHM 8.2
     @classmethod
-    def OptimalTransfer(cls,
+    def optimal_transfer(cls,
                         departurePlanet : CelestialBody,
                         arrivalPlanet : CelestialBody,
                         departureDate : datetime,
@@ -411,81 +434,81 @@ class InterplanetaryTrajectories:
             list: [maneuver_1, maneuver_2, lambert orbital elements, lambert final true anomaly]
         """
         
-        # * 1. Intial condition
+        # >>> 1. Intial condition
         
-        R_1, V_1 = cls.Ephemeris(departurePlanet, departureDate)
-        R_2, V_2 = cls.Ephemeris(arrivalPlanet, arrivalDate)
+        R_1, V_1 = cls.ephemeris(departurePlanet, departureDate)
+        R_2, V_2 = cls.ephemeris(arrivalPlanet, arrivalDate)
         
         dt = (arrivalDate - departureDate).total_seconds()
         
-        # * 2. Lambert problem
+        # >>> 2. Lambert problem
         
-        OrbitDetermination.setCelestialBody(CelestialBody.SUN)
+        OrbitDetermination.set_celestial_body(CelestialBody.SUN)
         
-        V_D_v, V_A_v, oe, theta_2 = OrbitDetermination.solveLambertProblem(R_1, R_2, dt)
+        V_D_v, V_A_v, oe, theta_2 = OrbitDetermination.solve_lambert_problem(R_1, R_2, dt)
         
-        # * 3. Hyperbolic excess velocities
+        # >>> 3. Hyperbolic excess velocities
         
         v_inf_D = V_D_v - V_1
         v_inf_A = V_A_v - V_2
         
         # print(linalg.norm(v_inf_D), linalg.norm(v_inf_A))
         
-        # * 4. Departure
+        # >>> 4. Departure
         
-        mu_D = AstronomicalData.GravitationalParameter(departurePlanet)
+        mu_D = AstronomicalData.gravitational_parameter(departurePlanet)
         
-            # * a. Hyperbola trajectory
+            # >>> a. Hyperbola trajectory
         
-        e = 1 + r_p_D * linalg.norm(v_inf_D)**2 / mu_D
+        e = 1 + r_p_D * np.linalg.norm(v_inf_D)**2 / mu_D
         
-        h = r_p_D * np.sqrt(linalg.norm(v_inf_D)**2 + 2 * mu_D / r_p_D)
+        h = r_p_D * np.sqrt(np.linalg.norm(v_inf_D)**2 + 2 * mu_D / r_p_D)
         
         beta = np.arccos(1 / e)
         
         v_p = h / r_p_D
         
-            # * b. Circular parking orbit
+            # >>> b. Circular parking orbit
         
         v_c = np.sqrt(mu_D / r_p_D)
         
-            # * c. Maneuver
+            # >>> c. Maneuver
         
-        maneuver_1 = MANEUVER_RESULT()
+        maneuver_1 = ManeuverResult()
         
         maneuver_1.dv = np.abs(v_p - v_c)
         
         maneuver_1.dt = 0.0
         
-        maneuver_1.dm = OrbitalManeuvers.propellantMass(m, maneuver_1.dv)
+        maneuver_1.dm = OrbitalManeuvers.propellant_mass(m, maneuver_1.dv)
         
-        maneuver_1.oe = ORBITAL_ELEMENTS(h, e, 0, 0, 0, 0, 0)
+        maneuver_1.oe = OrbitalElements(h, e, 0, 0, 0, 0, 0)
         
-        # * 5. Arrival
+        # >>> 5. Arrival
         
-        mu_A = AstronomicalData.GravitationalParameter(arrivalPlanet)
+        mu_A = AstronomicalData.gravitational_parameter(arrivalPlanet)
         
-        maneuver_2 = MANEUVER_RESULT()
+        maneuver_2 = ManeuverResult()
         
         if not gravityAssist:
         
-            # * a. Rendezvous orbit from period
+            # >>> a. Rendezvous orbit from period
         
             a = (T * np.sqrt(mu_A) / (2 * np.pi))**(2/3)
             
-            e = 1 - r_p_A / a if r_p_A != 0 else (2 * mu_A) / (a * linalg.norm(v_inf_A)**2) - 1
+            e = 1 - r_p_A / a if r_p_A != 0 else (2 * mu_A) / (a * np.linalg.norm(v_inf_A)**2) - 1
             
-            r_p = r_p_A if r_p_A != 0 else 2 * mu_A / linalg.norm(v_inf_A)**2 * (1 - e) / (1 + e)
+            r_p = r_p_A if r_p_A != 0 else 2 * mu_A / np.linalg.norm(v_inf_A)**2 * (1 - e) / (1 + e)
             
-            r_a = 2 * a - r_p if r_p_A != 0 else 2 * mu_A / linalg.norm(v_inf_A)**2
+            r_a = 2 * a - r_p if r_p_A != 0 else 2 * mu_A / np.linalg.norm(v_inf_A)**2
             
             v_c = np.sqrt(mu_A * (1 + e) / r_p)
         
-            # * b. Hyperbola trajectory
+            # >>> b. Hyperbola trajectory
         
-            e_hyp = 1 + r_p * linalg.norm(v_inf_A)**2 / mu_A
+            e_hyp = 1 + r_p * np.linalg.norm(v_inf_A)**2 / mu_A
             
-            h_hyp = r_p * np.sqrt(linalg.norm(v_inf_A)**2 + 2 * mu_A / r_p)
+            h_hyp = r_p * np.sqrt(np.linalg.norm(v_inf_A)**2 + 2 * mu_A / r_p)
             
             delta = 2 * np.arcsin(1 / e_hyp)
             
@@ -495,22 +518,22 @@ class InterplanetaryTrajectories:
             
             v_p = h_hyp / r_p
         
-            # * c. Maneuver
+            # >>> c. Maneuver
             
             maneuver_2.dv = np.abs(v_p - v_c)
             
             maneuver_2.dt = 0.0
             
-            maneuver_2.dm = OrbitalManeuvers.propellantMass(m, maneuver_2.dv) # * - maneuver_1.dm
+            maneuver_2.dm = OrbitalManeuvers.propellant_mass(m, maneuver_2.dv) # * - maneuver_1.dm
             
-            maneuver_2.oe = ORBITAL_ELEMENTS(h_hyp, e_hyp, 0, 0, 0, 0, 0)
+            maneuver_2.oe = OrbitalElements(h_hyp, e_hyp, 0, 0, 0, 0, 0)
         
         else:
             
-            # * a. Directions
+            # >>> a. Directions
             
-            u_S = - R_1 / linalg.norm(R_1)
-            u_V = V_1 / linalg.norm(V_1)
+            u_S = - R_1 / np. linalg.norm(R_1)
+            u_V = V_1 / np.linalg.norm(V_1)
             
             print(v_inf_A)
             print(u_S)
@@ -518,7 +541,7 @@ class InterplanetaryTrajectories:
             
             return
             
-            # * a. Hyperbola trajectory
+            # >>> a. Hyperbola trajectory
             
             e_hyp = 1 + r_p_A * linalg.norm(v_inf_A)**2 / mu_A
             
@@ -536,7 +559,7 @@ class InterplanetaryTrajectories:
             
             phi_1 = np.arctan(v_inf_1[1] / v_inf_1[0])
             
-            # * 3. Approach
+            # >>> 3. Approach
         
             phi_2 = phi_1 + delta if side == FlybySide.DARK_SIDE else phi_1 - delta
         
@@ -548,7 +571,7 @@ class InterplanetaryTrajectories:
             
             V_r_2 = - V_2_v[1]
             
-            # * 4. Postflyby ellipse (orbit 2)
+            # >>> 4. Postflyby ellipse (orbit 2)
                 
             h_2 = R_2 * V_t_2
             
@@ -561,79 +584,89 @@ class InterplanetaryTrajectories:
             
             R_p_2 = h_2**2 / mu_sun * 1 / (1 + e_2)
         
-            # * c. Maneuver
+            # >>> c. Maneuver
             
             maneuver_2.dv = np.abs(v_p - v_c)
             
             maneuver_2.dt = 0.0
             
-            maneuver_2.dm = OrbitalManeuvers.propellantMass(m, maneuver_2.dv) # * - maneuver_1.dm
+            maneuver_2.dm = OrbitalManeuvers.propellant_mass(m, maneuver_2.dv) # * - maneuver_1.dm
             
-            maneuver_2.oe = ORBITAL_ELEMENTS(h_2, e_2, 0, 0, 0, 0, 0)
+            maneuver_2.oe = OrbitalElements(h_2, e_2, 0, 0, 0, 0, 0)
         
         return [maneuver_1, maneuver_2, oe, theta_2]
 
     # ! EXTRA
 
     @classmethod
-    def PorkChop(cls,
+    def pork_chop(cls,
                  departurePlanet : CelestialBody,
                  arrivalPlanet : CelestialBody,
                  launchWindow : list,
                  arrivalWindow : list,
                  step: int = 1,
                  show : bool = False) -> None:
+        """Evaluates the pork chop of the transfer
+
+        Args:
+            departurePlanet (CelestialBody): Departure planet
+            arrivalPlanet (CelestialBody): Arrival planet
+            launchWindow (list): Launch window
+            arrivalWindow (list): Arrival window
+            step (int, optional): Step in days for the cost evaluation. Defaults to 1.
+            show (bool, optional):  True for plotting the pork chop. Defaults to False.
+        """
         
-        # * 1. Extract dates
+        # >>> 1. Extract dates
         
         lwBeg, lwEnd = launchWindow
         
         awBeg, awEnd = arrivalWindow
         
-        # * 2. Cycle of time windows
+        # >>> 2. Cycle of time windows
         
-        dv_1    = np.zeros(shape=(daterangeLength(awBeg, awEnd, step), daterangeLength(lwBeg, lwEnd, step)), dtype=float)
-        dv_2    = np.zeros(shape=(daterangeLength(awBeg, awEnd, step), daterangeLength(lwBeg, lwEnd, step)), dtype=float)
-        T_F     = np.zeros(shape=(daterangeLength(awBeg, awEnd, step), daterangeLength(lwBeg, lwEnd, step)), dtype=float)
-        X       = np.empty(shape=(daterangeLength(awBeg, awEnd, step), daterangeLength(lwBeg, lwEnd, step)), dtype='datetime64[s]')
-        Y       = np.empty(shape=(daterangeLength(awBeg, awEnd, step), daterangeLength(lwBeg, lwEnd, step)), dtype='datetime64[s]')
+        dv_1    = np.zeros(shape=(daterange_length(awBeg, awEnd, step), daterange_length(lwBeg, lwEnd, step)), dtype=float)
+        dv_2    = np.zeros(shape=(daterange_length(awBeg, awEnd, step), daterange_length(lwBeg, lwEnd, step)), dtype=float)
+        T_F     = np.zeros(shape=(daterange_length(awBeg, awEnd, step), daterange_length(lwBeg, lwEnd, step)), dtype=float)
+        X       = np.empty(shape=(daterange_length(awBeg, awEnd, step), daterange_length(lwBeg, lwEnd, step)), dtype='datetime64[s]')
+        Y       = np.empty(shape=(daterange_length(awBeg, awEnd, step), daterange_length(lwBeg, lwEnd, step)), dtype='datetime64[s]')
 
-        printProgressBar(0, daterangeLength(lwBeg, lwEnd, step), prefix = 'Progress:', suffix = 'Start', length = 50)
+        print_progress_bar(0, daterange_length(lwBeg, lwEnd, step), prefix = 'Progress:', suffix = 'Start', length = 50)
         
         for lwIndex, lwDate in enumerate(daterange(lwBeg, lwEnd, step)):
             
-            printProgressBar(lwIndex, daterangeLength(lwBeg, lwEnd, step), prefix = 'Progress:', suffix = 'Processing...', length = 50)
+            print_progress_bar(lwIndex, daterange_length(lwBeg, lwEnd, step), prefix = 'Progress:', suffix = 'Processing...', length = 50)
             
             for awIndex, awDate in enumerate(daterange(awBeg, awEnd, step)):
         
-                # * a. Extract ephemeris
+                # >>> a. Extract ephemeris
                 
-                R_1, V_1 = cls.Ephemeris(departurePlanet, lwDate)
-                R_2, V_2 = cls.Ephemeris(arrivalPlanet, awDate)
+                R_1, V_1 = cls.ephemeris(departurePlanet, lwDate)
+                R_2, V_2 = cls.ephemeris(arrivalPlanet, awDate)
                 
                 dt = (awDate - lwDate).total_seconds()
                 
                 T_F[awIndex, lwIndex] = dt / 3600 / 24
                 
-                # * b. Lambert problem
+                # >>> b. Lambert problem
                 
-                OrbitDetermination.setCelestialBody(CelestialBody.SUN)
+                OrbitDetermination.set_celestial_body(CelestialBody.SUN)
                 
-                V_D_v, V_A_v, oe, theta_2 = OrbitDetermination.solveLambertProblem(R_1, R_2, dt)
+                V_D_v, V_A_v, oe, theta_2 = OrbitDetermination.solve_lambert_problem(R_1, R_2, dt)
                 
-                # * c. Hyperbolic excess velocities
+                # >>> c. Hyperbolic excess velocities
                 
-                dv_1[awIndex, lwIndex] = linalg.norm(V_D_v - V_1)
-                dv_2[awIndex, lwIndex] = linalg.norm(V_A_v - V_2)
+                dv_1[awIndex, lwIndex] = np.linalg.norm(V_D_v - V_1)
+                dv_2[awIndex, lwIndex] = np.linalg.norm(V_A_v - V_2)
                 
-                # * d. Times
+                # >>> d. Times
                 
                 X[awIndex, lwIndex] = np.datetime64(lwDate.strftime('%Y-%m-%d'))
                 Y[awIndex, lwIndex] = np.datetime64(awDate.strftime('%Y-%m-%d'))
         
-        printProgressBar(daterangeLength(lwBeg, lwEnd, step), daterangeLength(lwBeg, lwEnd, step), prefix = 'Progress:', suffix = 'Completed', length = 50)
+        print_progress_bar(daterange_length(lwBeg, lwEnd, step), daterange_length(lwBeg, lwEnd, step), prefix = 'Progress:', suffix = 'Completed', length = 50)
         
-        # * 3. Show plot
+        # >>> 3. Show plot
         
         if show:
             
@@ -669,50 +702,50 @@ class InterplanetaryTrajectories:
 if __name__ == '__main__':
     
     print('EXAMPLE 8.1\n')
-    print(InterplanetaryTrajectories.SynodicPeriod(CelestialBody.EARTH, CelestialBody.MARS) / 86400)
+    print(InterplanetaryTrajectories.synodic_period(CelestialBody.EARTH, CelestialBody.MARS) / 86400)
     print('-' * 40, '\n')
     
     print('EXAMPLE 8.2\n')
-    print(InterplanetaryTrajectories.WaitTime(CelestialBody.EARTH, CelestialBody.MARS))
+    print(InterplanetaryTrajectories.wait_time(CelestialBody.EARTH, CelestialBody.MARS))
     print('-' * 40, '\n')
     
     print('EXAMPLE 8.3\n')
-    print(AstronomicalData.SphereOfInfluence(CelestialBody.EARTH) / 6378)
-    print(AstronomicalData.SphereOfInfluence(CelestialBody.MOON))
+    print(AstronomicalData.sphere_of_influence(CelestialBody.EARTH) / 6378)
+    print(AstronomicalData.sphere_of_influence(CelestialBody.MOON))
     print('-' * 40, '\n')
     
     print('EXAMPLE 8.4\n')
-    print(InterplanetaryTrajectories.Departure(CelestialBody.EARTH, CelestialBody.MARS, 6378 + 300, 2000))
+    print(InterplanetaryTrajectories.departure(CelestialBody.EARTH, CelestialBody.MARS, 6378 + 300, 2000))
     print('-' * 40, '\n')
     
     print('EXAMPLE 8.5\n')
-    print(InterplanetaryTrajectories.Rendezvous(CelestialBody.EARTH, CelestialBody.MARS, 0, 7 * 3600, 2000))
+    print(InterplanetaryTrajectories.rendezvous(CelestialBody.EARTH, CelestialBody.MARS, 0, 7 * 3600, 2000))
     print('-' * 40, '\n')
     
     print('EXAMPLE 8.6\n')
-    print(InterplanetaryTrajectories.Flyby(CelestialBody.EARTH, CelestialBody.VENUS, 300 + AstronomicalData.EquatiorialRadius(CelestialBody.VENUS), np.deg2rad(-30), 2000))
-    print(InterplanetaryTrajectories.Flyby(CelestialBody.EARTH, CelestialBody.VENUS, 300 + AstronomicalData.EquatiorialRadius(CelestialBody.VENUS), np.deg2rad(-30), 2000, FlybySide.SUNLIT_SIDE))
+    print(InterplanetaryTrajectories.flyby(CelestialBody.EARTH, CelestialBody.VENUS, 300 + AstronomicalData.equatiorial_radius(CelestialBody.VENUS), np.deg2rad(-30), 2000))
+    print(InterplanetaryTrajectories.flyby(CelestialBody.EARTH, CelestialBody.VENUS, 300 + AstronomicalData.equatiorial_radius(CelestialBody.VENUS), np.deg2rad(-30), 2000, FlybySide.SUNLIT_SIDE))
     print('-' * 40, '\n')
     
     print('EXAMPLE 8.7\n')
-    print(InterplanetaryTrajectories.Ephemeris(CelestialBody.EARTH, datetime(2003, 8, 27, 12, 0, 0)))
-    print(InterplanetaryTrajectories.Ephemeris(CelestialBody.MARS, datetime(2003, 8, 27, 12, 0, 0)))
+    print(InterplanetaryTrajectories.ephemeris(CelestialBody.EARTH, datetime(2003, 8, 27, 12, 0, 0)))
+    print(InterplanetaryTrajectories.ephemeris(CelestialBody.MARS, datetime(2003, 8, 27, 12, 0, 0)))
     print('-' * 40, '\n')
     
     print('EXAMPLE 8.8 - 8.9 - 8.10\n')
-    print(InterplanetaryTrajectories.OptimalTransfer(CelestialBody.EARTH, CelestialBody.MARS, datetime(1996, 11, 7, 0, 0, 0), datetime(1997, 9, 12, 0, 0, 0), 6378 + 180, 3380 + 300, 48 * 3600, 2000))
+    print(InterplanetaryTrajectories.optimal_transfer(CelestialBody.EARTH, CelestialBody.MARS, datetime(1996, 11, 7, 0, 0, 0), datetime(1997, 9, 12, 0, 0, 0), 6378 + 180, 3380 + 300, 48 * 3600, 2000))
     print('-' * 40, '\n')
-    print(InterplanetaryTrajectories.OptimalTransfer(CelestialBody.EARTH, CelestialBody.MARS, datetime(1996, 11, 7, 0, 0, 0), datetime(1997, 9, 12, 0, 0, 0), 6378 + 180, 3380 + 300, 48 * 3600, 2000, gravityAssist=True))
+    print(InterplanetaryTrajectories.optimal_transfer(CelestialBody.EARTH, CelestialBody.MARS, datetime(1996, 11, 7, 0, 0, 0), datetime(1997, 9, 12, 0, 0, 0), 6378 + 180, 3380 + 300, 48 * 3600, 2000, gravityAssist=True))
     print('-' * 40, '\n')
     
     print('Progetto')
-    print(InterplanetaryTrajectories.OptimalTransfer(CelestialBody.EARTH, CelestialBody.NEPTUNE, datetime(2020, 5, 8, 0, 0, 0), datetime(2039, 2, 15, 0, 0, 0), 6378 + 180, AstronomicalData.EquatiorialRadius(CelestialBody.NEPTUNE) + 300, 48 * 3600, 2000))
-    print(InterplanetaryTrajectories.Departure(CelestialBody.EARTH, CelestialBody.NEPTUNE, 6378 + 180, 2000))
-    print(InterplanetaryTrajectories.Rendezvous(CelestialBody.EARTH, CelestialBody.NEPTUNE, AstronomicalData.EquatiorialRadius(CelestialBody.NEPTUNE) + 300, 48 * 3600, 2000))
+    print(InterplanetaryTrajectories.optimal_transfer(CelestialBody.EARTH, CelestialBody.NEPTUNE, datetime(2020, 5, 8, 0, 0, 0), datetime(2039, 2, 15, 0, 0, 0), 6378 + 180, AstronomicalData.equatiorial_radius(CelestialBody.NEPTUNE) + 300, 48 * 3600, 2000))
+    print(InterplanetaryTrajectories.departure(CelestialBody.EARTH, CelestialBody.NEPTUNE, 6378 + 180, 2000))
+    print(InterplanetaryTrajectories.rendezvous(CelestialBody.EARTH, CelestialBody.NEPTUNE, AstronomicalData.equatiorial_radius(CelestialBody.NEPTUNE) + 300, 48 * 3600, 2000))
     print('-' * 40, '\n')
     
     print('Pork Chop Plot')
-    InterplanetaryTrajectories.PorkChop(CelestialBody.EARTH,
+    InterplanetaryTrajectories.pork_chop(CelestialBody.EARTH,
                                         CelestialBody.NEPTUNE,
                                         [datetime(2020, 1, 1, 0, 0, 0), datetime(2021, 1, 1, 0, 0, 0)],
                                         [datetime(2031, 1, 1, 0, 0, 0), datetime(2050, 6, 1, 0, 0, 0)],

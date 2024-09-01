@@ -21,6 +21,13 @@ ApplicationWindow
     width: 1200
     height: 700
 
+    Component.onCompleted:
+    {
+        console.log("Info")
+        console.warn("Warning")
+        console.error("Error")
+    }
+
     // ? Dialogs
 
     DialogAbout { id: _dlgAbout_ }
@@ -63,7 +70,7 @@ ApplicationWindow
             Action
             {
                 text: "Spacecraft Properties"
-                onTriggered: { /*__MissionParameters.loadSpacecraftProperties();*/ _dlgSpacecraft_.open() }
+                onTriggered: _dlgSpacecraft_.open()
             }
 
             Menu

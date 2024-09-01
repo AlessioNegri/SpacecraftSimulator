@@ -1,12 +1,22 @@
+""" AstronomicalData.py: Implements the main astronomical data """
+
+__author__      = "Alessio Negri"
+__license__     = "LGPL v3"
+__maintainer__  = "Alessio Negri"
+__book__        = "Orbital Mechanics for Engineering Students"
+
 import os
 import sys
 import numpy as np
 
-sys.path.append(os.path.dirname(__file__))
-
 from enum import IntEnum
 
+sys.path.append(os.path.dirname(__file__))
+
+# --- ENUMS 
+
 class CelestialBody(IntEnum):
+    """List of celestial bodies"""
     
     SUN     = 0
     MERCURY = 1
@@ -21,6 +31,7 @@ class CelestialBody(IntEnum):
     PLUTO   = 10
 
 class Planet(IntEnum):
+    """List of planets"""
     
     MERCURY = 0
     VENUS   = 1
@@ -31,8 +42,10 @@ class Planet(IntEnum):
     URANUS  = 6
     NEPTUNE = 7
     PLUTO   = 8
-    
-def celestialBodyFromPlanet(planet : Planet) -> CelestialBody:
+
+# --- CONVERTERS 
+
+def celestial_body_from_planet(planet : Planet) -> CelestialBody:
     """Converts the Planet enum to the CelestialBody enum
 
     Args:
@@ -55,8 +68,7 @@ def celestialBodyFromPlanet(planet : Planet) -> CelestialBody:
         case Planet.PLUTO:      return CelestialBody.PLUTO
         case _:                 return CelestialBody.EARTH
 
-    
-def celestialBodyFromIndex(index : int) -> CelestialBody:
+def celestial_body_from_index(index : int) -> CelestialBody:
     """Converts the index to the CelestialBody enum
 
     Args:
@@ -81,7 +93,7 @@ def celestialBodyFromIndex(index : int) -> CelestialBody:
         case 10: return CelestialBody.PLUTO
         case _:  return CelestialBody.EARTH
         
-def indexFromCelestialBody(celestialBody : CelestialBody) -> int:
+def index_from_celestial_body(celestialBody : CelestialBody) -> int:
     """Converts the CelestialBody enum to the index
 
     Args:
@@ -106,7 +118,7 @@ def indexFromCelestialBody(celestialBody : CelestialBody) -> int:
         case CelestialBody.PLUTO:   return 10
         case _:                     return 3
 
-def planetFromIndex(index : int) -> Planet:
+def planet_from_index(index : int) -> Planet:
     """Converts the index to the Planet enum
 
     Args:
@@ -129,7 +141,7 @@ def planetFromIndex(index : int) -> Planet:
         case 8: return Planet.PLUTO
         case _: return Planet.EARTH
         
-def indexFromPlanet(planet : Planet) -> int:
+def index_from_planet(planet : Planet) -> int:
     """Converts the Planet enum to the index
 
     Args:
@@ -152,23 +164,23 @@ def indexFromPlanet(planet : Planet) -> int:
         case Planet.PLUTO:   return 8
         case _:              return 2
 
+# --- CLASS 
 
 class AstronomicalData():
+    """Gives access to different methods for extrapolating data of celestial bodies"""
     
-    G = 6.6743015e-20 # ? Universal Gravitational Constant [km^3 / kg s^2]
+    # --- CONSTANTS 
     
-    AU = 149_597_870.707 # ? Astronimical Unit [km]
+    G   = 6.674_301_5e-20       # * Universal Gravitational Constant                    [ km^3 s^2 / kg ]
+    AU  = 149_597_870.707       # * Astronimical Unit                                   [ km ]
+    c   = 299_792_458           # * Speed of Light                                      [ m / s ]
+    S_0 = 5.670e-8 * 5_777**4   # * Radiated power intensity from the Sun photosphere   [ W / m^2 ]
+    R_0 = 696_000               # * Photosphere radius                                  [ km ]
     
-    c = 299_792_458 # ? Speed of Light [m / s]
-    
-    S_0 = 5.670e-8 * 5777**4 # ? Radiated power intensity from the Sun photosphere [W / m**2]
-    
-    R_0 = 696000 # ? Photosphere radius [km]
-    
-    def __init__(self) -> None: pass
+    # --- METHODS 
     
     @classmethod
-    def EquatiorialRadius(cls, celestialBody : CelestialBody) -> float:
+    def equatiorial_radius(cls, celestialBody : CelestialBody) -> float:
         """Equatorial Radius
 
         Args:
@@ -194,7 +206,7 @@ class AstronomicalData():
             case _:                     return 0
     
     @classmethod
-    def Flattening(cls, celestialBody : CelestialBody) -> float:
+    def flattening(cls, celestialBody : CelestialBody) -> float:
         """Flattening
 
         Args:
@@ -220,7 +232,7 @@ class AstronomicalData():
             case _:                     return 0
     
     @classmethod
-    def SecondZonalHarmonics(cls, celestialBody : CelestialBody) -> float:
+    def second_zonal_harmonics(cls, celestialBody : CelestialBody) -> float:
         """Second Zonal Harmonics
 
         Args:
@@ -246,7 +258,7 @@ class AstronomicalData():
             case _:                     return 0
     
     @classmethod
-    def SiderealOrbitalPeriod(cls, celestialBody : CelestialBody) -> float:
+    def sidereal_orbital_period(cls, celestialBody : CelestialBody) -> float:
         """Sidereal Orbital Period
 
         Args:
@@ -272,7 +284,7 @@ class AstronomicalData():
             case _:                     return 0
             
     @classmethod
-    def AngularVelocity(cls, celestialBody : CelestialBody) -> float:
+    def angular_velocity(cls, celestialBody : CelestialBody) -> float:
         """Angular Velocity
 
         Args:
@@ -285,20 +297,20 @@ class AstronomicalData():
         match (celestialBody):
             
             case CelestialBody.SUN:     return 0
-            case CelestialBody.MERCURY: return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody)
-            case CelestialBody.VENUS:   return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody)
-            case CelestialBody.EARTH:   return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody)
-            case CelestialBody.MOON:    return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody)
-            case CelestialBody.MARS:    return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody)
-            case CelestialBody.JUPITER: return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody)
-            case CelestialBody.SATURN:  return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody)
-            case CelestialBody.URANUS:  return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody)
-            case CelestialBody.NEPTUNE: return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody)
-            case CelestialBody.PLUTO:   return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody)
+            case CelestialBody.MERCURY: return 2 * np.pi / cls.sidereal_orbital_period(celestialBody)
+            case CelestialBody.VENUS:   return 2 * np.pi / cls.sidereal_orbital_period(celestialBody)
+            case CelestialBody.EARTH:   return 2 * np.pi / cls.sidereal_orbital_period(celestialBody)
+            case CelestialBody.MOON:    return 2 * np.pi / cls.sidereal_orbital_period(celestialBody)
+            case CelestialBody.MARS:    return 2 * np.pi / cls.sidereal_orbital_period(celestialBody)
+            case CelestialBody.JUPITER: return 2 * np.pi / cls.sidereal_orbital_period(celestialBody)
+            case CelestialBody.SATURN:  return 2 * np.pi / cls.sidereal_orbital_period(celestialBody)
+            case CelestialBody.URANUS:  return 2 * np.pi / cls.sidereal_orbital_period(celestialBody)
+            case CelestialBody.NEPTUNE: return 2 * np.pi / cls.sidereal_orbital_period(celestialBody)
+            case CelestialBody.PLUTO:   return 2 * np.pi / cls.sidereal_orbital_period(celestialBody)
             case _:                     return 0
     
     @classmethod
-    def GroundTrackAngularVelocity(cls, celestialBody : CelestialBody) -> float:
+    def ground_track_angular_velocity(cls, celestialBody : CelestialBody) -> float:
         """Ground Track Angular Velocity
 
         Args:
@@ -311,20 +323,20 @@ class AstronomicalData():
         match (celestialBody):
             
             case CelestialBody.SUN:     return 0
-            case CelestialBody.MERCURY: return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody) + 2 * np.pi / 86400
-            case CelestialBody.VENUS:   return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody) + 2 * np.pi / 86400
-            case CelestialBody.EARTH:   return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody) + 2 * np.pi / 86400
-            case CelestialBody.MOON:    return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody) + 2 * np.pi / 86400
-            case CelestialBody.MARS:    return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody) + 2 * np.pi / 86400
-            case CelestialBody.JUPITER: return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody) + 2 * np.pi / 86400
-            case CelestialBody.SATURN:  return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody) + 2 * np.pi / 86400
-            case CelestialBody.URANUS:  return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody) + 2 * np.pi / 86400
-            case CelestialBody.NEPTUNE: return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody) + 2 * np.pi / 86400
-            case CelestialBody.PLUTO:   return 2 * np.pi / cls.SiderealOrbitalPeriod(celestialBody) + 2 * np.pi / 86400
+            case CelestialBody.MERCURY: return 2 * np.pi / cls.sidereal_orbital_period(celestialBody) + 2 * np.pi / 86400
+            case CelestialBody.VENUS:   return 2 * np.pi / cls.sidereal_orbital_period(celestialBody) + 2 * np.pi / 86400
+            case CelestialBody.EARTH:   return 2 * np.pi / cls.sidereal_orbital_period(celestialBody) + 2 * np.pi / 86400
+            case CelestialBody.MOON:    return 2 * np.pi / cls.sidereal_orbital_period(celestialBody) + 2 * np.pi / 86400
+            case CelestialBody.MARS:    return 2 * np.pi / cls.sidereal_orbital_period(celestialBody) + 2 * np.pi / 86400
+            case CelestialBody.JUPITER: return 2 * np.pi / cls.sidereal_orbital_period(celestialBody) + 2 * np.pi / 86400
+            case CelestialBody.SATURN:  return 2 * np.pi / cls.sidereal_orbital_period(celestialBody) + 2 * np.pi / 86400
+            case CelestialBody.URANUS:  return 2 * np.pi / cls.sidereal_orbital_period(celestialBody) + 2 * np.pi / 86400
+            case CelestialBody.NEPTUNE: return 2 * np.pi / cls.sidereal_orbital_period(celestialBody) + 2 * np.pi / 86400
+            case CelestialBody.PLUTO:   return 2 * np.pi / cls.sidereal_orbital_period(celestialBody) + 2 * np.pi / 86400
             case _:                     return 0
     
     @classmethod
-    def Mass(cls, celestialBody : CelestialBody) -> float:
+    def mass(cls, celestialBody : CelestialBody) -> float:
         """Mass
 
         Args:
@@ -350,7 +362,7 @@ class AstronomicalData():
             case _:                     return 0
     
     @classmethod
-    def Gravity(cls, celestialBody : CelestialBody, km : bool = False) -> float:
+    def gravity(cls, celestialBody : CelestialBody, km : bool = False) -> float:
         """Gravity
 
         Args:
@@ -379,7 +391,7 @@ class AstronomicalData():
             case _:                     return 0 * conversion
     
     @classmethod
-    def SphereOfInfluence(cls, celestialBody : CelestialBody) -> float:
+    def sphere_of_influence(cls, celestialBody : CelestialBody) -> float:
         """Sphere Of Influence
 
         Args:
@@ -392,20 +404,20 @@ class AstronomicalData():
         match (celestialBody):
             
             case CelestialBody.SUN:     return 0
-            case CelestialBody.MERCURY: return cls.SemiMajorAxis(celestialBody) * (cls.Mass(celestialBody) / cls.Mass(CelestialBody.SUN))**(2/5)
-            case CelestialBody.VENUS:   return cls.SemiMajorAxis(celestialBody) * (cls.Mass(celestialBody) / cls.Mass(CelestialBody.SUN))**(2/5)
-            case CelestialBody.EARTH:   return cls.SemiMajorAxis(celestialBody) * (cls.Mass(celestialBody) / cls.Mass(CelestialBody.SUN))**(2/5)
-            case CelestialBody.MOON:    return cls.SemiMajorAxis(celestialBody) * (cls.Mass(celestialBody) / cls.Mass(CelestialBody.EARTH))**(2/5)
-            case CelestialBody.MARS:    return cls.SemiMajorAxis(celestialBody) * (cls.Mass(celestialBody) / cls.Mass(CelestialBody.SUN))**(2/5)
-            case CelestialBody.JUPITER: return cls.SemiMajorAxis(celestialBody) * (cls.Mass(celestialBody) / cls.Mass(CelestialBody.SUN))**(2/5)
-            case CelestialBody.SATURN:  return cls.SemiMajorAxis(celestialBody) * (cls.Mass(celestialBody) / cls.Mass(CelestialBody.SUN))**(2/5)
-            case CelestialBody.URANUS:  return cls.SemiMajorAxis(celestialBody) * (cls.Mass(celestialBody) / cls.Mass(CelestialBody.SUN))**(2/5)
-            case CelestialBody.NEPTUNE: return cls.SemiMajorAxis(celestialBody) * (cls.Mass(celestialBody) / cls.Mass(CelestialBody.SUN))**(2/5)
-            case CelestialBody.PLUTO:   return cls.SemiMajorAxis(celestialBody) * (cls.Mass(celestialBody) / cls.Mass(CelestialBody.SUN))**(2/5)
+            case CelestialBody.MERCURY: return cls.semi_major_axis(celestialBody) * (cls.mass(celestialBody) / cls.mass(CelestialBody.SUN))**(2/5)
+            case CelestialBody.VENUS:   return cls.semi_major_axis(celestialBody) * (cls.mass(celestialBody) / cls.mass(CelestialBody.SUN))**(2/5)
+            case CelestialBody.EARTH:   return cls.semi_major_axis(celestialBody) * (cls.mass(celestialBody) / cls.mass(CelestialBody.SUN))**(2/5)
+            case CelestialBody.MOON:    return cls.semi_major_axis(celestialBody) * (cls.mass(celestialBody) / cls.mass(CelestialBody.EARTH))**(2/5)
+            case CelestialBody.MARS:    return cls.semi_major_axis(celestialBody) * (cls.mass(celestialBody) / cls.mass(CelestialBody.SUN))**(2/5)
+            case CelestialBody.JUPITER: return cls.semi_major_axis(celestialBody) * (cls.mass(celestialBody) / cls.mass(CelestialBody.SUN))**(2/5)
+            case CelestialBody.SATURN:  return cls.semi_major_axis(celestialBody) * (cls.mass(celestialBody) / cls.mass(CelestialBody.SUN))**(2/5)
+            case CelestialBody.URANUS:  return cls.semi_major_axis(celestialBody) * (cls.mass(celestialBody) / cls.mass(CelestialBody.SUN))**(2/5)
+            case CelestialBody.NEPTUNE: return cls.semi_major_axis(celestialBody) * (cls.mass(celestialBody) / cls.mass(CelestialBody.SUN))**(2/5)
+            case CelestialBody.PLUTO:   return cls.semi_major_axis(celestialBody) * (cls.mass(celestialBody) / cls.mass(CelestialBody.SUN))**(2/5)
             case _:                     return 0
     
     @classmethod
-    def SemiMajorAxis(cls, celestialBody : CelestialBody) -> float:
+    def semi_major_axis(cls, celestialBody : CelestialBody) -> float:
         """Semi-major axis
 
         Args:
@@ -431,7 +443,7 @@ class AstronomicalData():
             case _:                     return 0
     
     @classmethod
-    def Eccentricity(cls, celestialBody : CelestialBody) -> float:
+    def eccentricity(cls, celestialBody : CelestialBody) -> float:
         """Eccentricity
 
         Args:
@@ -457,7 +469,7 @@ class AstronomicalData():
             case _:                     return 0
     
     @classmethod
-    def Inclination(cls, celestialBody : CelestialBody) -> float:
+    def inclination(cls, celestialBody : CelestialBody) -> float:
         """Inclination
 
         Args:
@@ -483,7 +495,7 @@ class AstronomicalData():
             case _:                     return 0
     
     @classmethod
-    def RightAscensionAscendingNode(cls, celestialBody : CelestialBody) -> float:
+    def right_ascension_of_ascending_node(cls, celestialBody : CelestialBody) -> float:
         """Right Ascension of the Ascending Node
 
         Args:
@@ -509,7 +521,7 @@ class AstronomicalData():
             case _:                     return 0
     
     @classmethod
-    def ArgumentPerihelion(cls, celestialBody : CelestialBody) -> float:
+    def argument_perihelion(cls, celestialBody : CelestialBody) -> float:
         """Argument of Perihelion
 
         Args:
@@ -535,7 +547,7 @@ class AstronomicalData():
             case _:                     return 0
     
     @classmethod
-    def GravitationalParameter(cls, celestialBody : CelestialBody) -> float:
+    def gravitational_parameter(cls, celestialBody : CelestialBody) -> float:
         """Gravitational Parameter
 
         Args:
@@ -561,7 +573,7 @@ class AstronomicalData():
             case _:                     return 0
 
     @classmethod
-    def Texture(cls, celestialBody : CelestialBody) -> str:
+    def texture(cls, celestialBody : CelestialBody) -> str:
         """Texture
 
         Args:
@@ -587,7 +599,7 @@ class AstronomicalData():
             case _:                     return './tools/texture/Earth.jpg'
     
     @classmethod
-    def PlanetaryOrbitalElementsAndRates(cls, celestialBody : CelestialBody) -> list:
+    def planetary_orbital_elements_and_rates(cls, celestialBody : CelestialBody) -> list:
         """Planetary Orbital Elements & Rates
 
         Args:
@@ -791,6 +803,6 @@ class AstronomicalData():
 
 if __name__ == '__main__':
     
-    print(AstronomicalData.GravitationalParameter(CelestialBody.EARTH))
-    print(AstronomicalData.AngularVelocity(CelestialBody.EARTH))
-    print(AstronomicalData.GroundTrackAngularVelocity(CelestialBody.EARTH))
+    print(AstronomicalData.gravitational_parameter(CelestialBody.EARTH))
+    print(AstronomicalData.angular_velocity(CelestialBody.EARTH))
+    print(AstronomicalData.ground_track_angular_velocity(CelestialBody.EARTH))

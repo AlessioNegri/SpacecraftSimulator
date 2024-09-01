@@ -1,55 +1,72 @@
+""" ThreeDimensionalOrbit.py: Implements the algorithms to represent an orbit in 3D """
+
+__author__      = "Alessio Negri"
+__license__     = "LGPL v3"
+__maintainer__  = "Alessio Negri"
+__book__        = "Orbital Mechanics for Engineering Students"
+__chapter__     = "4 - Orbits in Three Dimensions"
+
 import os
 import sys
+import numpy as np
+import matplotlib.pyplot as plt
+
+from dataclasses import dataclass
+from PIL import Image
 
 sys.path.append(os.path.dirname(__file__))
-    
-from TwoBodyProblem import *
-from Time import *
+
+from Common import wrap_to_2pi
+from AstronomicalData import AstronomicalData, CelestialBody
+from TwoBodyProblem import TwoBodyProblem
+from Time import Time, DirectionType
+
+# --- STRUCT 
 
 @dataclass
-class ORBITAL_ELEMENTS:
-    h       : float = 0.0   # ? Specific Angular Momentum [km^2 / s]
-    e       : float = 0.0   # ? Eccentricity []
-    i       : float = 0.0   # ? Inclination [rad]
-    Omega   : float = 0.0   # ? Right Ascension of the Ascending Node (RAAN) [rad]
-    omega   : float = 0.0   # ? Argument of the Perigee [rad]
-    theta   : float = 0.0   # ? True Anomaly [rad]
-    a       : float = 0.0   # ? Semi-Major Axis [km]
+class OrbitalElements:
+    """Orbital elements parameters"""
+    
+    h       : float = 0.0   # * Specific Angular Momentum                       [ km^2 / s ]
+    e       : float = 0.0   # * Eccentricity                                    [ ]
+    i       : float = 0.0   # * Inclination                                     [ rad ]
+    Omega   : float = 0.0   # * Right Ascension of the Ascending Node (RAAN)    [ rad ]
+    omega   : float = 0.0   # * Argument of the Perigee                         [ rad ]
+    theta   : float = 0.0   # * True Anomaly                                    [ rad ]
+    a       : float = 0.0   # * Semi-Major Axis                                 [ km ]
 
-# ! CHAPTER 4 - Orbits in Three Dimensions
+# --- CLASS 
+
 class ThreeDimensionalOrbit():
+    """Manages the conversions among different orbit representations"""
     
-    mu = AstronomicalData.GravitationalParameter(CelestialBody.EARTH)
+    # --- ASTRONOMICAL CONSTANTS 
     
-    J_2 = AstronomicalData.SecondZonalHarmonics(CelestialBody.EARTH)
+    mu      = AstronomicalData.gravitational_parameter(CelestialBody.EARTH)
+    J_2     = AstronomicalData.second_zonal_harmonics(CelestialBody.EARTH)
+    R_E     = AstronomicalData.equatiorial_radius(CelestialBody.EARTH)
+    omega   = AstronomicalData.ground_track_angular_velocity(CelestialBody.EARTH)
     
-    R_E = AstronomicalData.EquatiorialRadius(CelestialBody.EARTH)
-    
-    omega = AstronomicalData.GroundTrackAngularVelocity(CelestialBody.EARTH)
-    
-    def __init__(self) -> None: pass
+    # --- METHODS 
     
     @classmethod
-    def setCelestialBody(cls, celestialBody : CelestialBody) -> None:
+    def set_celestial_body(cls, celestialBody : CelestialBody) -> None:
         """Sets the current celectial body
 
         Args:
             celestialBody (CelestialBody): Celestial body
         """
         
-        cls.mu = AstronomicalData.GravitationalParameter(celestialBody)
-    
-        cls.J_2 = AstronomicalData.SecondZonalHarmonics(celestialBody)
-        
-        cls.R_E = AstronomicalData.EquatiorialRadius(celestialBody)
-        
-        cls.omega = AstronomicalData.GroundTrackAngularVelocity(celestialBody)
+        cls.mu      = AstronomicalData.gravitational_parameter(celestialBody)
+        cls.J_2     = AstronomicalData.second_zonal_harmonics(celestialBody)
+        cls.R_E     = AstronomicalData.equatiorial_radius(celestialBody)
+        cls.omega   = AstronomicalData.ground_track_angular_velocity(celestialBody)
     
     # ! SECTION 4.3
     
     # ! ALGORITHM 4.1
     @classmethod
-    def calculateRaDec(cls, r : np.ndarray) -> list:
+    def calculate_ra_dec(cls, r : np.ndarray) -> list:
         """Calculates the Right Ascension and Declination
 
         Args:
@@ -59,21 +76,21 @@ class ThreeDimensionalOrbit():
             list: [alpha, delta]
         """
         
-        # * 1. Magnitude
+        # >>> 1. Magnitude
         
-        r_m = linalg.norm(r)
+        r_m = np.linalg.norm(r)
         
-        # * 2. Direction cosines
+        # >>> 2. Direction cosines
         
         l = r[0] / r_m
         m = r[1] / r_m
         n = r[2] / r_m
         
-        # * 3. Declination
+        # >>> 3. Declination
         
         delta = np.arcsin(n)
         
-        # * 4. Right Ascension
+        # >>> 4. Right Ascension
         
         alpha = np.arccos(l / np.cos(delta)) if m > 0 else (2 * np.pi - np.arccos(l / np.cos(delta)))
         
@@ -83,7 +100,7 @@ class ThreeDimensionalOrbit():
     
     # ! ALGORITHM 4.2
     @classmethod
-    def calculateOrbitalElements(cls, r : np.ndarray, v : np.ndarray, deg : bool = False) -> ORBITAL_ELEMENTS:
+    def calculate_orbital_elements(cls, r : np.ndarray, v : np.ndarray, deg : bool = False) -> OrbitalElements:
         """Calculates the Orbital Elements from position and velocity vectors in Geocentric Equatorial Frame
 
         Args:
@@ -95,35 +112,35 @@ class ThreeDimensionalOrbit():
             ORBITAL_ELEMENTS: Orbital Elements
         """
         
-        oe = ORBITAL_ELEMENTS()
+        oe = OrbitalElements()
         
-        # * 1. Magnitudes
+        # >>> 1. Magnitudes
         
-        r_m = linalg.norm(r)
+        r_m = np.linalg.norm(r)
         
-        # * 2.
+        # >>> 2.
         
-        v_m = linalg.norm(v)
+        v_m = np.linalg.norm(v)
         
-        # * 3.
+        # >>> 3.
         
         v_r = np.dot(r, v) / r_m
         
-        # * 4. Angular momentum
+        # >>> 4. Angular momentum
         
         h = np.cross(r, v)
         
-        # * 5. Semi-major axis
+        # >>> 5. Semi-major axis
         
-        oe.h = linalg.norm(h)
+        oe.h = np.linalg.norm(h)
         
         oe.a = - 0.5 * cls.mu / (0.5 * v_m**2 - cls.mu / r_m)
         
-        # * 6. Inclination
+        # >>> 6. Inclination
         
         oe.i = np.arccos(h[2] / oe.h)
         
-        # * 7. Line of nodes
+        # >>> 7. Line of nodes
         
         N = np.array([1, 0, 0])
         
@@ -147,28 +164,28 @@ class ThreeDimensionalOrbit():
             
                 N = np.array([1, 0, 0])
         
-        #* 8.
+        # >>> 8.
         
-        N_m = linalg.norm(N)
+        N_m = np.linalg.norm(N)
         
-        # * 9. Right Ascension of the ascending node
+        # >>> 9. Right Ascension of the ascending node
         
         oe.Omega = np.arccos(N[0] / N_m) if N[1] >= 0 else (2 * np.pi - np.arccos(N[0] / N_m))
         
-        # * 10. Eccentricity
+        # >>> 10. Eccentricity
         
         e = 1 / cls.mu * (np.cross(v, h) - cls.mu * r / r_m)
         e = 1 / cls.mu * ((v_m**2 - cls.mu / r_m) * r - r_m * v_r * v)
         
-        # * 11.
+        # >>> 11.
         
-        oe.e = linalg.norm(e)
+        oe.e = np.linalg.norm(e)
         
-        # * 12. Anomaly of the perigee
+        # >>> 12. Anomaly of the perigee
         
         oe.omega = np.arccos(np.dot(N, e) / (N_m * oe.e)) if e[2] >= 0 else (2 * np.pi - np.arccos(np.dot(N, e) / (N_m * oe.e)))
         
-        # * 13. True anomaly
+        # >>> 13. True anomaly
         
         oe.theta = np.arccos(np.dot(e, r) / (oe.e * r_m)) if v_r >= 0 else (2 * np.pi - np.arccos(np.dot(e, r) / (oe.e * r_m)))
         
@@ -184,7 +201,7 @@ class ThreeDimensionalOrbit():
     # ! SECTION 4.6
     
     @classmethod
-    def GEF2PF(cls, r : np.ndarray, v : np.ndarray) -> list:
+    def gef_2_pf(cls, r : np.ndarray, v : np.ndarray) -> list:
         """Geocentric Equatiorial Frame --> Perifocal Frame
 
         Args:
@@ -195,11 +212,11 @@ class ThreeDimensionalOrbit():
             list: [r_PF, v_PF]
         """
         
-        # * 1.
+        # >>> 1.
         
-        oe = cls.calculateOrbitalElements(r, v)
+        oe = cls.calculate_orbital_elements(r, v)
         
-        # * 2.
+        # >>> 2.
         
         R_3_O = np.array(
             [
@@ -224,13 +241,13 @@ class ThreeDimensionalOrbit():
         
         R = np.matmul(R_3_o, np.matmul(R_1_i, R_3_O))
         
-        # * 3.
+        # >>> 3.
         
         return [np.matmul(R, r), np.matmul(R, v)]
     
     # ! ALGORITHM 4.5
     @classmethod
-    def PF2GEF(cls, oe : ORBITAL_ELEMENTS) -> list :
+    def pf_2_gef(cls, oe : OrbitalElements) -> list :
         """Perifocal Frame --> Geocentric Equatiorial Frame
 
         Args:
@@ -242,15 +259,15 @@ class ThreeDimensionalOrbit():
         
         p = (oe.a * (1 - oe.e**2)) if oe.h == 0 else (oe.h**2 / cls.mu)
         
-        # * 1.
+        # >>> 1.
         
         r = p / (1 + oe.e * np.cos(oe.theta)) * np.array([np.cos(oe.theta), np.sin(oe.theta), 0])
         
-        # * 2.
+        # >>> 2.
         
         v = np.sqrt(cls.mu / p) * np.array([-np.sin(oe.theta), oe.e + np.cos(oe.theta), 0])
         
-        # * 3.
+        # >>> 3.
         
         R_3_O = np.array(
             [
@@ -275,14 +292,14 @@ class ThreeDimensionalOrbit():
         
         R = np.matmul(R_3_o, np.matmul(R_1_i, R_3_O))
         
-        # * 4.
+        # >>> 4.
         
         return [np.matmul(R.T, r), np.matmul(R.T, v)]
 
     # ! SECTION 4.7
 
     @classmethod
-    def calculatePlanetOblatenessEffect(cls, oe : ORBITAL_ELEMENTS) -> list:
+    def calculate_planet_oblateness_effect(cls, oe : OrbitalElements) -> list:
         """Calculates the planet oblateness effect
         
         Args:
@@ -292,11 +309,11 @@ class ThreeDimensionalOrbit():
             list: [dOmega_dt, domega_dt]
         """
         
-        # * Right Ascension of the ascending node variation
+        # >>> Right Ascension of the ascending node variation
         
         dOmega_dt = - 3/2 * (np.sqrt(cls.mu) * cls.J_2 * cls.R_E**2) / ((1 - oe.e**2)**2 * oe.a**(7/2)) * np.cos(oe.i)
         
-        # * Anomaly of the perigee variation
+        # >>> Anomaly of the perigee variation
         
         domega_dt = - 3/2 * (np.sqrt(cls.mu) * cls.J_2 * cls.R_E**2) / ((1 - oe.e**2)**2 * oe.a**(7/2)) * (5/2 * np.sin(oe.i)**2 - 2)
         
@@ -306,7 +323,7 @@ class ThreeDimensionalOrbit():
     
     # ! ALGORITHM 4.6
     @classmethod
-    def calculateGroundTrack(cls, oe : ORBITAL_ELEMENTS, dt : float, show : bool = False, m : float = 1) -> list:
+    def calculate_ground_track(cls, oe : OrbitalElements, dt : float, show : bool = False, m : float = 1) -> list:
         """Calculates the Ground Track for the given time step
 
         Args:
@@ -321,15 +338,15 @@ class ThreeDimensionalOrbit():
         
         if oe.e >= 1.0: return [[], []]
         
-        # * 1. Oblateness
+        # >>> 1. Oblateness
         
-        dOmega_dt, domega_dt = cls.calculatePlanetOblatenessEffect(oe)
+        dOmega_dt, domega_dt = cls.calculate_planet_oblateness_effect(oe)
         
-        # * 2. Initial condition
+        # >>> 2. Initial condition
         
-        X = cls.PF2GEF(oe)
+        X = cls.pf_2_gef(oe)
         
-        parameters = TwoBodyProblem.calculateOrbitalParameters(X[0], X[1])
+        parameters = TwoBodyProblem.calculate_orbital_parameters(X[0], X[1])
         
         t_0 = 0.0
         
@@ -337,12 +354,12 @@ class ThreeDimensionalOrbit():
         
         Time.mu = cls.mu
         
-        if      oe.e == 0:      t_0 = Time.calculateCircularOrbit(dirType, T=parameters.T, theta=oe.theta)
-        elif    oe.e < 1.0:     t_0 = Time.calculateEllipticalOrbit(dirType, T=parameters.T, e=parameters.e, theta=oe.theta)
-        elif    oe.e == 1.0:    t_0 = Time.calculateParabolicOrbit(dirType, h=parameters.h, theta=oe.theta)
-        else:                   t_0 = Time.calculateHyperbolicOrbit(dirType, h=parameters.h, e=parameters.e, theta=oe.theta)
+        if      oe.e == 0:      t_0 = Time.calculate_circular_orbit(dirType, T=parameters.T, theta=oe.theta)
+        elif    oe.e < 1.0:     t_0 = Time.calculate_elliptical_orbit(dirType, T=parameters.T, e=parameters.e, theta=oe.theta)
+        elif    oe.e == 1.0:    t_0 = Time.calculate_parabolic_orbit(dirType, h=parameters.h, theta=oe.theta)
+        else:                   t_0 = Time.calculate_hyperbolic_orbit(dirType, h=parameters.h, e=parameters.e, theta=oe.theta)
         
-        # * 3. Cycle
+        # >>> 3. Cycle
         
         ra = []
         
@@ -352,28 +369,28 @@ class ThreeDimensionalOrbit():
         
         for t in np.arange(t_0, m * parameters.T + dt, dt):
             
-            # * a) True anomaly
+            # >>> a) True anomaly
             
             theta = 0.0
             
-            if      oe.e == 0:      theta = Time.calculateCircularOrbit(dirType, T=parameters.T, t=t)
-            elif    oe.e < 1.0:     theta = Time.calculateEllipticalOrbit(dirType, T=parameters.T, e=parameters.e, t=t)
-            elif    oe.e == 1.0:    theta = Time.calculateParabolicOrbit(dirType, h=parameters.h, t=t)
-            else:                   theta = Time.calculateHyperbolicOrbit(dirType, h=parameters.h, e=parameters.e, t=t)
+            if      oe.e == 0:      theta = Time.calculate_circular_orbit(dirType, T=parameters.T, t=t)
+            elif    oe.e < 1.0:     theta = Time.calculate_elliptical_orbit(dirType, T=parameters.T, e=parameters.e, t=t)
+            elif    oe.e == 1.0:    theta = Time.calculate_parabolic_orbit(dirType, h=parameters.h, t=t)
+            else:                   theta = Time.calculate_hyperbolic_orbit(dirType, h=parameters.h, e=parameters.e, t=t)
             
-            # * b) New Orbital Elements
+            # >>> b) New Orbital Elements
             
             oe.Omega = oe.Omega + dOmega_dt * dt
             oe.omega = oe.omega + domega_dt * dt
             oe.theta = theta
             
-            # * c) New state
+            # >>> c) New state
             
-            X = cls.PF2GEF(oe)
+            X = cls.pf_2_gef(oe)
             
-            # * d) New position
+            # >>> d) New position
             
-            theta = wrapTo2Pi(cls.omega * (t - t_0))
+            theta = wrap_to_2pi(cls.omega * (t - t_0))
             
             R_3_t = np.array(
                 [
@@ -382,14 +399,14 @@ class ThreeDimensionalOrbit():
                     [0               , 0              , 1]
                 ])
             
-            # * e) Right Ascension and Declination
+            # >>> e) Right Ascension and Declination
             
-            ra_i, dec_i = cls.calculateRaDec(np.matmul(R_3_t, X[0]))
+            ra_i, dec_i = cls.calculate_ra_dec(np.matmul(R_3_t, X[0]))
             
             ra.append(np.rad2deg(ra_i))
             dec.append(np.rad2deg(dec_i))
         
-        # * Plot
+        # >>> Plot
         
         if show:
             
@@ -416,22 +433,22 @@ if __name__ == '__main__':
     print(2 * np.pi / (365.256363004 * 86400))
     
     print('EXAMPLE 4.1\n')
-    print(np.rad2deg(ThreeDimensionalOrbit.calculateRaDec(np.array([-5368, -1784, 3691]))))
+    print(np.rad2deg(ThreeDimensionalOrbit.calculate_ra_dec(np.array([-5368, -1784, 3691]))))
     print('-' * 40, '\n')
     
     print('EXAMPLE 4.3\n')
-    print(ThreeDimensionalOrbit.calculateOrbitalElements(np.array([-6045, -3490, 2500]), np.array([-3.457, 6.618, 2.533]), deg=True))
+    print(ThreeDimensionalOrbit.calculate_orbital_elements(np.array([-6045, -3490, 2500]), np.array([-3.457, 6.618, 2.533]), deg=True))
     print('-' * 40, '\n')
     
     print('EXAMPLE 4.7\n')
-    print(ThreeDimensionalOrbit.PF2GEF(ORBITAL_ELEMENTS(80000, 1.4, np.deg2rad(30), np.deg2rad(40), np.deg2rad(60), np.deg2rad(30))))
-    print(ThreeDimensionalOrbit.GEF2PF(np.array([-4039.8959232, 4814.56048018, 3628.62470217]), np.array([-10.38598762, -4.77192164, 1.743875])))
+    print(ThreeDimensionalOrbit.pf_2_gef(OrbitalElements(80000, 1.4, np.deg2rad(30), np.deg2rad(40), np.deg2rad(60), np.deg2rad(30))))
+    print(ThreeDimensionalOrbit.gef_2_pf(np.array([-4039.8959232, 4814.56048018, 3628.62470217]), np.array([-10.38598762, -4.77192164, 1.743875])))
     print('-' * 40, '\n')
     
     print('EXAMPLE 4.8\n')
-    print(ThreeDimensionalOrbit.calculatePlanetOblatenessEffect(ORBITAL_ELEMENTS(0, 0.0089312, np.deg2rad(51.43), 0, 0, 0, 6718)))
+    print(ThreeDimensionalOrbit.calculate_planet_oblateness_effect(OrbitalElements(0, 0.0089312, np.deg2rad(51.43), 0, 0, 0, 6718)))
     print('-' * 40, '\n')
     
     print('EXAMPLE 4.8\n')
-    ThreeDimensionalOrbit.calculateGroundTrack(ORBITAL_ELEMENTS(56554, 0.19760, np.deg2rad(60), np.deg2rad(270), np.deg2rad(45), np.deg2rad(230), 8350), 60, show=True, m=3)
+    ThreeDimensionalOrbit.calculate_ground_track(OrbitalElements(56554, 0.19760, np.deg2rad(60), np.deg2rad(270), np.deg2rad(45), np.deg2rad(230), 8350), 60, show=True, m=3)
     print('-' * 40, '\n')

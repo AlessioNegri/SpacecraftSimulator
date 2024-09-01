@@ -1,116 +1,107 @@
-import os
-import sys
+""" Maneuver.py: Generic maneuver for QML """
+
+__author__      = "Alessio Negri"
+__license__     = "LGPL v3"
+__maintainer__  = "Alessio Negri"
+
 import PySide6.QtCore as qtCore
-import PySide6.QtQml as qtQml
 
-sys.path.append(os.path.dirname(__file__))
+from enum import IntEnum
 
-from tools.stdafx import IntEnum, dataclass
 from Utility import format
 
+# --- ENUM 
+
 class ManeuverType(IntEnum):
+    """List of maneuvers for orbit transfer"""
     
     HOHMANN             = 0
     BI_ELLIPTIC_HOHMANN = 1
     PLANE_CHANGE        = 2
     APSE_LINE_ROTATION  = 3
-    
 
-#QML_IMPORT_NAME = "extension.maneuver"
-#QML_IMPORT_MAJOR_VERSION = 1
+# --- CLASS 
 
-#@qtQml.QmlElement
-#@dataclass
 class Maneuver(qtCore.QObject):
-    """Class that manages the generic maneuver and interfaces with QML
+    """Class that manages the generic maneuver and interfaces with QML"""
+    
+    # --- PROPERTIES 
+    
+    # ? Type
+    
+    @qtCore.Property(int)
+    def type(self): return self._type
 
-    Args:
-        qtCore (_type_): _description_
-    """
+    @type.setter
+    def type(self, value : int): self._type = value
+    
+    # ? Option
+
+    @qtCore.Property(int)
+    def option(self): return self._option
+
+    @option.setter
+    def option(self, value : int): self._option = value
+    
+    # ? Option Value
+    
+    @qtCore.Property(float)
+    def option_value(self): return self._option_value
+
+    @option_value.setter
+    def option_value(self, value : float): self._option_value = value
+    
+    # ? Delta Velocity [km/s]
+    
+    @qtCore.Property(float)
+    def delta_velocity(self): return format(self._delta_velocity)
+
+    @delta_velocity.setter
+    def delta_velocity(self, value : float): self._delta_velocity = value
+    
+    # ? Delta Time [s]
+    
+    @qtCore.Property(float)
+    def delta_time(self): return format(self._delta_time, format='1.0000')
+
+    @delta_time.setter
+    def delta_time(self, value : float): self._delta_time = value
+    
+    # ? Delta Mass [kg]
+    
+    @qtCore.Property(float)
+    def delta_mass(self): return format(self._delta_mass, format='1.000')
+
+    @delta_mass.setter
+    def delta_mass(self, value : float): self._delta_mass = value
+    
+    # --- METHODS 
     
     def __init__(self,
                  type : int,
                  option : int,
-                 optionValue : float,
-                 dv : float = 0.0,
-                 dt : float = 0.0,
-                 dm : float = 0.0,
+                 option_value : float,
+                 delta_velocity : float = 0.0,
+                 delta_time : float = 0.0,
+                 delta_mass : float = 0.0,
                  parent = None):
         """Constructor
 
         Args:
             type (int): Maneuver type
             option (int): Maneuver option
-            optionValue (float): Maneuver option value
-            dv (float, optional): Maneuver delta velocity. Defaults to 0.0.
-            dt (float, optional): Maneuver delta time. Defaults to 0.0.
-            dm (float, optional): Maneuver delta mass. Defaults to 0.0.
+            option_value (float): Maneuver option value
+            delta_velocity (float, optional): Maneuver delta velocity [km/s]. Defaults to 0.0.
+            delta_time (float, optional): Maneuver delta time [s]. Defaults to 0.0.
+            delta_mass (float, optional): Maneuver delta mass [kg]. Defaults to 0.0.
             parent (_type_, optional): Parent Qt object. Defaults to None.
         """
         
         super().__init__(parent)
         
-        self._type          = type
-        self._option        = option
-        self._optionValue   = optionValue
-        self._dv            = dv
-        self._dt            = dt
-        self._dm            = dm
-    
-    # ! LOCAL
-    
-    def getType(self): return self._type
-    
-    def getOption(self): return self._option
-    
-    def getOptionValue(self): return self._optionValue
-    
-    def getDeltaVelocity(self): return self._dv
-    
-    def getDeltaTime(self): return self._dt
-    
-    def getDeltaMass(self): return self._dm
-    
-    def setDeltaVelocity(self, dv : float): self._dv = dv
-    
-    def setDeltaTime(self, dt : float): self._dt = dt
-    
-    def setDeltaMass(self, dm : float): self._dm = dm
-    
-    # ! QML
-
-    @qtCore.Property(int)
-    def type(self): return self._type
-
-    @type.setter
-    def type(self, n : int): self._type = n
-
-    @qtCore.Property(int)
-    def option(self): return self._option
-
-    @option.setter
-    def option(self, n : int): self._option = n
-    
-    @qtCore.Property(float)
-    def optionValue(self): return self._optionValue
-
-    @optionValue.setter
-    def optionValue(self, f : float): self._optionValue = f
-    
-    @qtCore.Property(float)
-    def dv(self): return format(self._dv)
-
-    @dv.setter
-    def dv(self, f : float): self._dv = f
-    
-    @qtCore.Property(float)
-    def dt(self): return format(self._dt, format='1.0000')
-
-    @dt.setter
-    def dt(self, f : float): self._dt = f
-    
-    @qtCore.Property(float)
-    def dm(self): return format(self._dm, format='1.000')
-
-    @dm.setter
-    def dm(self, f : float): self._dm = f
+        self._type              = type              # * Type of maneuver
+        self._option            = option            # * Option selection for a given maneuver
+        self._option_value      = option_value      # * Optional value for the option parameter
+        self._delta_velocity    = delta_velocity    # * Delta velocity cost of the maneuver     [ km / s]
+        self._delta_time        = delta_time        # * Delta time of the maneuver              [ s ]
+        self._delta_mass        = delta_mass        # * Delta mass cost of the maneuver         [ kg ]

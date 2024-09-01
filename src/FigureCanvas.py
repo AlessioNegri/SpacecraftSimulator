@@ -1,115 +1,111 @@
-import os
-import sys
+""" FigureCanvas.py: Generic figure canvas for QML """
+
+__author__      = "Alessio Negri"
+__license__     = "LGPL v3"
+__maintainer__  = "Alessio Negri"
+
 import PySide6.QtCore as qtCore
 import PySide6.QtGui as qtGui
 import PySide6.QtQuick as qtQuick
-import matplotlib.pyplot as plt
-
-sys.path.append(os.path.dirname(__file__))
+import numpy as np
+import mpl_toolkits.mplot3d.proj3d as proj3d
 
 from lib.matplotlib_backend_qtquick.backend_qtquick import NavigationToolbar2QtQuick
 from lib.matplotlib_backend_qtquick.backend_qtquickagg import FigureCanvasQtQuickAgg
 
 class FigureCanvas(qtCore.QObject):
-    """Base class for managing Matplotlib figures in QML
-    """
+    """Base class for managing Matplotlib figures in QML"""
     
-    # ! PROPERTIES
+    # --- PROPERTIES 
+    
+    # ? Coordinates
     
     coord_changed = qtCore.Signal()
     
-    def get_coord(self): return self._coord
-    
-    def set_coord(self, coord): self._coord = coord; self.coord_changed.emit()
-        
-    coord = qtCore.Property(str, get_coord, set_coord, notify=coord_changed)
+    @qtCore.Property(str, notify=coord_changed)
+    def coord(self): return self._coord
 
-    # ! METHODS
+    @coord.setter
+    def coord(self, val : str): self._coord = val; self.coord_changed.emit()
 
-    def __init__(self, parent : qtCore.QObject = None) -> None:
+    # --- METHODS 
+
+    def __init__(self, parent : qtCore.QObject = None, dof3 : bool = False, rows : int = 1, cols : int = 1) -> None:
         """Constructor
 
         Args:
             parent (qtCore.QObject, optional): Parent object. Defaults to None.
+            dof3 (bool, optional): True for 3D figures. Defaults to False.
+            rows (int, optional): Subplots configuration along row. Defaults to 1.
+            cols (int, optional): Subplots configuration along column. Defaults to 1.
         """
         
         super().__init__(parent)
         
-        self._coord     = '(0.00, 0.00)'
+        if rows < 1 or cols < 1: Exception('Figure rows / cols must be greater than 0!')
         
         self.canvas     = None
         self.figure     = None
         self.axes       = None
         self.toolbar    = None
-        self.dof3       = False
         self.figsize    = (6.0, 4.0)
-        self.rows       = 1
-        self.cols       = 1
-        self.multiplot  = False
+        self.dof3       = dof3
+        self.rows       = rows
+        self.cols       = cols
+        self.multiplot  = rows != 1 or cols != 1
+        
+        self._coord     = '(0.00, 0.00)' if not dof3 else '(0.00, 0.00, 0.00)'
 
-    def updateWithCanvas(self,
-                         canvas : FigureCanvasQtQuickAgg,
-                         parent : qtQuick.QQuickItem,
-                         dof3 : bool = False,
-                         rows : int = 1,
-                         cols : int = 1,
-                         figsize : tuple = (6.0, 4.0)) -> None:
+    def update_with_canvas(self, canvas : FigureCanvasQtQuickAgg, qml_object_parent : qtQuick.QQuickItem) -> None:
         """Initializes the canvas for the figure
 
         Args:
             canvas (FigureCanvasQtQuickAgg): Backend figure canvas
-            parent (qtQuick.QQuickItem): Parent qml object
-            dof3 (bool, optional): True for 3D figures. Defaults to False.
-            rows (int, optional): Subplots configuration along row. Defaults to 1.
-            cols (int, optional): Subplots configuration along column. Defaults to 1.
-            figsize (tuple, optional): Width and hegight in inches of the figure. Defaults to (6.0, 4.0).
+            qml_object_parent (qtQuick.QQuickItem): QML object parent
         """
         
-        figsize=(parent.width() // 100, (parent.height() - 50) // 100)
+        # ? Set Properties
         
         self.canvas     = canvas
         self.figure     = canvas.figure
         self.toolbar    = NavigationToolbar2QtQuick(canvas=canvas)
-        self.dof3       = dof3
-        self.figsize    = figsize
-        self.rows       = rows
-        self.cols       = cols
+        self.figsize    = (qml_object_parent.width() / 100, (qml_object_parent.height() - 50) / 100) # * width and height in inches
         
-        if rows != 1 or cols != 1:
+        # ? Set Axes
+        
+        if self.multiplot:
             
-            self.multiplot = True
+            self.axes = self.figure.subplots(nrows=self.rows, ncols=self.cols)
             
-            self.axes = self.figure.subplots(nrows=rows, ncols=cols)
-            
-            for r in range(0, rows):
+            for r in range(0, self.rows):
                 
-                for c in range(0, cols):
+                for c in range(0, self.cols):
                     
                     self.axes[r][c].grid(True)
                     self.axes[r][c].set_facecolor('#1C1B1F')# #424242
             
         else:
             
-            self.axes = self.figure.add_subplot(111) if not dof3 else self.figure.add_subplot(111, projection='3d')
+            self.axes = self.figure.add_subplot(111) if not self.dof3 else self.figure.add_subplot(111, projection='3d')
             
             self.axes.grid(True)
             self.axes.set_facecolor('#1C1B1F')
         
-            #self.figure.subplots_adjust(top=1.00, bottom=0.15, left=0.10, right=0.95)
+        # ? Set Figure
         
         self.figure.subplots_adjust(wspace=0.4, hspace=0.4)
         self.figure.set_layout_engine('constrained')
-        self.figure.set_figwidth(figsize[0])
-        self.figure.set_figheight(figsize[1])
+        self.figure.set_figwidth(self.figsize[0])
+        self.figure.set_figheight(self.figsize[1])
         self.figure.patch.set_facecolor('#1C1B1F')
         
-        #if dof3: self.figure.tight_layout()
+        # ? Set Canvas
         
         self.canvas.draw_idle()
         
         self.figure.canvas.mpl_connect('motion_notify_event', self.on_motion)
     
-    def resetCanvas(self) -> None:
+    def reset_canvas(self) -> None:
         """Resets the figure canvas
         """
         
@@ -125,34 +121,107 @@ class FigureCanvas(qtCore.QObject):
             
             self.axes.cla()
     
-    def redrawCanvas(self) -> None:
+    def redraw_canvas(self) -> None:
         """Redraws the figure canvas
         """
         
         self.canvas.draw_idle()
-            
-    # ! SLOTS
+    
+    def line2d_seg_dist(self, p1 : list, p2 : list, p0 : tuple) -> float:
+        """Distance(s) from line defined by p1 - p2 to point(s) p0
+        
+            p0[0] = x(s)
+            p0[1] = y(s)
+
+        intersection point p = p1 + u * (p2 - p1)
+        
+        and intersection point lies within segment if u is between 0 and 1
+        
+        Args:
+            p1 (list): Point 1
+            p2 (list): Point 2
+            p0 (tuple): Current 2D point
+
+        Returns:
+            float: Distance
+        """
+
+        x21 = p2[0] - p1[0]
+        y21 = p2[1] - p1[1]
+        
+        x01 = np.asarray(p0[0]) - p1[0]
+        y01 = np.asarray(p0[1]) - p1[1]
+
+        u = (x01*x21 + y01*y21) / (x21**2 + y21**2)
+        u = np.clip(u, 0, 1)
+        d = np.hypot(x01 - u*x21, y01 - u*y21)
+
+        return d
+    
+    def xyz_data(self, event : qtGui.QMouseEvent, ax) -> list:
+        """Retrieves the x-y-z coordinates in a 3D plot
+
+        Args:
+            event (qtGui.QMouseEvent): Event
+            ax (): Figure axis
+
+        Returns:
+            list: [x, y, z]
+        """
+        
+        if ax.M is None: return 0.0, 0.0, 0.0
+
+        xd, yd = event.xdata, event.ydata
+        
+        p = (xd, yd)
+        
+        edges = ax.tunit_edges()
+        
+        ldists = [(self.line2d_seg_dist(p0, p1, p), i) for i, (p0, p1) in enumerate(edges)]
+        
+        ldists.sort()
+
+        # ? Nearest edge
+        
+        edgei = ldists[0][1]
+
+        p0, p1 = edges[edgei]
+
+        # ? Scale the z value to match
+        
+        x0, y0, z0 = p0
+        x1, y1, z1 = p1
+        
+        d0 = np.hypot(x0 - xd, y0 - yd)
+        d1 = np.hypot(x1 - xd, y1 - yd)
+        dt = d0 + d1
+        
+        z = d1 / dt * z0 + d0 / dt * z1
+
+        x, y, z = proj3d.inv_transform(xd, yd, z, ax.M)
+        
+        return x, y, z
+    
+    # --- SLOTS 
     
     @qtCore.Slot(float, float)
     def resize_figure(self, width : float, height : float) -> None:
         """Resizes the figure
 
         Args:
-            event (qtCore.QEvent): Event
+            width (float): Width in pixels
+            height (float): Height in pixels
         """
         
         if self.figure == None: return
         
-        figsize=(width // 100, (height - 50) // 100)
+        self.figsize = (width / 100, (height - 50) / 100)
         
-        self.figsize = figsize
-        
-        self.figure.set_figwidth(figsize[0])
-        self.figure.set_figheight(figsize[1])
+        self.figure.set_figwidth(self.figsize[0])
+        self.figure.set_figheight(self.figsize[1])
         
         self.canvas.draw_idle()
  
-    
     @qtCore.Slot()
     def on_motion(self, event : qtGui.QMouseEvent):
         """Update the coordinates on the display
@@ -174,8 +243,10 @@ class FigureCanvas(qtCore.QObject):
         else:
             
             if event.inaxes == self.axes:
+                
+                x, y, z = self.xyz_data(event, self.axes)
             
-                self.coord = f'({event.xdata:.2f}, {event.ydata:.2f})'
+                self.coord = f'({x:.2f}, {y:.2f}, {z:.2f})'
  
     @qtCore.Slot()
     def pan(self, *args):

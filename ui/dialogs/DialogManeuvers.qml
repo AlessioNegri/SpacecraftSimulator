@@ -36,10 +36,10 @@ Dialog
                     "p_Id"              : r_Maneuvers.length + 1,
                     "p_Type"            : maneuver.type,
                     "p_Option"          : maneuver.option,
-                    "p_OptionValue"     : maneuver.optionValue,
-                    "p_DeltaVelocity"   : maneuver.dv,
-                    "p_DeltaTime"       : maneuver.dt,
-                    "p_DeltaMass"       : maneuver.dm
+                    "p_OptionValue"     : maneuver.option_value,
+                    "p_DeltaVelocity"   : maneuver.delta_velocity,
+                    "p_DeltaTime"       : maneuver.delta_time,
+                    "p_DeltaMass"       : maneuver.delta_mass
                 })
                 
                 if (obj == null)

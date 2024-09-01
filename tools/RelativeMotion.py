@@ -1,25 +1,42 @@
+""" RelativeMotion.py: Implements the relative motion between spacecraft """
+
+__author__      = "Alessio Negri"
+__license__     = "LGPL v3"
+__maintainer__  = "Alessio Negri"
+__book__        = "Orbital Mechanics for Engineering Students"
+__chapter__     = "7 - Relative Motion and Rendezvous"
+
 import os
 import sys
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import mpl_toolkits.mplot3d.art3d as art3d
+
+from scipy.integrate import solve_ivp
 
 sys.path.append(os.path.dirname(__file__))
 
-from ThreeDimensionalOrbit import *
-from TwoBodyProblem import *
-from LagrangeCoefficients import *
-from Time import *
+from AstronomicalData import AstronomicalData, CelestialBody
+from TwoBodyProblem import TwoBodyProblem
+from ThreeDimensionalOrbit import ThreeDimensionalOrbit, OrbitalElements
+from Time import Time, DirectionType
+from LagrangeCoefficients import LagrangeCoefficients
 
-# ! CHAPTER 7 - Relative Motion and Rendezvous
 class RelativeMotion:
+    """Contains different relative motion scenario as rendezvous"""
     
-    mu = AstronomicalData.GravitationalParameter(CelestialBody.EARTH)
+    # --- ASTRONOMICAL CONSTANTS 
     
-    def __init__(self) -> None: pass
+    mu = AstronomicalData.gravitational_parameter(CelestialBody.EARTH)
+    
+    # --- METHODS 
     
     # ! SECTION 7.2
     
     # ! ALGORITHM 7.1
     @classmethod
-    def calculateKinematicsLVLH(cls, r_T : np.ndarray, v_T : np.ndarray, r_C : np.ndarray, v_C : np.ndarray) -> list:
+    def calculate_kinematics_lvlh(cls, r_T : np.ndarray, v_T : np.ndarray, r_C : np.ndarray, v_C : np.ndarray) -> list:
         """Calculates the relative position, velocity, and acceleration in the LVLH frame
 
         Args:
@@ -32,44 +49,44 @@ class RelativeMotion:
             list: [r_rel, v_rel, a_rel, Omega]
         """
         
-        # * 1. Angular momentum
+        # >>> 1. Angular momentum
         
         h_T = np.cross(r_T, v_T)
         
-        # * 2. Unit vectors
+        # >>> 2. Unit vectors
         
-        i = r_T / linalg.norm(r_T)
-        k = h_T / linalg.norm(h_T)
+        i = r_T / np.linalg.norm(r_T)
+        k = h_T / np.linalg.norm(h_T)
         j = np.cross(k, i)
         
-        # * 3. Orthogonal trasformation matrix
+        # >>> 3. Orthogonal trasformation matrix
         
         Q_Xx = np.vstack((i, j, k))
         
-        # * 4. Angular velocity
+        # >>> 4. Angular velocity
         
-        Omega = h_T / linalg.norm(r_T)**2
+        Omega = h_T / np.linalg.norm(r_T)**2
         
-        dOmega_dt = - 2 * np.dot(v_T, r_T) / linalg.norm(r_T)**2 * Omega
+        dOmega_dt = - 2 * np.dot(v_T, r_T) / np.linalg.norm(r_T)**2 * Omega
         
-        # * 5. Absolute accelerations
+        # >>> 5. Absolute accelerations
         
-        a_T = - cls.mu / linalg.norm(r_T)**3 * r_T
-        a_C = - cls.mu / linalg.norm(r_C)**3 * r_C
+        a_T = - cls.mu / np.linalg.norm(r_T)**3 * r_T
+        a_C = - cls.mu / np.linalg.norm(r_C)**3 * r_C
         
-        # * 6. Relative position
+        # >>> 6. Relative position
         
         r_rel_X = r_C - r_T
         
-        # * 7. Relative velocity
+        # >>> 7. Relative velocity
         
         v_rel_X = v_C - v_T - np.cross(Omega, r_rel_X)
         
-        # * 8. Relative acceleration
+        # >>> 8. Relative acceleration
         
         a_rel_X = a_C - a_T - np.cross(dOmega_dt, r_rel_X) - np.cross(Omega, np.cross(Omega, r_rel_X)) - 2 * np.cross(Omega, v_rel_X)
         
-        # * 9. LVLH kinematics
+        # >>> 9. LVLH kinematics
         
         r_rel_x = np.matmul(Q_Xx, r_rel_X)
         v_rel_x = np.matmul(Q_Xx, v_rel_X)
@@ -78,7 +95,7 @@ class RelativeMotion:
         return [r_rel_x, v_rel_x, a_rel_x, np.matmul(Q_Xx, Omega)]
     
     @classmethod
-    def calculateKinematicsGEF(cls, r_T : np.ndarray, v_T : np.ndarray, r_rel_x : np.ndarray, v_rel_x : np.ndarray) -> list:
+    def calculate_kinematics_gef(cls, r_T : np.ndarray, v_T : np.ndarray, r_rel_x : np.ndarray, v_rel_x : np.ndarray) -> list:
         """Calculates the absolute position and velocity of the Chaser in the Geocentric Equatorial frame
 
         Args:
@@ -91,41 +108,41 @@ class RelativeMotion:
             list: [r_C, v_C]
         """
         
-        # * 1. Angular momentum
+        # >>> 1. Angular momentum
         
         h_T = np.cross(r_T, v_T)
         
-        # * 2. Unit vectors
+        # >>> 2. Unit vectors
         
-        i = r_T / linalg.norm(r_T)
-        k = h_T / linalg.norm(h_T)
+        i = r_T / np.linalg.norm(r_T)
+        k = h_T / np.linalg.norm(h_T)
         j = np.cross(k, i)
         
-        # * 3. Orthogonal trasformation matrix
+        # >>> 3. Orthogonal trasformation matrix
         
         Q_Xx = np.vstack((i, j, k))
         
-        # * 4. Relative position-velocity in GEF
+        # >>> 4. Relative position-velocity in GEF
         
-        r_rel_X = np.matmul(linalg.inv(Q_Xx), r_rel_x)
-        v_rel_X = np.matmul(linalg.inv(Q_Xx), v_rel_x)
+        r_rel_X = np.matmul(np.linalg.inv(Q_Xx), r_rel_x)
+        v_rel_X = np.matmul(np.linalg.inv(Q_Xx), v_rel_x)
         
-        # * 5. Angular velocity
+        # >>> 5. Angular velocity
         
-        Omega = h_T / linalg.norm(r_T)**2
+        Omega = h_T / np.linalg.norm(r_T)**2
         
-        # * 6. Chaser position
+        # >>> 6. Chaser position
         
         r_C  = r_T + r_rel_X
         
-        # * 7. Chaser velocity
+        # >>> 7. Chaser velocity
         
         v_C = v_T  + v_rel_X + np.cross(Omega, r_rel_X)
         
         return [r_C, v_C]
     
     @classmethod
-    def plotKinematicsLVLH(cls, r_T : np.ndarray, v_T : np.ndarray, r_C : np.ndarray, v_C : np.ndarray, m : float = 60, n : float = 1000) -> None:
+    def show_kinematics_lvlh(cls, r_T : np.ndarray, v_T : np.ndarray, r_C : np.ndarray, v_C : np.ndarray, m : float = 60, n : float = 1000) -> None:
         """Plots the trajectory of the Target w.r.t. the Chaser in the LVLH frame
 
         Args:
@@ -137,33 +154,33 @@ class RelativeMotion:
             n (float, optional): Number of points to plot. Defaults to 1000.
         """
         
-        # * 1. Target period
+        # >>> 1. Target period
         
         TwoBodyProblem.mu = cls.mu
         
-        parameters = TwoBodyProblem.calculateOrbitalParameters(r_T, v_T)
+        parameters = TwoBodyProblem.calculate_orbital_parameters(r_T, v_T)
         
         T_T = parameters.T
         
-        # * 2. Target initial time
+        # >>> 2. Target initial time
         
         ThreeDimensionalOrbit.mu = cls.mu
     
-        oe = ThreeDimensionalOrbit.calculateOrbitalElements(r_T, v_T)
+        oe = ThreeDimensionalOrbit.calculate_orbital_elements(r_T, v_T)
         
         Time.mu = cls.mu
         
-        t_0 = Time.calculateEllipticalOrbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=T_T, e=parameters.e, theta=oe.theta)
+        t_0 = Time.calculate_elliptical_orbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=T_T, e=parameters.e, theta=oe.theta)
         
-        # * 3. Final time
+        # >>> 3. Final time
         
         t_f = t_0 + m * T_T
         
-        # * 4. Delta time
+        # >>> 4. Delta time
         
         dt = (t_f - t_0) / n
         
-        # * 5. Cycle
+        # >>> 5. Cycle
         
         times = np.linspace(t_0, t_f, n)
         
@@ -175,21 +192,21 @@ class RelativeMotion:
         
         for t in times:
             
-            # * a. LVLH quantities
+            # >>> a. LVLH quantities
         
-            r_rel, v_rel, a_rel, Omega = cls.calculateKinematicsLVLH(r_T, v_T, r_C, v_C)
+            r_rel, v_rel, a_rel, Omega = cls.calculate_kinematics_lvlh(r_T, v_T, r_C, v_C)
             
             x.append(r_rel[0])
             y.append(r_rel[1])
             z.append(r_rel[2])
             
-            # * b. Update Target-Chaser vectors
+            # >>> b. Update Target-Chaser vectors
             
-            r_T, v_T = LagrangeCoefficients.calculatePositionVelocityByTime(r_T, v_T, dt)
+            r_T, v_T = LagrangeCoefficients.calculate_position_velocity_by_time(r_T, v_T, dt)
             
-            r_C, v_C = LagrangeCoefficients.calculatePositionVelocityByTime(r_C, v_C, dt)
+            r_C, v_C = LagrangeCoefficients.calculate_position_velocity_by_time(r_C, v_C, dt)
         
-        # * 6. Plot
+        # >>> 6. Plot
         
         fig = plt.figure()
         
@@ -204,7 +221,7 @@ class RelativeMotion:
     # ! SECTION 7.3
     
     @classmethod
-    def linearizedRelativeMotionEquations(cls, t : float, X : np.ndarray) -> np.ndarray:
+    def linearized_relative_motion_eom(cls, t : float, X : np.ndarray) -> np.ndarray:
         """Linearized equations of relative motion
 
         Args:
@@ -241,7 +258,7 @@ class RelativeMotion:
         return dX_dt
     
     @classmethod
-    def integrateLinearizedRelativeMotion(cls, y_0 : np.ndarray, t_0 : float = 0.0, t_f : float = 0.0, show : bool = False) -> None:
+    def simulate_linearized_relative_motion(cls, y_0 : np.ndarray, t_0 : float = 0.0, t_f : float = 0.0, show : bool = False) -> None:
         """Integrates the Ordinary Differential Equations for the linearized relative motion in the LVLH frame
 
         Args:
@@ -251,18 +268,18 @@ class RelativeMotion:
             show (bool, optional): True for plotting the trajectory. Defaults to False.
         """
         
-        # * 1.
+        # >>> 1.
         
-        if t_f < t_0: raise CustomException('Invalid integration time')
+        if t_f < t_0: raise Exception('Invalid integration time')
         
-        integrationResult = solve_ivp(fun=cls.linearizedRelativeMotionEquations, t_span=[t_0, t_f], y0=y_0, method='RK45', args=(), rtol=1e-8, atol=1e-8)
+        integrationResult = solve_ivp(fun=cls.linearized_relative_motion_eom, t_span=[t_0, t_f], y0=y_0, method='RK45', args=(), rtol=1e-8, atol=1e-8)
         
-        if not integrationResult['success']: raise CustomException(integrationResult['message'])
+        if not integrationResult['success']: raise Exception(integrationResult['message'])
         
         dx = integrationResult['y'][0, :]
         dy = integrationResult['y'][1, :]
         
-        # * 2.
+        # >>> 2.
         
         if show:
         
@@ -284,7 +301,7 @@ class RelativeMotion:
     # ! SECTION 7.4
     
     @classmethod
-    def ClohessyWiltshireMatrices(cls, n : float, t : float) -> list:
+    def clohessy_wiltshire_matrices(cls, n : float, t : float) -> list:
         """Clohessy-Wiltshire matrices
 
         Args:
@@ -326,7 +343,7 @@ class RelativeMotion:
         return [PHI_rr, PHI_rv, PHI_vr, PHI_vv]
     
     @classmethod
-    def ClohessyWiltshireEquations(cls, dr_0 : np.ndarray, dv_0 : np.ndarray, n : float, t : float) -> list:
+    def clohessy_wiltshire_equations(cls, dr_0 : np.ndarray, dv_0 : np.ndarray, n : float, t : float) -> list:
         """Clohessy-Wiltshire equations
 
         Args:
@@ -339,7 +356,7 @@ class RelativeMotion:
             list: [dr, dv]
         """
         
-        PHI_rr, PHI_rv, PHI_vr, PHI_vv = cls.ClohessyWiltshireMatrices(n, t)
+        PHI_rr, PHI_rv, PHI_vr, PHI_vv = cls.clohessy_wiltshire_matrices(n, t)
         
         dr = np.matmul(PHI_rr, dr_0) + np.matmul(PHI_rv, dv_0)
         dv = np.matmul(PHI_vr, dr_0) + np.matmul(PHI_vv, dv_0)
@@ -349,7 +366,7 @@ class RelativeMotion:
     # ! SECTION 7.5
     
     @classmethod
-    def twoImpulsiveRendezvousManeuver(cls, r_T : np.ndarray, v_T : np.ndarray, r_C : np.ndarray, v_C : np.ndarray, t_f : float, show : bool = False) -> float:
+    def two_impulsive_rendezvous_maneuver(cls, r_T : np.ndarray, v_T : np.ndarray, r_C : np.ndarray, v_C : np.ndarray, t_f : float, show : bool = False) -> float:
         """Two-Impulse Rendezvous maneuver
 
         Args:
@@ -364,29 +381,29 @@ class RelativeMotion:
             float: dv
         """
         
-        # * 1.
+        # >>> 1.
         
-        dr_0, dv_0_minus, a_rel, Omega = cls.calculateKinematicsLVLH(r_T, v_T, r_C, v_C)
+        dr_0, dv_0_minus, a_rel, Omega = cls.calculate_kinematics_lvlh(r_T, v_T, r_C, v_C)
         
-        # * 2.
+        # >>> 2.
         
-        PHI_rr, PHI_rv, PHI_vr, PHI_vv = cls.ClohessyWiltshireMatrices(linalg.norm(Omega), t_f)
+        PHI_rr, PHI_rv, PHI_vr, PHI_vv = cls.clohessy_wiltshire_matrices(np.linalg.norm(Omega), t_f)
         
-        dv_0_plus = - np.matmul(np.matmul(linalg.inv(PHI_rv), PHI_rr), dr_0)
+        dv_0_plus = - np.matmul(np.matmul(np.linalg.inv(PHI_rv), PHI_rr), dr_0)
         
-        # * 3.
+        # >>> 3.
         
-        dr_f, dv_f_minus = cls.ClohessyWiltshireEquations(dr_0, dv_0_plus, linalg.norm(Omega), t_f)
+        dr_f, dv_f_minus = cls.clohessy_wiltshire_equations(dr_0, dv_0_plus, np.linalg.norm(Omega), t_f)
         
-        # * 4.
+        # >>> 4.
         
         dv_f_plus = np.zeros(shape=(3))
         
-        # * 5.
+        # >>> 5.
         
-        dv_tot = linalg.norm(dv_0_plus - dv_0_minus) + linalg.norm(dv_f_plus - dv_f_minus)
+        dv_tot = np.linalg.norm(dv_0_plus - dv_0_minus) + np.linalg.norm(dv_f_plus - dv_f_minus)
         
-        # * 6.
+        # >>> 6.
         
         if show:
             
@@ -396,7 +413,7 @@ class RelativeMotion:
             
             for t in np.linspace(0, t_f, 1000):
                 
-                dr, dv = cls.ClohessyWiltshireEquations(dr_0, dv_0_plus, linalg.norm(Omega), t)
+                dr, dv = cls.clohessy_wiltshire_equations(dr_0, dv_0_plus, np.linalg.norm(Omega), t)
                 
                 dx.append(dr[0])
                 dy.append(dr[1])
@@ -436,22 +453,22 @@ class RelativeMotion:
 
 if __name__ == '__main__':
     
-    r_T, v_T = ThreeDimensionalOrbit.PF2GEF(ORBITAL_ELEMENTS(52059, 0.025724, np.deg2rad(60), np.deg2rad(40), np.deg2rad(30), np.deg2rad(40)))
+    r_T, v_T = ThreeDimensionalOrbit.pf_2_gef(OrbitalElements(52059, 0.025724, np.deg2rad(60), np.deg2rad(40), np.deg2rad(30), np.deg2rad(40)))
     
-    r_C, v_C = ThreeDimensionalOrbit.PF2GEF(ORBITAL_ELEMENTS(52362, 0.0072696, np.deg2rad(50), np.deg2rad(40), np.deg2rad(120), np.deg2rad(40)))
+    r_C, v_C = ThreeDimensionalOrbit.pf_2_gef(OrbitalElements(52362, 0.0072696, np.deg2rad(50), np.deg2rad(40), np.deg2rad(120), np.deg2rad(40)))
     
     print('EXAMPLE 7.1\n')
-    print(RelativeMotion.calculateKinematicsLVLH(r_T, v_T, r_C, v_C))
+    print(RelativeMotion.calculate_kinematics_lvlh(r_T, v_T, r_C, v_C))
     print('-' * 40)
     
     print('EXAMPLE 7.2\n')
-    RelativeMotion.plotKinematicsLVLH(r_T, v_T, r_C, v_C, m=10)
+    RelativeMotion.show_kinematics_lvlh(r_T, v_T, r_C, v_C, m=10)
     print('-' * 40)
     
     print('EXAMPLE 7.3\n')
-    r, v = ThreeDimensionalOrbit.PF2GEF(ORBITAL_ELEMENTS(0, 0.1, np.deg2rad(0), np.deg2rad(0), np.deg2rad(0), np.deg2rad(0), 6678 / (1 - 0.1)))
-    parameters = TwoBodyProblem.calculateOrbitalParameters(r, v)
-    RelativeMotion.integrateLinearizedRelativeMotion(np.hstack((np.array([-1, 0, 0]), np.array([0, 2 * 2 * np.pi / parameters.T, 0]), r, v)), t_f=5 * parameters.T, show=True)
+    r, v = ThreeDimensionalOrbit.pf_2_gef(OrbitalElements(0, 0.1, np.deg2rad(0), np.deg2rad(0), np.deg2rad(0), np.deg2rad(0), 6678 / (1 - 0.1)))
+    parameters = TwoBodyProblem.calculate_orbital_parameters(r, v)
+    RelativeMotion.simulate_linearized_relative_motion(np.hstack((np.array([-1, 0, 0]), np.array([0, 2 * 2 * np.pi / parameters.T, 0]), r, v)), t_f=5 * parameters.T, show=True)
     print('-' * 40)
     
     print('EXAMPLE 7.4\n')
@@ -459,11 +476,11 @@ if __name__ == '__main__':
     v_T = np.array([-7.29936, 0.492329, 2.48304])
     r_C = np.array([1612.75, 5310.19, 3750.33])
     v_C = np.array([-7.35170, 0.463828, 2.46906])
-    print(RelativeMotion.twoImpulsiveRendezvousManeuver(r_T, v_T, r_C, v_C, 8 * 3600, True))
+    print(RelativeMotion.two_impulsive_rendezvous_maneuver(r_T, v_T, r_C, v_C, 8 * 3600, True))
     print('-' * 40)
     
     print('EXAMPLE 7.5\n')
-    r_T, v_T = ThreeDimensionalOrbit.PF2GEF(ORBITAL_ELEMENTS(0, 0, np.deg2rad(0), np.deg2rad(0), np.deg2rad(0), np.deg2rad(0), 300 + 6378))
-    r_C, v_C = RelativeMotion.calculateKinematicsGEF(r_T, v_T, np.array([0, -2, 0]), np.array([0, 0, 0]))
-    print(RelativeMotion.twoImpulsiveRendezvousManeuver(r_T, v_T, r_C, v_C, 1.49 * 3600, True))
+    r_T, v_T = ThreeDimensionalOrbit.pf_2_gef(OrbitalElements(0, 0, np.deg2rad(0), np.deg2rad(0), np.deg2rad(0), np.deg2rad(0), 300 + 6378))
+    r_C, v_C = RelativeMotion.calculate_kinematics_gef(r_T, v_T, np.array([0, -2, 0]), np.array([0, 0, 0]))
+    print(RelativeMotion.two_impulsive_rendezvous_maneuver(r_T, v_T, r_C, v_C, 1.49 * 3600, True))
     print('-' * 40)

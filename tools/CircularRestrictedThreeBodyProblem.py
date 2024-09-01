@@ -1,42 +1,61 @@
+""" CircularRestrictedThreeBodyProblem.py: Implements the CR3BP equations """
+
+__author__      = "Alessio Negri"
+__license__     = "LGPL v3"
+__maintainer__  = "Alessio Negri"
+__book__        = "Orbital Mechanics for Engineering Students"
+__chapter__     = "2 - The Two-Body Problem"
+
 import os
 import sys
+import numpy as np
+import matplotlib.pyplot as plt
+
+from dataclasses import dataclass
+from scipy.optimize import newton
+from scipy.integrate import solve_ivp
 
 sys.path.append(os.path.dirname(__file__))
 
-from stdafx import *
+from AstronomicalData import AstronomicalData, CelestialBody
+
+# --- STRUCT 
 
 @dataclass
-class PARAMETERS_CRTBP:
-    L_1     : np.ndarray    # ? Lagrangian Equilibrium Point 1 [km]
-    L_2     : np.ndarray    # ? Lagrangian Equilibrium Point 2 [km]
-    L_3     : np.ndarray    # ? Lagrangian Equilibrium Point 3 [km]
-    L_4     : np.ndarray    # ? Lagrangian Equilibrium Point 4 [km]
-    L_5     : np.ndarray    # ? Lagrangian Equilibrium Point 5 [km]
-    Omega   : float = 0.0   # ? Inertial Angular Velocity [rad / s]
-    pi_1    : float = 0.0   # ? Dimensionless Mass Ratio 1 []
-    pi_2    : float = 0.0   # ? Dimensionless Mass Ratio 2 []
-    mu_1    : float = 0.0   # ? Gravitational Parameter 1 [km^3 / s^2]
-    mu_2    : float = 0.0   # ? Gravitational Parameter 2 [km^3 / s^2]
-    x_1     : float = 0.0   # ? Body Position 1 [km]
-    x_2     : float = 0.0   # ? Body Position 2 [km]
+class ParametersCrtbp:
+    """Circular Restricted Three Body Problem parameters"""
+    
+    L_1     : np.ndarray    # * Lagrangian Equilibrium Point 1  [ km ]
+    L_2     : np.ndarray    # * Lagrangian Equilibrium Point 2  [ km ]
+    L_3     : np.ndarray    # * Lagrangian Equilibrium Point 3  [ km ]
+    L_4     : np.ndarray    # * Lagrangian Equilibrium Point 4  [ km ]
+    L_5     : np.ndarray    # * Lagrangian Equilibrium Point 5  [ km ]
+    Omega   : float = 0.0   # * Inertial Angular Velocity       [ rad / s ]
+    pi_1    : float = 0.0   # * Dimensionless Mass Ratio 1      [ ]
+    pi_2    : float = 0.0   # * Dimensionless Mass Ratio 2      [ ]
+    mu_1    : float = 0.0   # * Gravitational Parameter 1       [ km^3 / s^2 ]
+    mu_2    : float = 0.0   # * Gravitational Parameter 2       [ km^3 / s^2 ]
+    x_1     : float = 0.0   # * Body Position 1                 [ km ]
+    x_2     : float = 0.0   # * Body Position 2                 [ km ]
 
-# ! CHAPTER 2 - The Two-Body Problem
+# --- CLASS 
+
 class CircularRestrictedThreeBodyProblem():
+    """Simulates the Circular Restricted Three Body Problem"""
     
-    m_1 = AstronomicalData.Mass(CelestialBody.EARTH)
+    # --- ASTRONOMICAL CONSTANTS 
     
-    m_2 = AstronomicalData.Mass(CelestialBody.MOON)
+    m_1     = AstronomicalData.mass(CelestialBody.EARTH)
+    m_2     = AstronomicalData.mass(CelestialBody.MOON)
+    r_12    = AstronomicalData.semi_major_axis(CelestialBody.MOON)
+    R_E_1   = AstronomicalData.equatiorial_radius(CelestialBody.EARTH)
     
-    r_12 = AstronomicalData.SemiMajorAxis(CelestialBody.MOON)
-    
-    R_E_1 = AstronomicalData.EquatiorialRadius(CelestialBody.EARTH)
-    
-    def __init__(self) -> None: pass
+    # --- METHODS 
         
     # ! SECTION 2.12
     
     @classmethod
-    def calculateOrbitalParameters(cls, show : bool = False) -> PARAMETERS_CRTBP:
+    def calculate_orbital_parameters(cls, show : bool = False) -> ParametersCrtbp:
         """Calculates the orbital parameters
 
         Args:
@@ -46,37 +65,37 @@ class CircularRestrictedThreeBodyProblem():
             PARAMETERS_R3BP: Orbital parameters
         """
         
-        # * 1.
+        # >>> 1.
         
-        parameters = PARAMETERS_CRTBP(np.zeros(3), np.zeros(3), np.zeros(3), np.zeros(3), np.zeros(3))
+        parameters = ParametersCrtbp(np.zeros(3), np.zeros(3), np.zeros(3), np.zeros(3), np.zeros(3))
         
-        # * Gravitational parameter global
+        # ? Gravitational parameter global
         
         mu = AstronomicalData.G * (cls.m_1 + cls.m_2)
         
-        # * Inertial angular velocity
+        # ? Inertial angular velocity
         
         parameters.Omega = np.sqrt(mu / cls.r_12**3)
         
-        # * Dimensionless mass ratio
+        # ? Dimensionless mass ratio
         
         parameters.pi_1 = cls.m_1 / (cls.m_1 + cls.m_2)
         
         parameters.pi_2 = cls.m_2 / (cls.m_1 + cls.m_2)
         
-        # * Gravitational parameter
+        # ? Gravitational parameter
         
         parameters.mu_1 = mu * parameters.pi_1
         
         parameters.mu_2 = mu * parameters.pi_2
         
-        # * Body position
+        # ? Body position
         
         parameters.x_1 = - parameters.pi_2 * cls.r_12
         
         parameters.x_2 = + parameters.pi_1 * cls.r_12
         
-        # * Lagrange points
+        # ? Lagrange points
         
         f  = lambda csi, pi_2: (1 - pi_2) / np.abs(csi + pi_2)**3 * (csi + pi_2) + pi_2 / np.abs(csi + pi_2 - 1)**3 * (csi + pi_2 - 1) - csi
         
@@ -90,7 +109,7 @@ class CircularRestrictedThreeBodyProblem():
         parameters.L_4 = np.array([0.5 * cls.r_12 - parameters.pi_2 * cls.r_12, + np.sqrt(3) / 2 * cls.r_12, 0])
         parameters.L_5 = np.array([0.5 * cls.r_12 - parameters.pi_2 * cls.r_12, - np.sqrt(3) / 2 * cls.r_12, 0])
         
-        # * 2.
+        # >>> 2.
         
         if show:
             
@@ -112,7 +131,7 @@ class CircularRestrictedThreeBodyProblem():
         return parameters
     
     @classmethod
-    def crtbpEquations(cls, t : float, X : np.ndarray, parameters : PARAMETERS_CRTBP) -> np.ndarray:
+    def crtbp_eom(cls, t : float, X : np.ndarray, parameters : ParametersCrtbp) -> np.ndarray:
         """Equations of the Circular Restricted Three Body Problem dynamics
 
         Args:
@@ -147,7 +166,7 @@ class CircularRestrictedThreeBodyProblem():
         return dX_dt
     
     @classmethod
-    def integrateCRTBP(cls, y_0 : np.ndarray, t_0 : float = 0.0, t_f : float = 0.0, show : bool = False) -> dict:
+    def simulate_crtbp(cls, y_0 : np.ndarray, t_0 : float = 0.0, t_f : float = 0.0, show : bool = False) -> dict:
         """Integrates the Ordinary Differential Equations for the Circular Restricted Three Body Problem
 
         Args:
@@ -160,33 +179,33 @@ class CircularRestrictedThreeBodyProblem():
             dict: { t: time, y: state[n_states, n_points] }
         """
         
-        # * 1.
+        # >>> 1.
         
-        if t_f < t_0: raise CustomException('Invalid integration time')
+        if t_f < t_0: raise Exception('Invalid integration time')
         
-        parameters = cls.calculateOrbitalParameters()
+        parameters = cls.calculate_orbital_parameters()
         
-        integrationResult = solve_ivp(fun=cls.crtbpEquations, t_span=[t_0, t_f], y0=y_0, method='RK45', args=(parameters, ), rtol=1e-8, atol=1e-8)
+        integrationResult = solve_ivp(fun=cls.crtbp_eom, t_span=[t_0, t_f], y0=y_0, method='RK45', args=(parameters, ), rtol=1e-8, atol=1e-8)
         
-        if not integrationResult['success']: CustomException(integrationResult['message'])
+        if not integrationResult['success']: Exception(integrationResult['message'])
         
         x = integrationResult['y'][0, :]
         y = integrationResult['y'][1, :]
         z = integrationResult['y'][2, :]
         
-        # * 2.
+        # >>> 2.
         
         if show:
             
-            plt.figure(figsize=(10, 8)) # fig.subplots_adjust(top=1.1, bottom=-0.1)
+            plt.figure(figsize=(10, 8))
             
             ax = plt.axes(projection='3d')
             
             # * Body 1
             
-            ax.scatter(parameters.x_1, 0, 0, c='c')# s=1000
+            ax.scatter(parameters.x_1, 0, 0, c='c')
             
-            angles = np.linspace(0 * np.pi, 2 * np.pi, 100 )
+            angles = np.linspace(0 * np.pi, 2 * np.pi, 100)
             
             ax.plot(cls.R_E_1 * np.cos(angles), cls.R_E_1 * np.sin(angles), color = 'green')
             
@@ -218,7 +237,6 @@ class CircularRestrictedThreeBodyProblem():
             ax.set_xlabel('$x$ [km]')
             ax.set_ylabel('$y$ [km]')
             ax.set_zlabel('$z$ [km]')
-            #plt.gca().set_aspect('equal')
             
             plt.legend()
             plt.show()
@@ -228,7 +246,7 @@ class CircularRestrictedThreeBodyProblem():
 if __name__  == '__main__':
     
     print('EXAMPLE 2.16\n')
-    print(CircularRestrictedThreeBodyProblem.calculateOrbitalParameters())
+    print(CircularRestrictedThreeBodyProblem.calculate_orbital_parameters())
     print('-' * 40, '\n')
     
     print('EXAMPLE 2.18\n')
@@ -241,5 +259,5 @@ if __name__  == '__main__':
     
     y0 = np.array([x, y, 0, vx, vy, vz])
     
-    CircularRestrictedThreeBodyProblem.integrateCRTBP(y0, 0, 100 * 24 * 3600, show=True)
+    CircularRestrictedThreeBodyProblem.simulate_crtbp(y0, 0, 100 * 24 * 3600, show=True)
     print('-' * 40, '\n')

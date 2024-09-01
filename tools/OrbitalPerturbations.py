@@ -1,46 +1,57 @@
+""" OrbitalPerturbations.py: Implements the orbital perturbations """
+
+__author__      = "Alessio Negri"
+__license__     = "LGPL v3"
+__maintainer__  = "Alessio Negri"
+__book__        = "Orbital Mechanics for Engineering Students"
+__chapter__     = "12 - Orbital Perturbations"
+
 import os
 import sys
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import mpl_toolkits.mplot3d.art3d as art3d
+
+from scipy.integrate import solve_ivp
+from datetime import datetime, timedelta
 
 sys.path.append(os.path.dirname(__file__))
 
-#from lib.pyextrema.extrema import extrema
+from Common import print_progress_bar, extrema, wrap_to360deg
+from AstronomicalData import AstronomicalData, CelestialBody
+from LagrangeCoefficients import LagrangeCoefficients
+from ThreeDimensionalOrbit import ThreeDimensionalOrbit, OrbitalElements
+from OrbitDetermination import OrbitDetermination
 
-from stdafx import *
-from LagrangeCoefficients import *
-from ThreeDimensionalOrbit import *
-from OrbitDetermination import *
-
-# ! CHAPTER 12 - Orbital Perturbations
 class OrbitalPerturbations():
+    """Implements the main methods to simulate the effect of perturbations on an orbit"""
     
-    mu = AstronomicalData.GravitationalParameter(CelestialBody.EARTH)
+    # --- ASTRONOMICAL CONSTANTS 
     
-    R_E = AstronomicalData.EquatiorialRadius(CelestialBody.EARTH)
+    mu      = AstronomicalData.gravitational_parameter(CelestialBody.EARTH)
+    R_E     = AstronomicalData.equatiorial_radius(CelestialBody.EARTH)
+    omega   = AstronomicalData.angular_velocity(CelestialBody.EARTH)
+    J_2     = AstronomicalData.second_zonal_harmonics(CelestialBody.EARTH)
     
-    omega = AstronomicalData.AngularVelocity(CelestialBody.EARTH)
+    # --- MEMBERS 
     
-    J_2 = AstronomicalData.SecondZonalHarmonics(CelestialBody.EARTH)
+    iteration = 0 # * Iteration counter
     
-    iteration = 0
-    
-    def __init__(self) -> None: pass
+    # --- METHODS 
     
     @classmethod
-    def setCelestialBody(cls, celestialBody : CelestialBody) -> None:
+    def set_celestial_body(cls, celestialBody : CelestialBody) -> None:
         """Sets the current celectial body
 
         Args:
             celestialBody (CelestialBody): Celestial body
         """
         
-        cls.mu = AstronomicalData.GravitationalParameter(celestialBody)
-        
-        cls.R_E = AstronomicalData.EquatiorialRadius(celestialBody)
-        
-        cls.omega = AstronomicalData.AngularVelocity(celestialBody)
-        
-        cls.J_2 = AstronomicalData.SecondZonalHarmonics(celestialBody)
-        
+        cls.mu      = AstronomicalData.gravitational_parameter(celestialBody)
+        cls.R_E     = AstronomicalData.equatiorial_radius(celestialBody)
+        cls.omega   = AstronomicalData.angular_velocity(celestialBody)
+        cls.J_2     = AstronomicalData.second_zonal_harmonics(celestialBody)
     
     # ! SECTION 12.4
     
@@ -55,13 +66,13 @@ class OrbitalPerturbations():
             float: Density
         """
         
-        # * 1. Geometric altitudes [km]
+        # >>> 1. Geometric altitudes [km]
         
         h = np.array([0, 25, 30, 40, 50, 60, 70, 80, 90, 100,
                       110, 120, 130, 140, 150, 180, 200, 250, 300, 350,
                       400, 450, 500, 600, 700, 800, 900, 1000])
         
-        # * 2. Corresponding densities [kg / m^3] from USSA76:
+        # >>> 2. Corresponding densities [kg / m^3] from USSA76:
         
         rho = np.array([1.225, 4.008e-2, 1.841e-2, 3.996e-3, 1.027e-3,
                         3.097e-4, 8.283e-5, 1.846e-5, 3.416e-6, 5.606e-7,
@@ -70,7 +81,7 @@ class OrbitalPerturbations():
                         2.803e-12, 1.184e-12, 5.215e-13, 1.137e-13, 3.070e-14,
                         1.136e-14, 5.759e-15, 3.561e-15])
         
-        # * 3. Scale heights [km]
+        # >>> 3. Scale heights [km]
 
         H = np.array([7.310, 6.427, 6.546, 7.360, 8.342,
                       7.583, 6.661, 5.927, 5.533, 5.703,
@@ -79,12 +90,12 @@ class OrbitalPerturbations():
                       58.019, 60.980, 65.654, 76.377, 100.587,
                       147.203, 208.020])
         
-        # * 4. Handle altitudes outside of the range
+        # >>> 4. Handle altitudes outside of the range
         
         if      z > 1000:   z = 1000
         elif    z < 0:      z = 0
         
-        # * 5. Determine the interpolation interval
+        # >>> 5. Determine the interpolation interval
         
         idx = 0
         
@@ -94,12 +105,12 @@ class OrbitalPerturbations():
             
         if z == 1000: idx = 26
         
-        # * 6. Exponential interpolation
+        # >>> 6. Exponential interpolation
         
         return rho[idx] * np.exp(-(z - h[idx]) / H[idx])
     
     @classmethod
-    def atmosphericDragEquations(cls, t : float, X : np.ndarray, B : float, t_0 : float, t_f : float) -> np.ndarray:
+    def atmospheric_drag_eom(cls, t : float, X : np.ndarray, B : float, t_0 : float, t_f : float) -> np.ndarray:
         """Equations of relative motion with atmospheric drag perturbation
 
         Args:
@@ -113,27 +124,27 @@ class OrbitalPerturbations():
             np.ndarray: Derivative of state
         """
         
-        # * Parameters
+        # >>> Parameters
         
         x, y, z, v_x, v_y, v_z = X
         
         r = np.sqrt(x**2 + y**2 + z**2)
         
-        # * Atmospheric Drag
+        # >>> Atmospheric Drag
         
         v_rel = X[3:] - np.cross(np.array([0, 0, cls.omega]), X[:3])
         
-        p = - 0.5 * cls.density(r - cls.R_E) * 1e9 * linalg.norm(v_rel) * B * 1e-6 * v_rel
+        p = - 0.5 * cls.density(r - cls.R_E) * 1e9 * np.linalg.norm(v_rel) * B * 1e-6 * v_rel
         
         if int(100 * ((t - t_0) / float(t_f - t_0))) != cls.iteration:
             
             cls.iteration = int(100 * ((t - t_0) / float(t_f - t_0)))
             
-            printProgressBar(t - t_0, t_f - t_0, prefix = 'Progress:', suffix = 'Processing...', length = 50)
+            print_progress_bar(t - t_0, t_f - t_0, prefix = 'Progress:', suffix = 'Processing...', length = 50)
             
             print(cls.density(r - cls.R_E))
         
-        # * Equations
+        # >>> Equations
         
         dX_dt = np.zeros(shape=(6))
         
@@ -147,7 +158,7 @@ class OrbitalPerturbations():
         return dX_dt
     
     @classmethod
-    def integrateRelativeMotionWithAtmosphericDrag(cls, y_0 : np.ndarray, B : float, t_0 : float = 0.0, t_f : float = 0.0, show : bool = False) -> dict:
+    def simulate_relative_motion_with_atmospheric_drag(cls, y_0 : np.ndarray, B : float, t_0 : float = 0.0, t_f : float = 0.0, show : bool = False) -> dict:
         """Integrates the Ordinary Differential Equations for the relative motion with atmospheric drag perturbation (COWELL's method)
 
         Args:
@@ -161,15 +172,15 @@ class OrbitalPerturbations():
             dict: { t: time, y: state[n_states, n_points] }
         """
         
-        # * 1.
+        # >>> 1.
         
-        if t_f < t_0: raise CustomException('Invalid integration time')
+        if t_f < t_0: raise Exception('Invalid integration time')
         
         cls.iteration = 0
         
-        integrationResult = solve_ivp(fun=cls.atmosphericDragEquations, t_span=[t_0, t_f], y0=y_0, method='RK45', args=(B, t_0, t_f), rtol=1e-8, atol=1e-8)
+        integrationResult = solve_ivp(fun=cls.atmospheric_drag_eom, t_span=[t_0, t_f], y0=y_0, method='RK45', args=(B, t_0, t_f), rtol=1e-8, atol=1e-8)
         
-        if not integrationResult['success']: CustomException(integrationResult['message'])
+        if not integrationResult['success']: Exception(integrationResult['message'])
         
         x = integrationResult['y'][0, :]
         y = integrationResult['y'][1, :]
@@ -184,7 +195,7 @@ class OrbitalPerturbations():
         imax = imax[1:]
         imin = imin[:-1]
         
-        # * 2.
+        # >>> 2.
         
         if show:
             
@@ -192,13 +203,13 @@ class OrbitalPerturbations():
             
             ax1 = plt.subplot(121, projection='3d')
             
-            # * Max Values
+            # ? Max Values
             
             xMax = 1.25 * max(np.absolute(x))
             yMax = 1.25 * max(np.absolute(y))
             zMax = 1.25 * max(np.absolute(z))
             
-            # * Plane
+            # ? Plane
             
             p = mpatches.Rectangle((-xMax, -yMax), 2 * xMax, 2 * yMax, fc=(0,0,0,0.1), ec=(0,0,0,1), lw=2)
             
@@ -206,25 +217,25 @@ class OrbitalPerturbations():
             
             art3d.pathpatch_2d_to_3d(p, z=0, zdir='z')
             
-            # * Axes
+            # ? Axes
             
             ax1.plot([0, xMax], [0, 0], [0, 0], 'k--')
             ax1.plot([0, 0], [0, yMax], [0, 0], 'k--')
             ax1.plot([0, 0], [0, 0], [0, zMax], 'k--')
             
-            # * Earth
+            # ? Earth
             
             ax1.scatter(0, 0, 0, s=1000, c='c')
             
-            # * Orbit
+            # ? Orbit
             
             ax1.plot(x, y, z, label='Orbit')
             
-            # * Start
+            # ? Start
             
             ax1.scatter(x[0], y[0], z[0], s=200, c='g', label='Start')
             
-            # * Finish
+            # ? Finish
             
             ax1.scatter(x[-1], y[-1], z[-1], s=200, c='r', label='Finish')
             
@@ -233,7 +244,7 @@ class OrbitalPerturbations():
             ax1.set_ylabel('$y$ [km]')
             ax1.set_zlabel('$z$ [km]')
             
-            # * Pericenter / Apocenter
+            # ? Pericenter / Apocenter
             
             ax2 = plt.subplot(122)
             
@@ -249,7 +260,7 @@ class OrbitalPerturbations():
     # ! SECTION 12.5
     
     @classmethod
-    def gravitationalPerturbationEquations(cls, t : float, X : np.ndarray, r_osc : np.ndarray, v_osc : np.ndarray) -> np.ndarray:
+    def gravitational_perturbation_eom(cls, t : float, X : np.ndarray, r_osc : np.ndarray, v_osc : np.ndarray) -> np.ndarray:
         """Equations of relative motion with gravitational perturbation
 
         Args:
@@ -262,24 +273,24 @@ class OrbitalPerturbations():
             np.ndarray: Derivative of state
         """
         
-        # * Parameters
+        # >>> Parameters
         
         dr, dv = X[:3], X[3:]
         
-        # * Osculating state
+        # >>> Osculating state
         
         r_ = r_osc + dr
         v_ = v_osc + dv
         
-        r = linalg.norm(r_)
+        r = np.linalg.norm(r_)
         
         x, y, z = r_
         
-        # * Gravitational Perturbation
+        # >>> Gravitational Perturbation
         
         p = 3 / 2 * cls.J_2 * cls.mu * cls.R_E**2 / r**4 * np.array([x / r * (5 * z**2 / r**2 - 1), y / r * (5 * z**2 / r**2 - 1), z / r * (5 * z**2 / r**2 - 3)])
         
-        # * Equations
+        # >>> Equations
         
         F = lambda q: float((q**2 - 3 * q + 3) / (1 + (1 - q)**(3/2)) * q)
         
@@ -292,15 +303,15 @@ class OrbitalPerturbations():
         dX_dt[0] = dv[0]
         dX_dt[1] = dv[1]
         dX_dt[2] = dv[2]
-        dX_dt[3] = - (cls.mu / linalg.norm(r_osc)**3) * (dr[0] - F(q) * r_[0]) + p[0]
-        dX_dt[4] = - (cls.mu / linalg.norm(r_osc)**3) * (dr[1] - F(q) * r_[1]) + p[1]
-        dX_dt[5] = - (cls.mu / linalg.norm(r_osc)**3) * (dr[2] - F(q) * r_[2]) + p[2]
+        dX_dt[3] = - (cls.mu / np.linalg.norm(r_osc)**3) * (dr[0] - F(q) * r_[0]) + p[0]
+        dX_dt[4] = - (cls.mu / np.linalg.norm(r_osc)**3) * (dr[1] - F(q) * r_[1]) + p[1]
+        dX_dt[5] = - (cls.mu / np.linalg.norm(r_osc)**3) * (dr[2] - F(q) * r_[2]) + p[2]
         
         return dX_dt
     
     # ! ALGORITHM 12.1
     @classmethod
-    def integrateRelativeMotionWithGravitationalPerturbation(cls, y_0 : np.ndarray, t_0 : float = 0.0, t_f : float = 0.0, show : bool = False) -> dict:
+    def simulate_relative_motion_with_gravitational_perturbation(cls, y_0 : np.ndarray, t_0 : float = 0.0, t_f : float = 0.0, show : bool = False) -> dict:
         """Integrates the Ordinary Differential Equations for the relative motion with gravitational perturbation (ENCKE's method)
 
         Args:
@@ -313,9 +324,9 @@ class OrbitalPerturbations():
             dict: { t: time, y: state[n_states, n_points] }
         """
         
-        # * 1.
+        # >>> 1.
         
-        if t_f < t_0: raise CustomException('Invalid integration time')
+        if t_f < t_0: raise Exception('Invalid integration time')
         
         t_prev = t_0
         
@@ -325,7 +336,7 @@ class OrbitalPerturbations():
         
         dt = times[1] - times[0]
         
-        r_osc, v_osc = LagrangeCoefficients.calculatePositionVelocityByTime(y_0[:3], y_0[3:], dt)
+        r_osc, v_osc = LagrangeCoefficients.calculate_position_velocity_by_time(y_0[:3], y_0[3:], dt)
         
         a = []
         e = []
@@ -338,15 +349,15 @@ class OrbitalPerturbations():
             
             #printProgressBar(t - t_0, t_f - t_0, prefix = 'Progress:', suffix = 'Processing...', length = 50)
             
-            # * a. Integrate perturbed motion
+            # >>> a. Integrate perturbed motion
             
-            integrationResult = solve_ivp(fun=cls.gravitationalPerturbationEquations, t_span=[t, t + dt], y0=dy_0, method='RK45', args=(r_osc, v_osc), rtol=1e-8, atol=1e-8)
+            integrationResult = solve_ivp(fun=cls.gravitational_perturbation_eom, t_span=[t, t + dt], y0=dy_0, method='RK45', args=(r_osc, v_osc), rtol=1e-8, atol=1e-8)
             
-            if not integrationResult['success']: CustomException(integrationResult['message'])
+            if not integrationResult['success']: Exception(integrationResult['message'])
             
-            # * b. Evaluates new osculating orbit
+            # >>> b. Evaluates new osculating orbit
             
-            r_osc, v_osc = LagrangeCoefficients.calculatePositionVelocityByTime(y_0[:3], y_0[3:], dt)
+            r_osc, v_osc = LagrangeCoefficients.calculate_position_velocity_by_time(y_0[:3], y_0[3:], dt)
             
             #print(y_0[:3], r_osc, integrationResult['y'][:3, -1])
         
@@ -354,9 +365,9 @@ class OrbitalPerturbations():
             v_0 = v_osc + integrationResult['y'][3:, -1]
             y_0 = np.hstack([r_0, v_0])
             
-            # * c. Calculates orbital elements
+            # >>> c. Calculates orbital elements
             
-            temp = ThreeDimensionalOrbit.calculateOrbitalElements(r_0, v_0, deg=True)
+            temp = ThreeDimensionalOrbit.calculate_orbital_elements(r_0, v_0, deg=True)
             
             a.append(temp.a)
             e.append(temp.e)
@@ -365,11 +376,11 @@ class OrbitalPerturbations():
             omega.append(temp.omega)
             h.append(temp.h)
             
-            # * d. Update previous time
+            # >>> d. Update previous time
             
             t_prev = t
         
-        # * 2.
+        # >>> 2.
         
         if show:
             
@@ -412,7 +423,7 @@ class OrbitalPerturbations():
     # ! SECTION 12.7
     
     @classmethod
-    def GaussVariationalEquations(cls,
+    def gauss_variational_eom(cls,
                                   t : float,
                                   X : np.ndarray,
                                   drag : bool,
@@ -439,7 +450,7 @@ class OrbitalPerturbations():
             np.ndarray: Derivative of state
         """
         
-        # * Parameters
+        # >>> Parameters
         
         h, e, theta, Omega, i, omega = X
         
@@ -461,19 +472,19 @@ class OrbitalPerturbations():
         
         p_r = p_s = p_w = 0
         
-        # * Drag perturbation
+        # >>> Drag perturbation
         
         if drag:
             
-            r_, v_ = ThreeDimensionalOrbit.PF2GEF(ORBITAL_ELEMENTS(h, e, i, Omega, omega, theta))
+            r_, v_ = ThreeDimensionalOrbit.pf_2_gef(OrbitalElements(h, e, i, Omega, omega, theta))
             
             v_rel = v_ - np.cross(np.array([0, 0, cls.omega]), r_)
             
             p_r += 0
-            p_s += - 0.5 * cls.density(r - cls.R_E) * 1e9 * linalg.norm(v_rel)**2 * B * 1e-6
+            p_s += - 0.5 * cls.density(r - cls.R_E) * 1e9 * np.linalg.norm(v_rel)**2 * B * 1e-6
             p_w += 0
         
-        # * Gravitational perturbation
+        # >>> Gravitational perturbation
         
         if gravitational:
             
@@ -481,17 +492,17 @@ class OrbitalPerturbations():
             p_s += - 3 / 2 * cls.J_2 * cls.mu * cls.R_E**2 / (r**4) * np.sin(i)**2 * np.sin(2 * (omega + theta))
             p_w += - 3 / 2 * cls.J_2 * cls.mu * cls.R_E**2 / (r**4) * np.sin(2 * i) * np.sin(omega + theta)
         
-        # * Solar Radiation Pressure perturbation
+        # >>> Solar Radiation Pressure perturbation
         
         if SRP:
             
-            r_, v_ = ThreeDimensionalOrbit.PF2GEF(ORBITAL_ELEMENTS(h, e, i, Omega, omega, theta))
+            r_, v_ = ThreeDimensionalOrbit.pf_2_gef(OrbitalElements(h, e, i, Omega, omega, theta))
             
-            r_sun, lam, eps = cls.SunPosition(OrbitDetermination.JulianDay2Date(t / 86400))
+            r_sun, lam, eps = cls.sun_position(OrbitDetermination.julian_day_2_date(t / 86400))
             
-            S = AstronomicalData.S_0 * AstronomicalData.R_0**2 / linalg.norm(r_sun)**2
+            S = AstronomicalData.S_0 * AstronomicalData.R_0**2 / np.linalg.norm(r_sun)**2
             
-            p_SR = cls.Shadow(r_, r_sun) * S / AstronomicalData.c * B_SRP * 1e-3
+            p_SR = cls.shadow(r_, r_sun) * S / AstronomicalData.c * B_SRP * 1e-3
             
             Q_Xr = np.array(
                 [
@@ -524,47 +535,47 @@ class OrbitalPerturbations():
             p_s += -p_SR * u[1]
             p_w += -p_SR * u[2]
         
-        # * Moon Gravity perturbation
+        # >>> Moon Gravity perturbation
         
         if MOON:
             
-            r_, v_ = ThreeDimensionalOrbit.PF2GEF(ORBITAL_ELEMENTS(h, e, i, Omega, omega, theta))
+            r_, v_ = ThreeDimensionalOrbit.pf_2_gef(OrbitalElements(h, e, i, Omega, omega, theta))
             
-            r_moon = cls.MoonPosition(OrbitDetermination.JulianDay2Date(t / 86400))
+            r_moon = cls.moon_position(OrbitDetermination.julian_day_2_date(t / 86400))
             
             r_moon_sc = r_moon - r_
             
-            p = AstronomicalData.GravitationalParameter(CelestialBody.MOON) * (r_moon_sc / linalg.norm(r_moon_sc)**3 - r_moon / linalg.norm(r_moon)**3)
+            p = AstronomicalData.gravitational_parameter(CelestialBody.MOON) * (r_moon_sc / np.linalg.norm(r_moon_sc)**3 - r_moon / np.linalg.norm(r_moon)**3)
             
-            r_hat = r_ / linalg.norm(r_)
-            w_hat = np.cross(r_, v_) / linalg.norm(np.cross(r_, v_))
-            s_hat = np.cross(w_hat, r_) / linalg.norm(np.cross(w_hat, r_))
+            r_hat = r_ / np.linalg.norm(r_)
+            w_hat = np.cross(r_, v_) / np.linalg.norm(np.cross(r_, v_))
+            s_hat = np.cross(w_hat, r_) / np.linalg.norm(np.cross(w_hat, r_))
             
             p_r += np.dot(p, r_hat)
             p_s += np.dot(p, s_hat)
             p_w += np.dot(p, w_hat)
             
-        # * Sun Gravity perturbation
+        # >>> Sun Gravity perturbation
         
         if SUN:
             
-            r_, v_ = ThreeDimensionalOrbit.PF2GEF(ORBITAL_ELEMENTS(h, e, i, Omega, omega, theta))
+            r_, v_ = ThreeDimensionalOrbit.pf_2_gef(OrbitalElements(h, e, i, Omega, omega, theta))
             
-            r_sun, lam, eps = cls.SunPosition(OrbitDetermination.JulianDay2Date(t / 86400))
+            r_sun, lam, eps = cls.sun_position(OrbitDetermination.julian_day_2_date(t / 86400))
             
             r_sun_sc = r_sun - r_
             
-            p = AstronomicalData.GravitationalParameter(CelestialBody.SUN) * (r_sun_sc / linalg.norm(r_sun_sc)**3 - r_sun / linalg.norm(r_sun)**3)
+            p = AstronomicalData.gravitational_parameter(CelestialBody.SUN) * (r_sun_sc / np.linalg.norm(r_sun_sc)**3 - r_sun / np.linalg.norm(r_sun)**3)
             
-            r_hat = r_ / linalg.norm(r_)
-            w_hat = np.cross(r_, v_) / linalg.norm(np.cross(r_, v_))
-            s_hat = np.cross(w_hat, r_) / linalg.norm(np.cross(w_hat, r_))
+            r_hat = r_ / np.linalg.norm(r_)
+            w_hat = np.cross(r_, v_) / np.linalg.norm(np.cross(r_, v_))
+            s_hat = np.cross(w_hat, r_) / np.linalg.norm(np.cross(w_hat, r_))
             
             p_r += np.dot(p, r_hat)
             p_s += np.dot(p, s_hat)
             p_w += np.dot(p, w_hat)
         
-        # * Equations
+        # >>> Equations
         
         # da_dt       = 2 * a**2 * v / cls.mu * p_s
         # de_dt       = 1 / v * (2 * (e + np.cos(theta)) * p_s - r / a * np.sin(theta) * p_r)
@@ -583,7 +594,7 @@ class OrbitalPerturbations():
         return np.array([dh_dt, de_dt, dtheta_dt, dOmega_dt, di_dt, domega_dt])
     
     @classmethod
-    def integrateGaussVariationalEquations(cls,
+    def simulate_gauss_variational_equations(cls,
                                            y_0 : np.ndarray,
                                            drag : bool = False,
                                            gravitational : bool = False,
@@ -618,17 +629,17 @@ class OrbitalPerturbations():
             dict: { t: time, y: state[n_states, n_points] }
         """
         
-        # * 1.
+        # >>> 1.
         
-        if t_f < t_0 and JD_0 == 0.0 and JD_f == 0.0: raise CustomException('Invalid integration time')
+        if t_f < t_0 and JD_0 == 0.0 and JD_f == 0.0: raise Exception('Invalid integration time')
         
-        if JD_f < JD_0 and t_0 == 0.0 and t_f == 0.0: raise CustomException('Invalid integration time')
+        if JD_f < JD_0 and t_0 == 0.0 and t_f == 0.0: raise Exception('Invalid integration time')
         
         t_span = [t_0, t_f] if JD_0 == 0.0 and JD_f == 0.0 else [JD_0, JD_f]
             
-        integrationResult = solve_ivp(fun=cls.GaussVariationalEquations, t_span=t_span, y0=y_0, method='RK45', args=(drag, gravitational, SRP, MOON, SUN, B, B_SRP), rtol=1e-8, atol=1e-8)
+        integrationResult = solve_ivp(fun=cls.gauss_variational_eom, t_span=t_span, y0=y_0, method='RK45', args=(drag, gravitational, SRP, MOON, SUN, B, B_SRP), rtol=1e-8, atol=1e-8)
             
-        if not integrationResult['success']: CustomException(integrationResult['message'])
+        if not integrationResult['success']: Exception(integrationResult['message'])
         
         t       = (integrationResult['t'] - integrationResult['t'][0]) / 86400
         h       = integrationResult['y'][0, :]
@@ -639,7 +650,7 @@ class OrbitalPerturbations():
         omega   = integrationResult['y'][5, :] * 180 / np.pi
         a       = h**2 / (cls.mu * (1 - e**2))
         
-        # * 2.
+        # >>> 2.
         
         if show:
             
@@ -683,7 +694,7 @@ class OrbitalPerturbations():
     
     # ! ALGORITHM 12.2
     @classmethod
-    def SunPosition(cls, date : datetime) -> list:
+    def sun_position(cls, date : datetime) -> list:
         """Calculates the position of the Sun with respect to the Earth based on the Astronomical Almanac
 
         Args:
@@ -693,39 +704,39 @@ class OrbitalPerturbations():
             list: [r_sun GEF, lambda, epsilon]
         """
         
-        # * 1. Julian day number
+        # >>> 1. Julian day number
         
-        JD = OrbitDetermination.JulianDay(date.year, date.month, date.day, date.hour, date.minute, date.second)
+        JD = OrbitDetermination.julian_day(date.year, date.month, date.day, date.hour, date.minute, date.second)
         
-        # * 2. Number of days since J2000
+        # >>> 2. Number of days since J2000
         
         n = JD - 2_451_545.0
         
-        # * 3. Mean anonaly
+        # >>> 3. Mean anonaly
         
-        M = wrapTo360Deg(357.529 + 0.98560023 * n)
+        M = wrap_to360deg(357.529 + 0.98560023 * n)
         
-        # * 4. Mean solar longitude
+        # >>> 4. Mean solar longitude
         
-        L = wrapTo360Deg(280.459 + 0.98564736 * n)
+        L = wrap_to360deg(280.459 + 0.98564736 * n)
         
-        # * 5. Longitude
+        # >>> 5. Longitude
         
-        lam = wrapTo360Deg(L + 1.915 * np.sin(np.deg2rad(M)) + 0.0200 * np.sin(2 * np.deg2rad(M)))
+        lam = wrap_to360deg(L + 1.915 * np.sin(np.deg2rad(M)) + 0.0200 * np.sin(2 * np.deg2rad(M)))
         
-        # * 6. Obliquity
+        # >>> 6. Obliquity
         
-        eps = wrapTo360Deg(23.439 - 3.56e-7 * n)
+        eps = wrap_to360deg(23.439 - 3.56e-7 * n)
         
-        # * 7. Earth-Sun unit direction vector
+        # >>> 7. Earth-Sun unit direction vector
         
         u = np.array([np.cos(np.deg2rad(lam)), np.sin(np.deg2rad(lam)) * np.cos(np.deg2rad(eps)), np.sin(np.deg2rad(lam)) * np.sin(np.deg2rad(eps))])
         
-        # * 8. Earth-Sun distance
+        # >>> 8. Earth-Sun distance
         
         r_S = (1.00014 - 0.01671 * np.cos(np.deg2rad(M)) - 0.000140 * np.cos(2 * np.deg2rad(M))) * AstronomicalData.AU
         
-        # * 9. Sun Geocentric position vector
+        # >>> 9. Sun Geocentric position vector
         
         r_S_ = r_S * u
         
@@ -733,7 +744,7 @@ class OrbitalPerturbations():
     
     # ! ALGORITHM 12.3
     @classmethod
-    def Shadow(cls, r_sat : np.ndarray, r_sun : np.ndarray) -> int:
+    def shadow(cls, r_sat : np.ndarray, r_sun : np.ndarray) -> int:
         """Evaluates if the satellite is in the Earth shadow
 
         Args:
@@ -744,23 +755,23 @@ class OrbitalPerturbations():
             int: Shadow function value (0 -> in shadow, 1 -> in light)
         """
         
-        # * 1. Magnitudes
+        # >>> 1. Magnitudes
         
-        _r_sat_ = linalg.norm(r_sat)
+        _r_sat_ = np.linalg.norm(r_sat)
         
-        _r_sun_ = linalg.norm(r_sun)
+        _r_sun_ = np.linalg.norm(r_sun)
         
-        # * 2. Angle between position vectors
+        # >>> 2. Angle between position vectors
         
         theta = np.arccos(np.dot(r_sun, r_sat) / (_r_sun_ * _r_sat_))
         
-        # * 3. Inner angles
+        # >>> 3. Inner angles
         
         theta_1 = np.arccos(cls.R_E / _r_sun_)
         
         theta_2 = np.arccos(cls.R_E / _r_sat_)
         
-        # * 4. Shadow condition
+        # >>> 4. Shadow condition
         
         return 0 if theta_1 + theta_2 <= theta else 1
     
@@ -768,7 +779,7 @@ class OrbitalPerturbations():
     
     # ! ALGORITHM 12.4
     @classmethod
-    def MoonPosition(cls, date : datetime) -> np.ndarray:
+    def moon_position(cls, date : datetime) -> np.ndarray:
         """Calculates the position of the Moon with respect to the Earth based on the Astronomical Almanac
 
         Args:
@@ -778,7 +789,7 @@ class OrbitalPerturbations():
             np.ndarray: r_moon GEF
         """
         
-        # * 0. Coefficients
+        # >>> 0. Coefficients
         
         b_0 = 218.32
         c_0 = 481_267.881
@@ -797,41 +808,41 @@ class OrbitalPerturbations():
         h = [ 135.0, 259.3, 253.7, 269.9 ]
         k = [ 477_198.87, -413_335.38, 890_534.22, 954_397.70 ]
         
-        # * 1. Julian day number
+        # >>> 1. Julian day number
         
-        JD = OrbitDetermination.JulianDay(date.year, date.month, date.day, date.hour, date.minute, date.second)
+        JD = OrbitDetermination.julian_day(date.year, date.month, date.day, date.hour, date.minute, date.second)
         
-        # * 2. Number of Julian centuries since J2000
+        # >>> 2. Number of Julian centuries since J2000
         
         T_0 = (JD - 2_451_545.0) / 36_525
         
-        # * 3. Obliquity
+        # >>> 3. Obliquity
         
-        eps = wrapTo360Deg(23.439 - 0.0130042 * T_0)
+        eps = wrap_to360deg(23.439 - 0.0130042 * T_0)
         
-        # * 4. Lunar ecliptic longitude
+        # >>> 4. Lunar ecliptic longitude
         
-        lam = wrapTo360Deg(b_0 + c_0 * T_0 + sum([a[i] * np.sin(np.deg2rad(b[i] + c[i] * T_0)) for i in range(0, 6)]))
+        lam = wrap_to360deg(b_0 + c_0 * T_0 + sum([a[i] * np.sin(np.deg2rad(b[i] + c[i] * T_0)) for i in range(0, 6)]))
         
-        # * 5. Lunar ecliptic latitude
+        # >>> 5. Lunar ecliptic latitude
         
-        delta = wrapTo360Deg(sum([d[i] * np.sin(np.deg2rad(e[i] + f[i] * T_0)) for i in range(0, 4)]))
+        delta = wrap_to360deg(sum([d[i] * np.sin(np.deg2rad(e[i] + f[i] * T_0)) for i in range(0, 4)]))
         
-        # * 6. Lunar horizontal parallax
+        # >>> 6. Lunar horizontal parallax
         
-        HP = wrapTo360Deg(g_0 + sum([g[i] * np.cos(np.deg2rad(h[i] + k[i] * T_0)) for i in range(0, 4)]))
+        HP = wrap_to360deg(g_0 + sum([g[i] * np.cos(np.deg2rad(h[i] + k[i] * T_0)) for i in range(0, 4)]))
         
-        # * 7. Earth-Moon distance
+        # >>> 7. Earth-Moon distance
         
         r_m = cls.R_E / np.sin(np.deg2rad(HP))
         
-        # * 8. Earth-Moon unit direction vector
+        # >>> 8. Earth-Moon unit direction vector
         
         u = np.array([np.cos(np.deg2rad(delta)) * np.cos(np.deg2rad(lam)),
                       np.cos(np.deg2rad(eps)) * np.cos(np.deg2rad(delta)) * np.sin(np.deg2rad(lam)) - np.sin(np.deg2rad(eps)) * np.sin(np.deg2rad(delta)),
                       np.sin(np.deg2rad(eps)) * np.cos(np.deg2rad(delta)) * np.sin(np.deg2rad(lam)) + np.cos(np.deg2rad(eps)) * np.sin(np.deg2rad(delta))])
         
-        # * 9. Moon Geocentric position vector
+        # >>> 9. Moon Geocentric position vector
         
         r_m_ = r_m * u
         
@@ -852,23 +863,23 @@ if __name__ == '__main__':
     print('-' * 40, '\n')
     
     print('EXAMPLE 12.7\n')
-    print(OrbitalPerturbations.SunPosition(datetime(2013, 7, 25, 8, 0, 0)))
+    print(OrbitalPerturbations.sun_position(datetime(2013, 7, 25, 8, 0, 0)))
     print('-' * 40, '\n')
     
     print('EXAMPLE 12.8\n')
-    print(OrbitalPerturbations.Shadow(np.array([2817.899, -14110.473, -7502.672]), np.array([-11_747_041, 139_486_985, 60_472_278])))
+    print(OrbitalPerturbations.shadow(np.array([2817.899, -14110.473, -7502.672]), np.array([-11_747_041, 139_486_985, 60_472_278])))
     print('-' * 40, '\n')
     
     print('EXAMPLE 12.9\n')
     JD_0 = 2_438_400.5
     
-    _date = OrbitDetermination.JulianDay2Date(JD_0)
+    _date = OrbitDetermination.julian_day_2_date(JD_0)
     
-    print(JD_0, OrbitDetermination.JulianDay(_date.year, _date.month, _date.day, _date.hour, _date.minute, _date.second))
+    print(JD_0, OrbitDetermination.julian_day(_date.year, _date.month, _date.day, _date.hour, _date.minute, _date.second))
     
     _date_f = datetime(_date.year + 3, _date.month, _date.day, _date.hour, _date.minute, _date.second)
     
-    JD_f = OrbitDetermination.JulianDay(_date_f.year, _date_f.month, _date_f.day, _date_f.hour, _date_f.minute, _date_f.second)
+    JD_f = OrbitDetermination.julian_day(_date_f.year, _date_f.month, _date_f.day, _date_f.hour, _date_f.minute, _date_f.second)
     
     print(_date, _date_f, JD_0, JD_f)
     
@@ -876,19 +887,19 @@ if __name__ == '__main__':
     print('-' * 40, '\n')
     
     print('EXAMPLE 12.10\n')
-    print(OrbitalPerturbations.MoonPosition(datetime(2013, 7, 25, 8, 0, 0)))
+    print(OrbitalPerturbations.moon_position(datetime(2013, 7, 25, 8, 0, 0)))
     print('-' * 40, '\n')
     
     print('EXAMPLE 12.11\n')
     JD_0 = 2_454_283.0
     
-    _date = OrbitDetermination.JulianDay2Date(JD_0)
+    _date = OrbitDetermination.julian_day_2_date(JD_0)
     
-    print(JD_0, OrbitDetermination.JulianDay(_date.year, _date.month, _date.day, _date.hour, _date.minute, _date.second))
+    print(JD_0, OrbitDetermination.julian_day(_date.year, _date.month, _date.day, _date.hour, _date.minute, _date.second))
     
     _date_f = _date + timedelta(days=60)
     
-    JD_f = OrbitDetermination.JulianDay(_date_f.year, _date_f.month, _date_f.day, _date_f.hour, _date_f.minute, _date_f.second)
+    JD_f = OrbitDetermination.julian_day(_date_f.year, _date_f.month, _date_f.day, _date_f.hour, _date_f.minute, _date_f.second)
     
     print(_date, _date_f, JD_0, JD_f)
     
@@ -902,7 +913,7 @@ if __name__ == '__main__':
     print('EXAMPLE 12.12\n')
     _date_f = _date + timedelta(days=720)
     
-    JD_f = OrbitDetermination.JulianDay(_date_f.year, _date_f.month, _date_f.day, _date_f.hour, _date_f.minute, _date_f.second)
+    JD_f = OrbitDetermination.julian_day(_date_f.year, _date_f.month, _date_f.day, _date_f.hour, _date_f.minute, _date_f.second)
     
-    OrbitalPerturbations.integrateGaussVariationalEquations(oe_LEO, SUN=True, JD_0=JD_0*86400, JD_f=JD_f*86400, show=True)
+    OrbitalPerturbations.simulate_gauss_variational_equations(oe_LEO, SUN=True, JD_0=JD_0*86400, JD_f=JD_f*86400, show=True)
     print('-' * 40, '\n')

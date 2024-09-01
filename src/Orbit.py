@@ -1,16 +1,23 @@
+""" Orbit.py: Generic orbit for QML """
+
+__author__      = "Alessio Negri"
+__license__     = "LGPL v3"
+__maintainer__  = "Alessio Negri"
+
 import PySide6.QtCore as qtCore
 import PySide6.QtQml as qtQml
 import numpy as np
 
 from Utility import format, singleton
-from tools.ThreeDimensionalOrbit import ORBITAL_ELEMENTS, ORBITAL_PARAMETERS
+
+from tools.TwoBodyProblem import OrbitalParameters
+from tools.ThreeDimensionalOrbit import OrbitalElements
 
 @singleton
 class Orbit(qtCore.QObject):
-    """This class describes the properties and parameters of an Orbit
-    """
+    """This class describes the properties and parameters of an Orbit"""
     
-    # ! PROPERTIES
+    # --- PROPERTIES 
     
     # ? Body
     
@@ -20,7 +27,7 @@ class Orbit(qtCore.QObject):
     def body(self): return self._body
 
     @body.setter
-    def body(self, val : int): self._body = val
+    def body(self, val : int): self._body = val; self.body_changed.emit()
     
     # ? State
     
@@ -30,7 +37,7 @@ class Orbit(qtCore.QObject):
     def state(self): return self._state
 
     @state.setter
-    def state(self, val : int): self._state = val
+    def state(self, val : int): self._state = val; self.state_changed.emit()
     
     # ? R_X [km]
     
@@ -40,7 +47,7 @@ class Orbit(qtCore.QObject):
     def r_x(self): return format(self._r_x)
 
     @r_x.setter
-    def r_x(self, val : float): self._r_x = val
+    def r_x(self, val : float): self._r_x = val; self.r_x_changed.emit()
     
     # ? R_Y [km]
     
@@ -50,7 +57,7 @@ class Orbit(qtCore.QObject):
     def r_y(self): return format(self._r_y)
 
     @r_y.setter
-    def r_y(self, val : float): self._r_y = val
+    def r_y(self, val : float): self._r_y = val; self.r_y_changed.emit()
     
     # ? R_Z [km]
     
@@ -60,7 +67,7 @@ class Orbit(qtCore.QObject):
     def r_z(self): return format(self._r_z)
 
     @r_z.setter
-    def r_z(self, val : float): self._r_z = val
+    def r_z(self, val : float): self._r_z = val; self.r_z_changed.emit()
     
     # ? V_X [km / s]
     
@@ -70,7 +77,7 @@ class Orbit(qtCore.QObject):
     def v_x(self): return format(self._v_x)
 
     @v_x.setter
-    def v_x(self, val : float): self._v_x = val
+    def v_x(self, val : float): self._v_x = val; self.v_x_changed.emit()
     
     # ? V_Y [km / s]
     
@@ -80,7 +87,7 @@ class Orbit(qtCore.QObject):
     def v_y(self): return format(self._v_y)
 
     @v_y.setter
-    def v_y(self, val : float): self._v_y = val
+    def v_y(self, val : float): self._v_y = val; self.v_y_changed.emit()
     
     # ? V_Z [km / s]
     
@@ -90,7 +97,7 @@ class Orbit(qtCore.QObject):
     def v_z(self): return format(self._v_z)
 
     @v_z.setter
-    def v_z(self, val : float): self._v_z = val
+    def v_z(self, val : float): self._v_z = val; self.v_z_changed.emit()
     
     # ? Semi Major Axis [km]
     
@@ -100,7 +107,7 @@ class Orbit(qtCore.QObject):
     def semi_major_axis(self): return format(self._semi_major_axis)
 
     @semi_major_axis.setter
-    def semi_major_axis(self, val : float): self._semi_major_axis = val
+    def semi_major_axis(self, val : float): self._semi_major_axis = val; self.semi_major_axis_changed.emit()
     
     # ? Eccentricity
     
@@ -110,7 +117,7 @@ class Orbit(qtCore.QObject):
     def eccentricity(self): return format(self._eccentricity)
 
     @eccentricity.setter
-    def eccentricity(self, val : float): self._eccentricity = val
+    def eccentricity(self, val : float): self._eccentricity = val; self.eccentricity_changed.emit()
     
     # ? Inclination [rad]
     
@@ -120,7 +127,7 @@ class Orbit(qtCore.QObject):
     def inclination(self): return format(self._inclination, deg=True)
 
     @inclination.setter
-    def inclination(self, val : float): self._inclination = np.deg2rad(val)
+    def inclination(self, val : float): self._inclination = np.deg2rad(val); self.inclination_changed.emit()
     
     # ? Right Ascension Ascending Node [rad]
     
@@ -130,7 +137,7 @@ class Orbit(qtCore.QObject):
     def right_ascension_ascending_node(self): return format(self._right_ascension_ascending_node, deg=True)
 
     @right_ascension_ascending_node.setter
-    def right_ascension_ascending_node(self, val : float): self._right_ascension_ascending_node = np.deg2rad(val)
+    def right_ascension_ascending_node(self, val : float): self._right_ascension_ascending_node = np.deg2rad(val); self.right_ascension_ascending_node_changed.emit()
     
     # ? Periapsis Anomaly [rad]
     
@@ -140,7 +147,7 @@ class Orbit(qtCore.QObject):
     def periapsis_anomaly(self): return format(self._periapsis_anomaly, deg=True)
 
     @periapsis_anomaly.setter
-    def periapsis_anomaly(self, val : float): self._periapsis_anomaly = np.deg2rad(val)
+    def periapsis_anomaly(self, val : float): self._periapsis_anomaly = np.deg2rad(val); self.periapsis_anomaly_changed.emit()
     
     # ? True Anomaly [rad]
     
@@ -150,7 +157,7 @@ class Orbit(qtCore.QObject):
     def true_anomaly(self): return format(self._true_anomaly, deg=True)
 
     @true_anomaly.setter
-    def true_anomaly(self, val : float): self._true_anomaly = np.deg2rad(val)
+    def true_anomaly(self, val : float): self._true_anomaly = np.deg2rad(val); self.true_anomaly_changed.emit()
     
     # ? Periapsis Radius [km]
     
@@ -160,7 +167,7 @@ class Orbit(qtCore.QObject):
     def periapsis_radius(self): return format(self._periapsis_radius)
 
     @periapsis_radius.setter
-    def periapsis_radius(self, val : float): self._periapsis_radius = val
+    def periapsis_radius(self, val : float): self._periapsis_radius = val; self.periapsis_radius_changed.emit()
     
     # ? Apoapsis Radius [km]
     
@@ -170,9 +177,9 @@ class Orbit(qtCore.QObject):
     def apoapsis_radius(self): return format(self._apoapsis_radius)
 
     @apoapsis_radius.setter
-    def apoapsis_radius(self, val : float): self._apoapsis_radius = val
+    def apoapsis_radius(self, val : float): self._apoapsis_radius = val; self.apoapsis_radius_changed.emit()
     
-    # ! CONSTRUCTOR
+    # --- METHODS 
     
     def __init__(self, engine : qtQml.QQmlApplicationEngine) -> None:
         """Constructor
@@ -202,40 +209,34 @@ class Orbit(qtCore.QObject):
         self._periapsis_radius                  : float = 0.0
         self._apoapsis_radius                   : float = 0.0
     
-    # ! METHODS
-    
-    def getKeplerianParameters(self) -> ORBITAL_ELEMENTS:
+    def get_keplerian_parameters(self) -> OrbitalElements:
         """Retrieves the Keplerian parameters
 
         Returns:
             ORBITAL_ELEMENTS: Orbital elements
         """
         
-        return ORBITAL_ELEMENTS(0, self._eccentricity, self._inclination, self._right_ascension_ascending_node, self._periapsis_anomaly, self._true_anomaly, self._semi_major_axis)
+        return OrbitalElements(0, self._eccentricity, self._inclination, self._right_ascension_ascending_node, self._periapsis_anomaly, self._true_anomaly, self._semi_major_axis)
     
-    def updateCentralBody(self, body : int) -> None:
+    def update_central_body(self, body : int) -> None:
         """Updates the central body
 
         Args:
             body (int): Central body
         """
         
-        self._body = body
+        self.body = body
         
-        self.body_changed.emit()
-        
-    def updateState(self, state : int) -> None:
+    def update_state(self, state : int) -> None:
         """Updates the parameters selection state
 
         Args:
             state (int): State
         """
         
-        self._state = state
-        
-        self.state_changed.emit()
+        self.state = state
     
-    def updateCartesianParameters(self, r : np.ndarray, v : np.ndarray) -> None:
+    def update_cartesian_parameters(self, r : np.ndarray, v : np.ndarray) -> None:
         """Updates the Cartesian parameters
 
         Args:
@@ -243,52 +244,35 @@ class Orbit(qtCore.QObject):
             v (np.ndarray): Velocity vector (3, 1) [km / s]
         """
         
-        self._r_x = r[0]
-        self._r_y = r[1]
-        self._r_z = r[2]
-        self._v_x = v[0]
-        self._v_y = v[1]
-        self._v_z = v[2]
-        
-        self.r_x_changed.emit()
-        self.r_y_changed.emit()
-        self.r_z_changed.emit()
-        self.v_x_changed.emit()
-        self.v_y_changed.emit()
-        self.v_z_changed.emit()
+        self.r_x = r[0]
+        self.r_y = r[1]
+        self.r_z = r[2]
+        self.v_x = v[0]
+        self.v_y = v[1]
+        self.v_z = v[2]
     
-    def updateKeplerianParameters(self, orbital_elements : ORBITAL_ELEMENTS) -> None:
+    def update_keplerian_parameters(self, orbital_elements : OrbitalElements) -> None:
         """Updates the Keplerian parameters
 
         Args:
             orbital_elements (ORBITAL_ELEMENTS): Orbital elements
         """
         
-        self._semi_major_axis                   = orbital_elements.a
-        self._eccentricity                      = orbital_elements.e
-        self._inclination                       = orbital_elements.i
-        self._right_ascension_ascending_node    = orbital_elements.Omega
-        self._periapsis_anomaly                 = orbital_elements.omega
-        self._true_anomaly                      = orbital_elements.theta
-        
-        self.semi_major_axis_changed.emit()
-        self.eccentricity_changed.emit()
-        self.inclination_changed.emit()
-        self.right_ascension_ascending_node_changed.emit()
-        self.periapsis_anomaly_changed.emit()
-        self.true_anomaly_changed.emit()
+        self.semi_major_axis                = orbital_elements.a
+        self.eccentricity                   = orbital_elements.e
+        self.inclination                    = orbital_elements.i
+        self.right_ascension_ascending_node = orbital_elements.Omega
+        self.periapsis_anomaly              = orbital_elements.omega
+        self.true_anomaly                   = orbital_elements.theta
     
-    def updateKeplerianParametersFromRadii(self) -> None:
+    def update_keplerian_parameters_from_radii(self) -> None:
         """Updates the Keplerian parameters from the periapsis and apoapsis radii
         """
         
-        self._semi_major_axis   = (self._periapsis_radius + self._apoapsis_radius) / 2
-        self._eccentricity      = (self._apoapsis_radius - self._periapsis_radius) / (self._apoapsis_radius + self._periapsis_radius)
-        
-        self.semi_major_axis_changed.emit()
-        self.eccentricity_changed.emit()
+        self.semi_major_axis    = (self._periapsis_radius + self._apoapsis_radius) / 2
+        self.eccentricity       = (self._apoapsis_radius - self._periapsis_radius) / (self._apoapsis_radius + self._periapsis_radius)
     
-    def updateModifiedKeplerianParameters(self, orbital_elements : ORBITAL_ELEMENTS, orbital_parameters : ORBITAL_PARAMETERS) -> None:
+    def update_modified_keplerian_parameters(self, orbital_elements : OrbitalElements, orbital_parameters : OrbitalParameters) -> None:
         """Updates the Keplerian parameters
 
         Args:
@@ -296,20 +280,11 @@ class Orbit(qtCore.QObject):
             orbital_parameters (ORBITAL_PARAMETERS): Orbital parameters
         """
         
-        self._semi_major_axis                   = orbital_elements.a
-        self._eccentricity                      = orbital_elements.e
-        self._inclination                       = orbital_elements.i
-        self._right_ascension_ascending_node    = orbital_elements.Omega
-        self._periapsis_anomaly                 = orbital_elements.omega
-        self._true_anomaly                      = orbital_elements.theta
-        self._periapsis_radius                  = orbital_parameters.r_p
-        self._apoapsis_radius                   = orbital_parameters.r_a
-        
-        self.semi_major_axis_changed.emit()
-        self.eccentricity_changed.emit()
-        self.inclination_changed.emit()
-        self.right_ascension_ascending_node_changed.emit()
-        self.periapsis_anomaly_changed.emit()
-        self.true_anomaly_changed.emit()
-        self.periapsis_radius_changed.emit()
-        self.apoapsis_radius_changed.emit()
+        self.semi_major_axis                = orbital_elements.a
+        self.eccentricity                   = orbital_elements.e
+        self.inclination                    = orbital_elements.i
+        self.right_ascension_ascending_node = orbital_elements.Omega
+        self.periapsis_anomaly              = orbital_elements.omega
+        self.true_anomaly                   = orbital_elements.theta
+        self.periapsis_radius               = orbital_parameters.r_p
+        self.apoapsis_radius                = orbital_parameters.r_a
