@@ -71,6 +71,22 @@ class Spacecraft(qtCore.QObject):
     @reference_surface.setter
     def reference_surface(self, val : float): self._reference_surface = val
     
+    # ?  Radiation Pressure Coefficient []
+    
+    @qtCore.Property(float)
+    def radiation_pressure_coefficient(self): return format(self._radiation_pressure_coefficient)
+
+    @radiation_pressure_coefficient.setter
+    def radiation_pressure_coefficient(self, val : float): self._radiation_pressure_coefficient = val
+    
+    # ? Absorbing Surface [m^2]
+    
+    @qtCore.Property(float)
+    def absorbing_surface(self): return format(self._absorbing_surface)
+
+    @absorbing_surface.setter
+    def absorbing_surface(self, val : float): self._absorbing_surface = val
+    
     # ? Capsule Nose Radius [m]
     
     @qtCore.Property(float)
@@ -140,20 +156,22 @@ class Spacecraft(qtCore.QObject):
         
         engine.rootContext().setContextProperty("__Spacecraft", self)
         
-        self._initial_mass                  : float = 2000.0    # * Initial Mass                [ kg ]
-        self._mass                          : float = 2000.0    # * Current Mass                [ kg ]
-        self._specific_impulse              : float = 300.0     # * Specific Impulse            [ s ]
-        self._thrust                        : float = 10e3      # * Thrust                      [ kg * m / s^2 ]
-        self._lift_coefficient              : float = 0.0       # * Lift Coefficient            [ ]
-        self._drag_coefficient              : float = 1.0       # * Drag Coefficient            [ ]
-        self._reference_surface             : float = 1.0       # * Reference Surface           [ m^2 ]
-        self._capsule_nose_radius           : float = 0.3       # * Capsule Nose Radius         [ m ]
-        self._parachute_drag_coefficient    : float = 1.4       # * Parachute Drag Coefficient  [ ]
-        self._parachute_reference_surface   : float = 70        # * Parachute Reference Surface [ m^2 ]
-        self._capsule_mass                  : float = 26.27     # * Capsule Mass                [ kg ]
-        self._capsule_drag_coefficient      : float = 1.096     # * Capsule Drag Coefficient    [ ]
-        self._capsule_lift_coefficient      : float = 0.0       # * Capsule Lift Coefficient    [ ]
-        self._capsule_reference_surface     : float = 0.341     # * Capsule Reference Surface   [ m^2 ]
+        self._initial_mass                      : float = 2000.0    # * Initial Mass                    [ kg ]
+        self._mass                              : float = 2000.0    # * Current Mass                    [ kg ]
+        self._specific_impulse                  : float = 300.0     # * Specific Impulse                [ s ]
+        self._thrust                            : float = 10e3      # * Thrust                          [ kg * m / s^2 ]
+        self._lift_coefficient                  : float = 0.0       # * Lift Coefficient                [ ]
+        self._drag_coefficient                  : float = 1.0       # * Drag Coefficient                [ ]
+        self._reference_surface                 : float = 1.0       # * Reference Surface               [ m^2 ]
+        self._radiation_pressure_coefficient    : float = 2.0       # * Radiation Pressure Coefficient  [ ]
+        self._absorbing_surface                 : float = 10        # * Absorbing Surface               [ m^2 ]
+        self._capsule_nose_radius               : float = 0.3       # * Capsule Nose Radius             [ m ]
+        self._parachute_drag_coefficient        : float = 1.4       # * Parachute Drag Coefficient      [ ]
+        self._parachute_reference_surface       : float = 70        # * Parachute Reference Surface     [ m^2 ]
+        self._capsule_mass                      : float = 26.27     # * Capsule Mass                    [ kg ]
+        self._capsule_drag_coefficient          : float = 1.096     # * Capsule Drag Coefficient        [ ]
+        self._capsule_lift_coefficient          : float = 0.0       # * Capsule Lift Coefficient        [ ]
+        self._capsule_reference_surface         : float = 0.341     # * Capsule Reference Surface       [ m^2 ]
     
     def reset(self) -> None:
         """Resets the spacecraft parameters

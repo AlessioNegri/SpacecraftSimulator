@@ -69,7 +69,7 @@ class FigureCanvas(qtCore.QObject):
         self.canvas     = canvas
         self.figure     = canvas.figure
         self.toolbar    = NavigationToolbar2QtQuick(canvas=canvas)
-        self.figsize    = (qml_object_parent.width() / 100, (qml_object_parent.height() - 50) / 100) # * width and height in inches
+        self.figsize    = (qml_object_parent.width() // 100, (qml_object_parent.height() - 50) // 100) # * width and height in inches
         
         # ? Set Axes
         
@@ -215,7 +215,7 @@ class FigureCanvas(qtCore.QObject):
         
         if self.figure == None: return
         
-        self.figsize = (width / 100, (height - 50) / 100)
+        self.figsize = (width // 100, (height - 50) // 100)
         
         self.figure.set_figwidth(self.figsize[0])
         self.figure.set_figheight(self.figsize[1])

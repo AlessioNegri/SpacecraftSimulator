@@ -66,8 +66,6 @@ Page
                 Layout.alignment: Qt.AlignBottom
             }
         }
-
-        
     }
 
     footer: Rectangle

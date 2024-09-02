@@ -7,6 +7,8 @@ import "../components"
 // ? The DialogAbout class manages the about dialog.
 Dialog
 {
+    // ! ----------------------------------------- ! //
+    
     id: root
     title: "About - Spacecraft Simulator"
     anchors.centerIn: parent

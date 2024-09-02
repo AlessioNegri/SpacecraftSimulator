@@ -9,7 +9,7 @@ import "DialogAtmosphericEntryConditions.js" as Script
 // ? The DialogAtmosphericEntryConditions class manages the atmospheric entry conditions dialog.
 Dialog
 {
-    // !-----------------------------------------! //
+    // ! ----------------------------------------- ! //
 
     id: root
     anchors.centerIn: parent
@@ -50,7 +50,7 @@ Dialog
             width: parent.width
             spacing: 25
 
-            // - PARAMETERS 
+            // --- PARAMETERS 
 
             Text
             {
@@ -117,7 +117,7 @@ Dialog
                 Layout.fillWidth: true
             }
 
-            // - RESULTS 
+            // --- RESULTS 
 
             Text
             {

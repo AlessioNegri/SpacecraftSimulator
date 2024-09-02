@@ -100,6 +100,8 @@ In the **Aerodynamics** section you can set:
 - **Lift Coefficient**
 - **Drag Coefficient**
 - **Reference Surface**
+- **Radiation Pressure Coefficient** (1 => absorbing surface, 2 => reflective surface)
+- **Absorbing Surface**
 
 <p align="center"><img src="./images/spacecraft_properties_aerodynamics.png" width="100%"></p>
 
@@ -168,14 +170,16 @@ By clicking on the `Save` button, the transfer becomes visible in the main windo
 ## 5 Orbit Propagation
 
 Under the menu item `Missions \ Orbit Propagation \ Orbital Perturbations` it is possible to analyze the effects of the following perturbations on an orbit around Earth in a range of dates:
-- **Drag**: the user shall give the value of the *Ballistic Coefficient*
+- **Drag**
 - **Gravitational**
-- **Solar Radiation Pressure**: the user shall give the value of the *Ballistic Coefficient*
+- **Solar Radiation Pressure**
 - **Third Body**: the user shall select the third body between *Moon* and *Sun*
 
-![Orbital Perturbations.](./images/orbital_perturbations.png)
+for a given set of initial orbital elements. By clicking on the `Save` button the parameters are updated.
 
-By clicking on the `Save` button, the propagation of the orbit becomes visible in the main window in terms of the evolution of the orbital elements with respect to the initial values.
+<p align="center"><img src="./images/orbital_perturbations.png" width="100%"></p>
+
+To simulate the orbit propagation click on the `Run` button. The evolution of the orbital elements with respect to the initial values can be analyzed in the main window.
 
 ![Orbital Propagation.](./images/orbit_propagation.png)
 

@@ -50,7 +50,7 @@ class MissionParameters(qtCore.QObject):
         
         self.mission_orbit_transfer.setUpdateWithCanvas(engine)
         
-        self.mission_orbit_propagation.setUpdateWithCanvas(engine)
+        self.mission_orbit_propagation.set_update_with_canvas(engine)
         
         self.mission_interplanetary_transfer.setUpdateWithCanvas(engine)
         

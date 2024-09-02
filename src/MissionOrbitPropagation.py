@@ -1,26 +1,32 @@
+""" MissionOrbitPropagation.py: Implements the orbit propagation mission """
+
+__author__      = "Alessio Negri"
+__license__     = "LGPL v3"
+__maintainer__  = "Alessio Negri"
+
 import PySide6.QtCore as qtCore
 import PySide6.QtQml as qtQml
 import numpy as np
+import mplcyberpunk
 
 from datetime import datetime
 
 from Utility import format
 from FigureCanvas import FigureCanvas
-from Orbit import Orbit
+from Spacecraft import Spacecraft
 
 from tools.AstronomicalData import CelestialBody
 from tools.OrbitalPerturbations import OrbitalPerturbations
 from tools.OrbitDetermination import OrbitDetermination
 
 class MissionOrbitPropagation(qtCore.QObject):
+    """Manages the orbit propagation mission"""
     
-    # ! PROPERTIES
+    # --- PROPERTIES 
     
     # ? Angular Momentum [km^2 / s]
     
-    angular_momentum_changed = qtCore.Signal()
-    
-    @qtCore.Property(float, notify=angular_momentum_changed)
+    @qtCore.Property(float)
     def angular_momentum(self): return format(self._angular_momentum)
 
     @angular_momentum.setter
@@ -28,9 +34,7 @@ class MissionOrbitPropagation(qtCore.QObject):
     
     # ? Eccentricity
     
-    eccentricity_changed = qtCore.Signal()
-    
-    @qtCore.Property(float, notify=eccentricity_changed)
+    @qtCore.Property(float)
     def eccentricity(self): return format(self._eccentricity)
 
     @eccentricity.setter
@@ -38,9 +42,7 @@ class MissionOrbitPropagation(qtCore.QObject):
     
     # ? Inclination [rad]
     
-    inclination_changed = qtCore.Signal()
-    
-    @qtCore.Property(float, notify=inclination_changed)
+    @qtCore.Property(float)
     def inclination(self): return format(self._inclination, deg=True)
 
     @inclination.setter
@@ -48,9 +50,7 @@ class MissionOrbitPropagation(qtCore.QObject):
     
     # ? Right Ascension Ascending Node [rad]
     
-    right_ascension_ascending_node_changed = qtCore.Signal()
-    
-    @qtCore.Property(float, notify=right_ascension_ascending_node_changed)
+    @qtCore.Property(float)
     def right_ascension_ascending_node(self): return format(self._right_ascension_ascending_node, deg=True)
 
     @right_ascension_ascending_node.setter
@@ -58,9 +58,7 @@ class MissionOrbitPropagation(qtCore.QObject):
     
     # ? Periapsis Anomaly [rad]
     
-    periapsis_anomaly_changed = qtCore.Signal()
-    
-    @qtCore.Property(float, notify=periapsis_anomaly_changed)
+    @qtCore.Property(float)
     def periapsis_anomaly(self): return format(self._periapsis_anomaly, deg=True)
 
     @periapsis_anomaly.setter
@@ -68,9 +66,7 @@ class MissionOrbitPropagation(qtCore.QObject):
     
     # ? True Anomaly [rad]
     
-    true_anomaly_changed = qtCore.Signal()
-    
-    @qtCore.Property(float, notify=true_anomaly_changed)
+    @qtCore.Property(float)
     def true_anomaly(self): return format(self._true_anomaly, deg=True)
 
     @true_anomaly.setter
@@ -78,29 +74,15 @@ class MissionOrbitPropagation(qtCore.QObject):
     
     # ? Drag Perturbation
     
-    drag_changed = qtCore.Signal()
-    
-    @qtCore.Property(bool, notify=drag_changed)
+    @qtCore.Property(bool)
     def drag(self): return self._drag
 
     @drag.setter
     def drag(self, val : bool): self._drag = val
     
-    # ? Drag Ballistic Coefficient [m^2 / kg]
-    
-    drag_ballistic_coefficient_changed = qtCore.Signal()
-    
-    @qtCore.Property(float, notify=drag_ballistic_coefficient_changed)
-    def drag_ballistic_coefficient(self): return format(self._drag_ballistic_coefficient)
-
-    @drag_ballistic_coefficient.setter
-    def drag_ballistic_coefficient(self, val : float): self._drag_ballistic_coefficient = val
-    
     # ? Gravitational Perturbation
     
-    gravitational_changed = qtCore.Signal()
-    
-    @qtCore.Property(bool, notify=gravitational_changed)
+    @qtCore.Property(bool)
     def gravitational(self): return self._gravitational
 
     @gravitational.setter
@@ -108,29 +90,15 @@ class MissionOrbitPropagation(qtCore.QObject):
     
     # ? Solar Radiation Pressure Perturbation
     
-    srp_changed = qtCore.Signal()
-    
-    @qtCore.Property(bool, notify=srp_changed)
-    def srp(self): return self._srp
+    @qtCore.Property(bool)
+    def solar_radiation_pressure(self): return self._solar_radiation_pressure
 
-    @srp.setter
-    def srp(self, val : bool): self._srp = val
-    
-    # ? Solar Radiation Pressure Ballistic Coefficient [m^2 / kg]
-    
-    srp_ballistic_coefficient_changed = qtCore.Signal()
-    
-    @qtCore.Property(float, notify=srp_ballistic_coefficient_changed)
-    def srp_ballistic_coefficient(self): return format(self._srp_ballistic_coefficient)
-
-    @srp_ballistic_coefficient.setter
-    def srp_ballistic_coefficient(self, val : float): self._srp_ballistic_coefficient = val
+    @solar_radiation_pressure.setter
+    def solar_radiation_pressure(self, val : bool): self._solar_radiation_pressure = val
     
     # ? Third Body Perturbation
     
-    third_body_changed = qtCore.Signal()
-    
-    @qtCore.Property(bool, notify=third_body_changed)
+    @qtCore.Property(bool)
     def third_body(self): return self._third_body
 
     @third_body.setter
@@ -138,9 +106,7 @@ class MissionOrbitPropagation(qtCore.QObject):
     
     # ? Third Body Choice
     
-    third_body_choice_changed = qtCore.Signal()
-    
-    @qtCore.Property(int, notify=third_body_choice_changed)
+    @qtCore.Property(int)
     def third_body_choice(self): return self._third_body_choice
 
     @third_body_choice.setter
@@ -148,9 +114,7 @@ class MissionOrbitPropagation(qtCore.QObject):
     
     # ? Start Date
     
-    start_date_changed = qtCore.Signal()
-    
-    @qtCore.Property(str, notify=start_date_changed)
+    @qtCore.Property(str)
     def start_date(self): return self._start_date
 
     @start_date.setter
@@ -158,15 +122,13 @@ class MissionOrbitPropagation(qtCore.QObject):
     
     # ? End Date
     
-    end_date_changed = qtCore.Signal()
-    
-    @qtCore.Property(str, notify=end_date_changed)
+    @qtCore.Property(str)
     def end_date(self): return self._end_date
 
     @end_date.setter
     def end_date(self, val : str): self._end_date = val
     
-    # ! CONSTRUCTOR
+    # --- METHODS 
     
     def __init__(self, engine : qtQml.QQmlApplicationEngine) -> None:
         """Constructor
@@ -179,38 +141,36 @@ class MissionOrbitPropagation(qtCore.QObject):
         
         engine.rootContext().setContextProperty("__MissionOrbitPropagation", self)
         
-        # * Orbital elements
+        self.spacecraft = Spacecraft(engine)
         
-        self._angular_momentum                  : float = 63383.4
-        self._eccentricity                      : float = 0.025422
-        self._inclination                       : float = np.deg2rad(343.427)
-        self._right_ascension_ascending_node    : float = np.deg2rad(45.3812)
-        self._periapsis_anomaly                 : float = np.deg2rad(88.3924)
-        self._true_anomaly                      : float = np.deg2rad(227.493)
+        # ? Orbital elements
         
-        # * Orbital Perturbations
+        self._angular_momentum                  : float = 63383.4               # * Angular Momentum                                [ km^2 / s ]
+        self._eccentricity                      : float = 0.025422              # * Eccentricity                                    [ ]
+        self._inclination                       : float = np.deg2rad(343.427)   # * Inclination                                     [ deg ]
+        self._right_ascension_ascending_node    : float = np.deg2rad(45.3812)   # * Right Ascension of the Ascending Node (RAAN)    [ deg ]
+        self._periapsis_anomaly                 : float = np.deg2rad(88.3924)   # * Periapsis anomaly                               [ deg ]
+        self._true_anomaly                      : float = np.deg2rad(227.493)   # * True anomaly                                    [ deg ]
         
-        self._drag                              : bool = False
-        self._drag_ballistic_coefficient        : float = 2.2 * (np.pi * 1**2 / 4) / 100
-        self._gravitational                     : bool = False
-        self._srp                               : bool = False
-        self._srp_ballistic_coefficient         : float = 2 * 2
-        self._third_body                        : bool = False
-        self._third_body_choice                 : int = 0
-        self._start_date                        : str = '2024-06-01 00:00:00'
-        self._end_date                          : str = '2024-06-02 00:00:00'
+        # ? Orbital perturbations
         
-        # * Orbit propagation
+        self._drag                              : bool = False                  # * Use drag perturbation
+        self._gravitational                     : bool = False                  # * Use gravitational perturbation
+        self._solar_radiation_pressure          : bool = False                  # * Use solar radiation pressure perturbation
+        self._third_body                        : bool = False                  # * Use third body perturbation
+        self._third_body_choice                 : int = 0                       # * Third body selection
+        self._start_date                        : str = '2024-06-01 00:00:00'   # * Start date
+        self._end_date                          : str = '2024-06-02 00:00:00'   # * End date
         
-        self.figure_orbit_propagation = FigureCanvas(rows=2, cols=3)
+        # ? Orbit propagation
         
-        # * Context properties
+        self.figure = FigureCanvas(rows=2, cols=3)
         
-        engine.rootContext().setContextProperty("__OrbitPropagationFigure", self.figure_orbit_propagation)
+        # ? Context properties
+        
+        engine.rootContext().setContextProperty("__OrbitPropagationFigure", self.figure)
     
-    # ! PUBLIC
-    
-    def setUpdateWithCanvas(self, engine : qtQml.QQmlApplicationEngine) -> None:
+    def set_update_with_canvas(self, engine : qtQml.QQmlApplicationEngine) -> None:
         """Connects all the QML figures with the backend model
 
         Args:
@@ -219,83 +179,106 @@ class MissionOrbitPropagation(qtCore.QObject):
         
         win = engine.rootObjects()[0]
         
-        self.figure_orbit_propagation.update_with_canvas(win.findChild(qtCore.QObject, "OrbitPropagationFigure"), win.findChild(qtCore.QObject, "OrbitPropagationFigureParent"))
+        self.figure.update_with_canvas(win.findChild(qtCore.QObject, "OrbitPropagationFigure"), win.findChild(qtCore.QObject, "OrbitPropagationFigureParent"))
+        
+        self.init_figure()
     
-     # ! SLOTS
+    # --- PUBLIC SLOTS 
      
     @qtCore.Slot()
-    def loadOrbitalPerturbationsParameters(self) -> None:
-        """Loads the orbital perturbations parameters
+    def simulate(self) -> None:
+        """Simulates the orbital perturbations
         """
         
-        pass
-    
-    @qtCore.Slot()
-    def saveOrbitalPerturbationsParameters(self) -> None:
-        """Saves the orbital perturbations parameters
-        """
+        # ? Simulation
         
         OrbitalPerturbations.set_celestial_body(CelestialBody.EARTH)
         
-        y_0 = np.array([self._angular_momentum, self._eccentricity, self._true_anomaly, self._right_ascension_ascending_node, self._inclination, self._periapsis_anomaly])
+        y_0 = np.array([self.angular_momentum, self.eccentricity, self.true_anomaly, self.right_ascension_ascending_node, self.inclination, self.periapsis_anomaly])
         
-        start_date = datetime.strptime(self._start_date, '%Y-%m-%d %H:%M:%S')
-        end_date = datetime.strptime(self._end_date, '%Y-%m-%d %H:%M:%S')
+        start_date  = datetime.strptime(self.start_date, '%Y-%m-%d %H:%M:%S')
+        end_date    = datetime.strptime(self.end_date, '%Y-%m-%d %H:%M:%S')
         
         JD_0 = OrbitDetermination.julian_day(start_date.year, start_date.month, start_date.day, start_date.hour, start_date.minute, start_date.second)
         JD_f = OrbitDetermination.julian_day(end_date.year, end_date.month, end_date.day, end_date.hour, end_date.minute, end_date.second)
         
-        y = OrbitalPerturbations.simulate_gauss_variational_equations(y_0,
-                                                                    drag=self._drag,
-                                                                    gravitational=self._gravitational,
-                                                                    SRP=self._srp,
-                                                                    B=self._drag_ballistic_coefficient,
-                                                                    B_SRP=self._srp_ballistic_coefficient,
-                                                                    MOON=self._third_body and self._third_body_choice == 0,
-                                                                    SUN=self._third_body and self._third_body_choice == 1,
-                                                                    JD_0=JD_0 * 86400,
-                                                                    JD_f=JD_f * 86400)
+        B       = self.spacecraft.drag_coefficient * self.spacecraft.reference_surface / self.spacecraft.initial_mass
+        B_SRP   = self.spacecraft.radiation_pressure_coefficient * self.spacecraft.absorbing_surface / self.spacecraft.initial_mass
         
-        self.plotOrbitalPerturbations(y)
+        result = OrbitalPerturbations.simulate_gauss_variational_equations(y_0,
+                                                                           drag=self.drag,
+                                                                           gravitational=self.gravitational,
+                                                                           SRP=self.solar_radiation_pressure,
+                                                                           B=B,
+                                                                           B_SRP=B_SRP,
+                                                                           MOON=self.third_body and self.third_body_choice == 0,
+                                                                           SUN=self.third_body and self.third_body_choice == 1,
+                                                                           JD_0=JD_0 * 86400,
+                                                                           JD_f=JD_f * 86400)
+        
+        a       = result['a']
+        e       = result['e']
+        h       = result['h']
+        i       = result['i']
+        Omega   = result['Omega']
+        omega   = result['omega']
+        t       = result['t']
+        
+        # ? Plot
+        
+        self.figure.reset_canvas()
+        
+        self.figure.axes[0,0].plot(t, a - a[0], color='#FFCC80')
+        self.figure.axes[0,0].set_title('Semi-Major Axis Variation [ $km$ ]')
+        
+        self.figure.axes[0,1].plot(t, e - e[0], color='#90CAF9')
+        self.figure.axes[0,1].set_title('Eccentricity Variation')
+        
+        self.figure.axes[0,2].plot(t, h - h[0], color='#CE93D8')
+        self.figure.axes[0,2].set_title('Angular Momentum Variation [ $km^2\;/\;s$ ]')
+        
+        self.figure.axes[1,0].plot(t, i - i[0], color='#F48FB1')
+        self.figure.axes[1,0].set_xlabel('Time [days]')
+        self.figure.axes[1,0].set_title('Inclination Variation [ $°$ ]')
+        
+        self.figure.axes[1,1].plot(t, Omega - Omega[0], color='#E6EE9C')
+        self.figure.axes[1,1].set_xlabel('Time [days]')
+        self.figure.axes[1,1].set_title('RAAN Variation [ $°$ ]')
+        
+        self.figure.axes[1,2].plot(t, omega - omega[0], color='#80CBC4')
+        self.figure.axes[1,2].set_xlabel('Time [days]')
+        self.figure.axes[1,2].set_title('Periapsis Anomaly Variation [ $°$ ]')
+        
+        mplcyberpunk.make_lines_glow(self.figure.axes[0,0])
+        mplcyberpunk.make_lines_glow(self.figure.axes[0,1])
+        mplcyberpunk.make_lines_glow(self.figure.axes[0,2])
+        mplcyberpunk.make_lines_glow(self.figure.axes[1,0])
+        mplcyberpunk.make_lines_glow(self.figure.axes[1,1])
+        mplcyberpunk.make_lines_glow(self.figure.axes[1,2])
+        
+        self.figure.redraw_canvas()
     
-    # ! PRIVATE
+    # --- PRIVATE METHODS 
     
-    def plotOrbitalPerturbations(self, y : np.ndarray) -> None:
-        """Plots the orbital perturbations
-
-        Args:
-            y (np.ndarray): Integration vector [t, a, e, i, Omega, omega, h]
+    def init_figure(self) -> None:
+        """Initializes the figure canvas
         """
         
-        self.figure_orbit_propagation.reset_canvas()
+        self.figure.reset_canvas()
         
-        self.figure_orbit_propagation.figure.suptitle('Orbital Perturbations', fontsize=16)
+        self.figure.axes[0,0].set_title('Semi-Major Axis Variation [ $km$ ]')
         
-        self.figure_orbit_propagation.axes[0][0].plot(y['t'], y['a'] - y['a'][0])
-        self.figure_orbit_propagation.axes[0][0].set_title('$a - a_0$ [$km$]')
-        self.figure_orbit_propagation.axes[0][0].grid(True)
+        self.figure.axes[0,1].set_title('Eccentricity Variation')
         
-        self.figure_orbit_propagation.axes[0][1].plot(y['t'], y['e'] - y['e'][0])
-        self.figure_orbit_propagation.axes[0][1].set_title('$e - e_0$')
-        self.figure_orbit_propagation.axes[0][1].grid(True)
+        self.figure.axes[0,2].set_title('Angular Momentum Variation [ $km^2\;/\;s$ ]')
         
-        self.figure_orbit_propagation.axes[0][2].plot(y['t'], y['h'] - y['h'][0])
-        self.figure_orbit_propagation.axes[0][2].set_title('$h - h_0$ [$km^2 / s$]')
-        self.figure_orbit_propagation.axes[0][2].grid(True)
+        self.figure.axes[1,0].set_xlabel('Time [days]')
+        self.figure.axes[1,0].set_title('Inclination Variation [ $°$ ]')
         
-        self.figure_orbit_propagation.axes[1][0].plot(y['t'], y['i'] - y['i'][0])
-        self.figure_orbit_propagation.axes[1][0].set_title('$i - i_0$ [deg]')
-        self.figure_orbit_propagation.axes[1][0].set_xlabel('Time [days]')
-        self.figure_orbit_propagation.axes[1][0].grid(True)
+        self.figure.axes[1,1].set_xlabel('Time [days]')
+        self.figure.axes[1,1].set_title('RAAN Variation [ $°$ ]')
         
-        self.figure_orbit_propagation.axes[1][1].plot(y['t'], y['Omega'] - y['Omega'][0])
-        self.figure_orbit_propagation.axes[1][1].set_title('$\Omega - \Omega_0$ [deg]')
-        self.figure_orbit_propagation.axes[1][1].set_xlabel('Time [days]')
-        self.figure_orbit_propagation.axes[1][1].grid(True)
+        self.figure.axes[1,2].set_xlabel('Time [days]')
+        self.figure.axes[1,2].set_title('Periapsis Anomaly Variation [ $°$ ]')
         
-        self.figure_orbit_propagation.axes[1][2].plot(y['t'], y['omega'] - y['omega'][0])
-        self.figure_orbit_propagation.axes[1][2].set_title('$\omega - \omega_0$ [deg]')
-        self.figure_orbit_propagation.axes[1][2].set_xlabel('Time [days]')
-        self.figure_orbit_propagation.axes[1][2].grid(True)
-
-        self.figure_orbit_propagation.redraw_canvas()
+        self.figure.redraw_canvas()

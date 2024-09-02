@@ -70,7 +70,7 @@ class MissionAtmosphericEntry(qtCore.QObject):
     @impact_velocity.setter
     def impact_velocity(self, val : float): self._impact_velocity = val; self.impact_velocity_changed.emit()
     
-    # --- METHODS 
+    # --- PUBLIC METHODS 
     
     def __init__(self, engine : qtQml.QQmlApplicationEngine) -> None:
         """Constructor
@@ -103,8 +103,6 @@ class MissionAtmosphericEntry(qtCore.QObject):
         
         engine.rootContext().setContextProperty("__AtmosphericEntryFigure", self.figure)
     
-    # --- PUBLIC METHODS 
-    
     def set_update_with_canvas(self, engine : qtQml.QQmlApplicationEngine) -> None:
         """Connects all the QML figures with the backend model
 
@@ -125,7 +123,7 @@ class MissionAtmosphericEntry(qtCore.QObject):
         """Simulates the atmospheric entry mission
         """
         
-        # ? Simulation 
+        # ? Simulation
         
         AtmosphericEntry.set_capsule_parameters(0, 300, 0, self.spacecraft.capsule_lift_coefficient, self.spacecraft.capsule_drag_coefficient, self.spacecraft.capsule_reference_surface)
         
@@ -148,7 +146,7 @@ class MissionAtmosphericEntry(qtCore.QObject):
         
         self.impact_velocity = V[-1] * 1e3
         
-        # ? Plot 
+        # ? Plot
         
         t = t / 60
         

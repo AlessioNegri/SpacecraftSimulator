@@ -9,7 +9,7 @@ import "DialogSpacecraft.js" as Script
 // ? The DialogSpacecraft class manages the spacecraft dialog.
 Dialog
 {
-    // !-----------------------------------------! //
+    // ! ----------------------------------------- ! //
 
     id: root
     anchors.centerIn: parent
@@ -71,152 +71,153 @@ Dialog
             anchors.bottom: parent.bottom
             anchors.margins: 20
 
-            // - Propulsion 
+            // --- Propulsion 
 
-            Item
+            GridLayout
             {
-                anchors.fill: parent
+                columns: 3
+                columnSpacing: 50
+                rowSpacing: 25
+                width: parent.width
 
-                GridLayout
+                DialogParameter
                 {
-                    columns: 3
-                    columnSpacing: 50
-                    rowSpacing: 25
-                    width: parent.width
+                    id: _initial_mass_
+                    placeholderText: "Initial Mass [kg]"
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                }
 
-                    DialogParameter
-                    {
-                        id: _initial_mass_
-                        placeholderText: "Initial Mass [kg]"
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                    }
+                DialogParameter
+                {
+                    id: _specific_impulse_
+                    placeholderText: "Specific Impulse [s]"
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                }
 
-                    DialogParameter
-                    {
-                        id: _specific_impulse_
-                        placeholderText: "Specific Impulse [s]"
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                    }
-
-                    DialogParameter
-                    {
-                        id: _thrust_
-                        placeholderText: "Thrust [N]"
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                    }
+                DialogParameter
+                {
+                    id: _thrust_
+                    placeholderText: "Thrust [N]"
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
                 }
             }
 
-             // - Aerodynamics 
+            // --- Aerodynamics 
 
-            Item
+            GridLayout
             {
-                anchors.fill: parent
+                columns: 3
+                columnSpacing: 50
+                rowSpacing: 25
+                width: parent.width
 
-                GridLayout
+                DialogParameter
                 {
-                    columns: 3
-                    columnSpacing: 50
-                    rowSpacing: 25
-                    width: parent.width
+                    id: _lift_coefficient_
+                    placeholderText: "Lift Coefficient"
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                }
 
-                    DialogParameter
-                    {
-                        id: _lift_coefficient_
-                        placeholderText: "Lift Coefficient"
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                    }
+                DialogParameter
+                {
+                    id: _drag_coefficient_
+                    placeholderText: "Drag Coefficient"
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                }
 
-                    DialogParameter
-                    {
-                        id: _drag_coefficient_
-                        placeholderText: "Drag Coefficient"
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                    }
+                DialogParameter
+                {
+                    id: _reference_surface_
+                    placeholderText: "Reference Surface [m^2]"
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                }
 
-                    DialogParameter
-                    {
-                        id: _reference_surface_
-                        placeholderText: "Reference Surface [m^2]"
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                    }
+                DialogParameter
+                {
+                    id: _radiation_pressure_coefficient_
+                    placeholderText: "Radiation Pressure Coefficient"
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                }
+
+                DialogParameter
+                {
+                    id: _absorbing_surface_
+                    placeholderText: "Absorbing Surface [m^2]"
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
                 }
             }
 
-            // - Atmospheric Entry 
+            // --- Atmospheric Entry 
 
-            Item
+            GridLayout
             {
-                anchors.fill: parent
+                columns: 3
+                columnSpacing: 50
+                rowSpacing: 25
+                width: parent.width
 
-                GridLayout
+                DialogParameter
                 {
-                    columns: 3
-                    columnSpacing: 50
-                    rowSpacing: 25
-                    width: parent.width
+                    id: _capsule_node_radius_
+                    placeholderText: "Capsule Nose Radius [m]"
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                }
 
-                    DialogParameter
-                    {
-                        id: _capsule_node_radius_
-                        placeholderText: "Capsule Nose Radius [m]"
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                    }
+                DialogParameter
+                {
+                    id: _parachute_drag_coefficient_
+                    placeholderText: "Parachute Drag Coeffient"
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                }
 
-                    DialogParameter
-                    {
-                        id: _parachute_drag_coefficient_
-                        placeholderText: "Parachute Drag Coeffient"
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                    }
+                DialogParameter
+                {
+                    id: _parachute_reference_surface_
+                    placeholderText: "Parachute Reference Surface [m^2]"
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                }
 
-                    DialogParameter
-                    {
-                        id: _parachute_reference_surface_
-                        placeholderText: "Parachute Reference Surface [m^2]"
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                    }
+                DialogParameter
+                {
+                    id: _capsule_mass_
+                    placeholderText: "Capsule Mass [kg]"
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                }
 
-                    DialogParameter
-                    {
-                        id: _capsule_mass_
-                        placeholderText: "Capsule Mass [kg]"
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                    }
+                DialogParameter
+                {
+                    id: _capsule_drag_coefficient_
+                    placeholderText: "Capsule Drag Coefficient"
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                }
 
-                    DialogParameter
-                    {
-                        id: _capsule_drag_coefficient_
-                        placeholderText: "Capsule Drag Coefficient"
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                    }
+                DialogParameter
+                {
+                    id: _capsule_lift_coefficient_
+                    placeholderText: "Capsule Lift Coefficient"
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                }
 
-                    DialogParameter
-                    {
-                        id: _capsule_lift_coefficient_
-                        placeholderText: "Capsule Lift Coefficient"
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                    }
-
-                    DialogParameter
-                    {
-                        id: _capsule_reference_surface_
-                        placeholderText: "Capsule Reference Surface [m^2]"
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                    }
+                DialogParameter
+                {
+                    id: _capsule_reference_surface_
+                    placeholderText: "Capsule Reference Surface [m^2]"
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
                 }
             }
         }

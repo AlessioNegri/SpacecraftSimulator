@@ -13,7 +13,7 @@ Dialog
     // ? Reference of the backend figure canvas.
     property var p_FigureCanvasModel: null
 
-    //!-----------------------------------------!//
+    // ! ----------------------------------------- ! //
 
     anchors.centerIn: parent
     modal: true
