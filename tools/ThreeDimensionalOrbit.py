@@ -403,7 +403,7 @@ class ThreeDimensionalOrbit():
             
             ra_i, dec_i = cls.calculate_ra_dec(np.matmul(R_3_t, X[0]))
             
-            ra.append(np.rad2deg(ra_i))
+            ra.append(np.rad2deg(ra_i) - 180)
             dec.append(np.rad2deg(dec_i))
         
         # >>> Plot
@@ -413,7 +413,7 @@ class ThreeDimensionalOrbit():
             img = np.asarray(Image.open('./tools/texture/Earth.jpg').transpose(Image.FLIP_TOP_BOTTOM))
             
             plt.figure()
-            plt.imshow(img, origin='lower', extent=(0, 360, -90, 90))
+            plt.imshow(img, origin='lower', extent=(-180, 180, -90, 90))
             plt.grid(True)
             plt.scatter(ra, dec, c='c')
             plt.scatter(ra[0], dec[0], c='m', label='Start')
@@ -421,8 +421,8 @@ class ThreeDimensionalOrbit():
             plt.legend()
             plt.xlabel('Right Ascension [deg]')
             plt.ylabel('Declination [deg]')
-            plt.xlim([0, 360])
-            plt.ylim([-90, 90])
+            #plt.xlim([0, 360])
+            #plt.ylim([-90, 90])
             plt.show()
         
         return [ra, dec]

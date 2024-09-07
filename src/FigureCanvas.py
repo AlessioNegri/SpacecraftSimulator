@@ -30,7 +30,7 @@ class FigureCanvas(qtCore.QObject):
 
     # --- METHODS 
 
-    def __init__(self, parent : qtCore.QObject = None, dof3 : bool = False, rows : int = 1, cols : int = 1) -> None:
+    def __init__(self, parent : qtCore.QObject = None, dof3 : bool = False, rows : int = 1, cols : int = 1, figure_in_dialog : bool = False) -> None:
         """Constructor
 
         Args:
@@ -44,15 +44,16 @@ class FigureCanvas(qtCore.QObject):
         
         if rows < 1 or cols < 1: Exception('Figure rows / cols must be greater than 0!')
         
-        self.canvas     = None
-        self.figure     = None
-        self.axes       = None
-        self.toolbar    = None
-        self.figsize    = (6.0, 4.0)
-        self.dof3       = dof3
-        self.rows       = rows
-        self.cols       = cols
-        self.multiplot  = rows != 1 or cols != 1
+        self.canvas             = None
+        self.figure             = None
+        self.axes               = None
+        self.toolbar            = None
+        self.figsize            = (6.0, 4.0)
+        self.dof3               = dof3
+        self.rows               = rows
+        self.cols               = cols
+        self.multiplot          = rows != 1 or cols != 1
+        self.figure_in_dialog   = figure_in_dialog
         
         self._coord     = '(0.00, 0.00)' if not dof3 else '(0.00, 0.00, 0.00)'
 
@@ -82,22 +83,32 @@ class FigureCanvas(qtCore.QObject):
                 for c in range(0, self.cols):
                     
                     self.axes[r][c].grid(True)
-                    self.axes[r][c].set_facecolor('#1C1B1F')# #424242
+                    self.axes[r][c].set_facecolor('#424242' if self.figure_in_dialog else '#1C1B1F')
             
         else:
             
             self.axes = self.figure.add_subplot(111) if not self.dof3 else self.figure.add_subplot(111, projection='3d')
             
             self.axes.grid(True)
-            self.axes.set_facecolor('#1C1B1F')
+            self.axes.set_facecolor('#424242' if self.figure_in_dialog else '#1C1B1F')
         
         # ? Set Figure
         
-        self.figure.subplots_adjust(wspace=0.4, hspace=0.4)
-        self.figure.set_layout_engine('constrained')
+        if self.dof3:
+            
+            self.figure.subplots_adjust(left=-0.11, top=0.99)
+            self.figure.set_layout_engine('compressed')
+            self.axes.set_aspect('equal', adjustable='box')
+            
+        else:
+            
+        
+            self.figure.subplots_adjust(wspace=0.4, hspace=0.4)
+            self.figure.set_layout_engine('constrained')
+            
         self.figure.set_figwidth(self.figsize[0])
         self.figure.set_figheight(self.figsize[1])
-        self.figure.patch.set_facecolor('#1C1B1F')
+        self.figure.patch.set_facecolor('#424242' if self.figure_in_dialog else '#1C1B1F')
         
         # ? Set Canvas
         
@@ -169,7 +180,7 @@ class FigureCanvas(qtCore.QObject):
             list: [x, y, z]
         """
         
-        if ax.M is None: return 0.0, 0.0, 0.0
+        #if ax.M is None: return 0.0, 0.0, 0.0
 
         xd, yd = event.xdata, event.ydata
         
@@ -244,9 +255,15 @@ class FigureCanvas(qtCore.QObject):
             
             if event.inaxes == self.axes:
                 
-                x, y, z = self.xyz_data(event, self.axes)
+                if self.dof3:
+                
+                    x, y, z = self.xyz_data(event, self.axes)
             
-                self.coord = f'({x:.2f}, {y:.2f}, {z:.2f})'
+                    self.coord = f'({x:.2f}, {y:.2f}, {z:.2f})'
+                
+                else:
+                    
+                    self.coord = f'({event.xdata:.2f}, {event.ydata:.2f})'
  
     @qtCore.Slot()
     def pan(self, *args):

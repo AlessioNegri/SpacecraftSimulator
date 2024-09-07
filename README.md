@@ -124,6 +124,8 @@ All these missions will be discussed in detail in the following sections.
 
 ## 4 Orbit Transfer
 
+An orbit transfer consists of a set of maneuvers to move a spacecraft from a departure orbit towards an arrival orbit. The user can decide the two orbits and the list of maneuver to simulate an orbit transfer.
+
 ### 4.1 Departure & Arrival Orbits
 
 Under the menu item `Missions \ Orbit Transfer \ Departure Orbit` it is possible to configure the **Departure Orbit**. The same discussion is valid for the **Arrival Orbit**. The orbit can be configured using one of the following representations:
@@ -143,13 +145,13 @@ Under the menu item `Missions \ Orbit Transfer \ Departure Orbit` it is possible
     - *Anomaly of the Perigee*
     - *True Anomaly*
 
-![Departure Orbit.](./images/departure_orbit.png)
+<p align="center"><img src="./images/departure_orbit.png" width="100%"></p>
 
-The user can select the planet as central body. In addition, a preview of the **Orbit** and the **Ground Track** can be visioned by the available buttons.
+The user can select the planet that will be considered as the central body. In addition, a preview of the **Orbit** and the **Ground Track** can be visioned by the available buttons.
 
-![Orbit Preview.](./images/orbit_preview.png)
+<p align="center"><img src="./images/orbit_preview.png" width="100%"></p>
 
-![Ground Track Preview.](./images/ground_track_preview.png)
+<p align="center"><img src="./images/departure_orbit.png" width="100%"></p>
 
 ### 4.2 Maneuvers
 
@@ -159,13 +161,13 @@ Under the menu item `Missions \ Orbit Transfer \ Maneuvers` it is possible to co
 - **Plane Change Maneuver**
 - **Apse Line Rotation From Eta**
 
-After the transfer has been evaluated, the values of $\Delta v$, $\Delta t$, and $\Delta m$ for each transfer are calculated for a detailed analysis of the cost of the transfer.
+After the transfer has been evaluated, the values of $\Delta v$, $\Delta t$, and $\Delta m$ for each transfer are calculated for a detailed analysis of the cost of the transfer. Click the `Save` button to update the parameters.
 
-![Maneuvers.](./images/maneuvers.png)
+<p align="center"><img src="./images/maneuvers.png" width="100%"></p>
 
-By clicking on the `Save` button, the transfer becomes visible in the main window.
+By clicking on the `Run` button, the transfer is simulated and becomes visible in the chart.
 
-![Orbit Transfer.](./images/orbit_transfer.png)
+<p align="center"><img src="./images/orbit_transfer.png" width="100%"></p>
 
 ## 5 Orbit Propagation
 

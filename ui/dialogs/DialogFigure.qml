@@ -15,57 +15,38 @@ Dialog
 
     // ! ----------------------------------------- ! //
 
+    id: root
     anchors.centerIn: parent
     modal: true
+    width: window.width * 0.8
+    height: window.height * 0.8
     closePolicy: Popup.NoAutoClose
-    font.pointSize: 14
-    width: 1200
-    height: 800
+    font.pointSize: 12
   
-    header: Item
+    header: DialogHeader
     {
-        width: parent.width
-        height: 75
+        p_Title: root.title
+    }
 
-        Text
+    footer: DialogFooter
+    {
+        p_ShowSaveButton: false
+
+        function f_Close()
         {
-            text: title
-            padding: 20
-            font.pointSize: 24
-            font.bold: true
-            color: Material.color(Material.Indigo)
+            close()
         }
     }
 
-    footer: Item
+    contentItem: Rectangle
     {
-        width: parent.width
-        height: 60
-        
-        RowLayout
+        color: "transparent"
+
+        Figure
         {
-            width: parent.width
-
-            Item { Layout.fillWidth: true }
-
-            Button
-            {
-                text: "Ok"
-                font.pointSize: 12
-                font.bold: true
-                Layout.alignment: Qt.AlignRight
-                Material.background: Material.Indigo
-                Material.foreground: "#FFFFFF"
-                onClicked: close()
-            }
-
-            Item { width: 10 }
+            p_ObjectName: p_FigureCanvasName
+            r_Model: p_FigureCanvasModel
+            anchors.fill: parent
         }
-    }
-
-    Figure {
-        p_ObjectName: p_FigureCanvasName
-        r_Model: p_FigureCanvasModel
-        anchors.fill: parent
     }
 }

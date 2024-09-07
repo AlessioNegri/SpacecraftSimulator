@@ -457,6 +457,8 @@ class OrbitalManeuvers():
         
         theta = phi + np.arccos(c / a * np.cos(phi)) if not secondIntersectionPoint else phi - np.arccos(c / a * np.cos(phi))
         
+        if theta < 0: theta = 2 * np.pi + theta
+        
         # >>> 3. Orbit 1
         
         r = h_1**2 / cls.mu * 1 / (1 + e_1 * np.cos(theta))

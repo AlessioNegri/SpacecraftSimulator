@@ -260,10 +260,10 @@ class Orbit(qtCore.QObject):
         
         self.semi_major_axis                = orbital_elements.a
         self.eccentricity                   = orbital_elements.e
-        self.inclination                    = orbital_elements.i
-        self.right_ascension_ascending_node = orbital_elements.Omega
-        self.periapsis_anomaly              = orbital_elements.omega
-        self.true_anomaly                   = orbital_elements.theta
+        self.inclination                    = np.rad2deg(orbital_elements.i)
+        self.right_ascension_ascending_node = np.rad2deg(orbital_elements.Omega)
+        self.periapsis_anomaly              = np.rad2deg(orbital_elements.omega)
+        self.true_anomaly                   = np.rad2deg(orbital_elements.theta)
     
     def update_keplerian_parameters_from_radii(self) -> None:
         """Updates the Keplerian parameters from the periapsis and apoapsis radii
@@ -282,9 +282,9 @@ class Orbit(qtCore.QObject):
         
         self.semi_major_axis                = orbital_elements.a
         self.eccentricity                   = orbital_elements.e
-        self.inclination                    = orbital_elements.i
-        self.right_ascension_ascending_node = orbital_elements.Omega
-        self.periapsis_anomaly              = orbital_elements.omega
-        self.true_anomaly                   = orbital_elements.theta
+        self.inclination                    = np.rad2deg(orbital_elements.i)
+        self.right_ascension_ascending_node = np.rad2deg(orbital_elements.Omega)
+        self.periapsis_anomaly              = np.rad2deg(orbital_elements.omega)
+        self.true_anomaly                   = np.rad2deg(orbital_elements.theta)
         self.periapsis_radius               = orbital_parameters.r_p
         self.apoapsis_radius                = orbital_parameters.r_a

@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import "../dialogs/DialogManeuvers.js" as Script
+
 // ? The Maneuver class manages the generic maneuver.
 Rectangle
 {
@@ -26,14 +28,13 @@ Rectangle
     // ? Value of the maneuver's delta mass.
     property string p_DeltaMass: "0.0"
 
-    //!-----------------------------------------!//
+    // ! ----------------------------------------- ! //
 
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.rightMargin: 20
+    id: root
+    width: parent.width - 20
     height: 100
     color: "transparent"
-    border.color: Material.color(Material.Indigo)
+    border.color: "#FFFFFF"
     border.width: 2
     radius: 5
 
@@ -136,13 +137,14 @@ Rectangle
 
         Button
         {
+            text: "Remove"
             icon.source: "/images/img/delete.svg"
             font.pointSize: 12
             font.bold: true
-            Material.background: Material.Red
+            Material.background: "#F44336"
             Material.foreground: "#FFFFFF"
             Layout.alignment: Qt.AlignRight
-            onClicked: removeManeuver(p_Id)
+            onClicked: Script.removeManeuver(p_Id)
         }
 
         Item { width: 10 }

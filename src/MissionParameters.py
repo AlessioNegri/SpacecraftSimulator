@@ -30,9 +30,6 @@ class MissionParameters(qtCore.QObject):
         
         self.mission_orbit_transfer = MissionOrbitTransfer(engine)
         
-        self.mission_orbit_transfer.loadDepartureOrbit()
-        self.mission_orbit_transfer.loadArrivalOrbit()
-        
         self.mission_orbit_propagation = MissionOrbitPropagation(engine)
         
         self.mission_interplanetary_transfer = MissionInterplanetaryTransfer(engine)
@@ -48,7 +45,7 @@ class MissionParameters(qtCore.QObject):
             engine (qtQml.QQmlApplicationEngine): QML engine
         """
         
-        self.mission_orbit_transfer.setUpdateWithCanvas(engine)
+        self.mission_orbit_transfer.set_update_with_canvas(engine)
         
         self.mission_orbit_propagation.set_update_with_canvas(engine)
         

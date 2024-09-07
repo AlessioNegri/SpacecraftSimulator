@@ -12,7 +12,7 @@ ApplicationWindow
     // ? Current mission selected.
     property int gp_CurrentMission: 0
 
-    // !-----------------------------------------! //
+    // ! ----------------------------------------- ! //
 
     id: window
     title: "Spacecraft Simulator"
@@ -34,9 +34,9 @@ ApplicationWindow
 
     DialogSpacecraft { id: _dlgSpacecraft_ }
 
-    DialogOrbit { id: _dlgOrbitDeparture_; title: "Departure Orbit"; p_Departure: true }
+    DialogOrbit { id: _dlgOrbitDeparture_; p_Departure: true }
 
-    DialogOrbit { id: _dlgOrbitArrival_; title: "Arrival Orbit"; p_Departure: false }
+    DialogOrbit { id: _dlgOrbitArrival_; p_Departure: false }
 
     DialogManeuvers { id: _dlgManeuvers_ }
 
@@ -120,9 +120,9 @@ ApplicationWindow
                 title: "Orbit Transfer"
                 enabled: gp_CurrentMission === 0
 
-                Action { text: "Departure Orbit"; onTriggered: { __MissionOrbitTransfer.fillDepartureOrbit(); _dlgOrbitDeparture_.open() } }
+                Action { text: "Departure Orbit"; onTriggered: _dlgOrbitDeparture_.open() }
 
-                Action { text: "Arrival Orbit"; onTriggered: { __MissionOrbitTransfer.fillArrivalOrbit(); _dlgOrbitArrival_.open() } }
+                Action { text: "Arrival Orbit"; onTriggered: _dlgOrbitArrival_.open() }
 
                 Action { text: "Maneuvers"; onTriggered: _dlgManeuvers_.open() }
             }

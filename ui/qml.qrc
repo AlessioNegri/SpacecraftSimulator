@@ -19,6 +19,7 @@
         <file>dialogs/DialogFigure.qml</file>
         <file>dialogs/DialogInterplanetaryTransfer.js</file>
         <file>dialogs/DialogInterplanetaryTransfer.qml</file>
+        <file>dialogs/DialogManeuvers.js</file>
         <file>dialogs/DialogManeuvers.qml</file>
         <file>dialogs/DialogOrbit.js</file>
         <file>dialogs/DialogOrbit.qml</file>

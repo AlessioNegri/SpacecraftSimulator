@@ -1,9 +1,10 @@
-// ? Updates the parameters and saves based on the \a save option.
-function updateParameters(save)
+// ? Updates the parameters of the orbit.
+function saveParameters()
 {
-    __Orbit.body = _celestialBody_.currentIndex
+    __Orbit.body    = _celestial_body_.currentIndex
+    __Orbit.state   = _representation_.currentIndex
 
-    switch (_selection_.currentIndex)
+    switch (_representation_.currentIndex)
     {
         case 0: // * Cartesian
 
@@ -18,23 +19,23 @@ function updateParameters(save)
 
         case 1: // * Keplerian
 
-            __Orbit.semi_major_axis                 = _a_.text
-            __Orbit.eccentricity                    = _e_.text
-            __Orbit.inclination                     = _i_.text
-            __Orbit.right_ascension_ascending_node  = _Omega_.text
-            __Orbit.periapsis_anomaly               = _omega_.text
-            __Orbit.true_anomaly                    = _theta_.text
+            __Orbit.semi_major_axis                 = _semi_major_axis_.text
+            __Orbit.eccentricity                    = _eccentricity_.text
+            __Orbit.inclination                     = _inclination_.text
+            __Orbit.right_ascension_ascending_node  = _raan_.text
+            __Orbit.periapsis_anomaly               = _periapsis_anomaly_.text
+            __Orbit.true_anomaly                    = _true_anomaly_.text
 
             break
 
         case 2: // * Modified Keplerian
 
-            __Orbit.periapsis_radius                = _r_p_.text
-            __Orbit.apoapsis_radius                 = _r_a_.text
-            __Orbit.inclination                     = _i_2_.text
-            __Orbit.right_ascension_ascending_node  = _Omega_2_.text
-            __Orbit.periapsis_anomaly               = _omega_2_.text
-            __Orbit.true_anomaly                    = _theta_2_.text
+            __Orbit.periapsis_radius                = _periapsis_radius_.text
+            __Orbit.apoapsis_radius                 = _apoapsis_radius_.text
+            __Orbit.inclination                     = _inclination_2_.text
+            __Orbit.right_ascension_ascending_node  = _raan_2_.text
+            __Orbit.periapsis_anomaly               = _periapsis_anomaly_2_.text
+            __Orbit.true_anomaly                    = _true_anomaly_2_.text
 
             break
         
@@ -45,12 +46,37 @@ function updateParameters(save)
 
     if (p_Departure)
     {
-        save ? __MissionOrbitTransfer.saveDepartureOrbit() : __MissionOrbitTransfer.updateDepartureOrbit()
+        __MissionOrbitTransfer.update_departure_orbit()
     }
     else
     {
-        save ? __MissionOrbitTransfer.saveArrivalOrbit() : __MissionOrbitTransfer.updateArrivalOrbit()
+        __MissionOrbitTransfer.update_arrival_orbit()
     }
 
-    if (save) close()
+    restoreParameters()
+}
+
+// ? Restores the parameters of the orbit.
+function restoreParameters()
+{
+    _celestial_body_.currentIndex   = __Orbit.body
+    _representation_.currentIndex   = __Orbit.state
+    _x_.text                        = __Orbit.r_x
+    _y_.text                        = __Orbit.r_y
+    _z_.text                        = __Orbit.r_z
+    _v_x_.text                      = __Orbit.v_x
+    _v_y_.text                      = __Orbit.v_y
+    _v_z_.text                      = __Orbit.v_z
+    _semi_major_axis_.text          = __Orbit.semi_major_axis
+    _eccentricity_.text             = __Orbit.eccentricity
+    _inclination_.text              = __Orbit.inclination
+    _raan_.text                     = __Orbit.right_ascension_ascending_node
+    _periapsis_anomaly_.text        = __Orbit.periapsis_anomaly
+    _true_anomaly_.text             = __Orbit.true_anomaly
+    _periapsis_radius_.text         = __Orbit.periapsis_radius
+    _apoapsis_radius_.text          = __Orbit.apoapsis_radius
+    _inclination_2_.text            = __Orbit.inclination
+    _raan_2_.text                   = __Orbit.right_ascension_ascending_node
+    _periapsis_anomaly_2_.text      = __Orbit.periapsis_anomaly
+    _true_anomaly_2_.text           = __Orbit.true_anomaly
 }

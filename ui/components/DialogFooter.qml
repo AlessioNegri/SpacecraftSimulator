@@ -7,28 +7,23 @@ Item
     // ? True for showing the save button.
     property bool p_ShowSaveButton: true
 
+    // ? True for showing the update button.
+    property bool p_ShowUpdateButton: false
+
     // ? Override to implement the "Close" button action.
     function f_Close() {}
 
     // ? Override to implement the "Save" button action.
     function f_Save() {}
 
-    // !-----------------------------------------! //
+    // ? Override to implement the "Update" button action.
+    function f_Update() {}
+
+    // ! ----------------------------------------- ! //
 
     id: root
     width: parent.width
     height: _layout_.height
-
-    /*
-    Rectangle
-    {
-        anchors.fill: parent
-        opacity: 0.10
-        color: Material.color(Material.Orange)
-        bottomLeftRadius: 30
-        bottomRightRadius: 30
-    }
-    */
 
     ColumnLayout
     {
@@ -50,6 +45,17 @@ Item
             Layout.fillWidth: true
 
             Item { Layout.fillWidth: true }
+
+            Button
+            {
+                text: "Update"
+                visible: p_ShowUpdateButton
+                font.pointSize: 10
+                font.bold: true
+                Layout.alignment: Qt.AlignRight
+                Material.background: "#3F51B5"
+                onClicked: f_Update()
+            }
 
             Button
             {
