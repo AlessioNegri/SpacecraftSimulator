@@ -151,7 +151,7 @@ The user can select the planet that will be considered as the central body. In a
 
 <p align="center"><img src="./images/orbit_preview.png" width="100%"></p>
 
-<p align="center"><img src="./images/departure_orbit.png" width="100%"></p>
+<p align="center"><img src="./images/ground_track_preview.png" width="100%"></p>
 
 ### 4.2 Maneuvers
 
