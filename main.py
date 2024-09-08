@@ -80,7 +80,7 @@ if not engine.rootObjects(): sys.exit(-1)
 
 # ! QML-Matplotlib Setup
 
-missionParameters.setUpdateWithCanvas(engine)
+missionParameters.set_update_with_canvas(engine)
 
 # ! EXEC
 

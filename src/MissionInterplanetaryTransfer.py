@@ -1,3 +1,9 @@
+""" MissionInterplanetaryTransfer.py: Implements the Interplanetary transfer mission """
+
+__author__      = "Alessio Negri"
+__license__     = "LGPL v3"
+__maintainer__  = "Alessio Negri"
+
 import PySide6.QtCore as qtCore
 import PySide6.QtQml as qtQml
 import numpy as np
@@ -16,94 +22,61 @@ from tools.Time import Time
 from tools.InterplanetaryTrajectories import InterplanetaryTrajectories, ManeuverResult
 
 class MissionInterplanetaryTransfer(qtCore.QObject):
+    """Manages the interplanetary transfer mission"""
     
-    # ! SIGNALS
+    # --- SIGNALS 
     
-    porkChopPlotFinished = qtCore.Signal()
+    signal_pork_chop_plot_finished = qtCore.Signal()
     
-    updateProgressBar = qtCore.Signal(float)
+    signal_update_progress_bar = qtCore.Signal(float)
     
-    # ! PROPERTIES
+    # --- PROPERTIES 
     
-    # ! Pork Chop Plot
+    # ? Launch Window Begin
     
-    # ? Pork Chop Plot - Departure Planet
-    
-    pcp_planet_dep_changed = qtCore.Signal()
-    
-    @qtCore.Property(int, notify=pcp_planet_dep_changed)
-    def pcp_planet_dep(self): return self._pcp_planet_dep
+    @qtCore.Property(str)
+    def launch_window_beg(self): return self._launch_window_beg
 
-    @pcp_planet_dep.setter
-    def pcp_planet_dep(self, val : int): self._pcp_planet_dep = val
+    @launch_window_beg.setter
+    def launch_window_beg(self, val : str): self._launch_window_beg = val
     
-    # ? Pork Chop Plot - Arrival Planet
+    # ? Launch Window End
     
-    pcp_planet_arr_changed = qtCore.Signal()
-    
-    @qtCore.Property(int, notify=pcp_planet_arr_changed)
-    def pcp_planet_arr(self): return self._pcp_planet_arr
+    @qtCore.Property(str)
+    def launch_window_end(self): return self._launch_window_end
 
-    @pcp_planet_arr.setter
-    def pcp_planet_arr(self, val : int): self._pcp_planet_arr = val
+    @launch_window_end.setter
+    def launch_window_end(self, val : str): self._launch_window_end = val
     
-    # ? Pork Chop Plot - Launch Window Begin
+    # ? Arrival Window Begin
     
-    pcp_launch_window_beg_changed = qtCore.Signal()
-    
-    @qtCore.Property(str, notify=pcp_launch_window_beg_changed)
-    def pcp_launch_window_beg(self): return self._pcp_launch_window_beg
+    @qtCore.Property(str)
+    def arrival_window_beg(self): return self._arrival_window_beg
 
-    @pcp_launch_window_beg.setter
-    def pcp_launch_window_beg(self, val : str): self._pcp_launch_window_beg = val
+    @arrival_window_beg.setter
+    def arrival_window_beg(self, val : str): self._arrival_window_beg = val
     
-    # ? Pork Chop Plot - Launch Window End
+    # ? Arrival Window End
     
-    pcp_launch_window_end_changed = qtCore.Signal()
-    
-    @qtCore.Property(str, notify=pcp_launch_window_end_changed)
-    def pcp_launch_window_end(self): return self._pcp_launch_window_end
+    @qtCore.Property(str)
+    def arrival_window_end(self): return self._arrival_window_end
 
-    @pcp_launch_window_end.setter
-    def pcp_launch_window_end(self, val : str): self._pcp_launch_window_end = val
+    @arrival_window_end.setter
+    def arrival_window_end(self, val : str): self._arrival_window_end = val
     
-    # ? Pork Chop Plot - Arrival Window Begin
-    
-    pcp_arrival_window_beg_changed = qtCore.Signal()
-    
-    @qtCore.Property(str, notify=pcp_arrival_window_beg_changed)
-    def pcp_arrival_window_beg(self): return self._pcp_arrival_window_beg
-
-    @pcp_arrival_window_beg.setter
-    def pcp_arrival_window_beg(self, val : str): self._pcp_arrival_window_beg = val
-    
-    # ? Pork Chop Plot - Arrival Window End
-    
-    pcp_arrival_window_end_changed = qtCore.Signal()
-    
-    @qtCore.Property(str, notify=pcp_arrival_window_end_changed)
-    def pcp_arrival_window_end(self): return self._pcp_arrival_window_end
-
-    @pcp_arrival_window_end.setter
-    def pcp_arrival_window_end(self, val : str): self._pcp_arrival_window_end = val
-    
-    # ? Pork Chop Plot - Step [days]
+    # ? Window Step [days]
     
     pcp_step_changed = qtCore.Signal()
     
     @qtCore.Property(int, notify=pcp_step_changed)
-    def pcp_step(self): return self._pcp_step
+    def window_step(self): return self._window_step
 
-    @pcp_step.setter
-    def pcp_step(self, val : int): self._pcp_step = val
-    
-    # ! Interplanetary Leg
+    @window_step.setter
+    def window_step(self, val : int): self._window_step = val
     
     # ? Departure Planet
     
-    dep_planet_changed = qtCore.Signal()
-    
-    @qtCore.Property(int, notify=dep_planet_changed)
+    @qtCore.Property(int)
     def dep_planet(self): return self._dep_planet
 
     @dep_planet.setter
@@ -111,9 +84,7 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
     
     # ? Arrival Planet
     
-    arr_planet_changed = qtCore.Signal()
-    
-    @qtCore.Property(int, notify=arr_planet_changed)
+    @qtCore.Property(int)
     def arr_planet(self): return self._arr_planet
 
     @arr_planet.setter
@@ -121,9 +92,7 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
     
     # ? Departure Date
     
-    dep_date_changed = qtCore.Signal()
-    
-    @qtCore.Property(str, notify=dep_date_changed)
+    @qtCore.Property(str)
     def dep_date(self): return self._dep_date
 
     @dep_date.setter
@@ -131,9 +100,7 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
     
     # ? Arrival Date
     
-    arr_date_changed = qtCore.Signal()
-    
-    @qtCore.Property(str, notify=arr_date_changed)
+    @qtCore.Property(str)
     def arr_date(self): return self._arr_date
 
     @arr_date.setter
@@ -141,9 +108,7 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
     
     # ? Departure Periapsis Height [km]
     
-    dep_periapsis_height_changed = qtCore.Signal()
-    
-    @qtCore.Property(float, notify=dep_periapsis_height_changed)
+    @qtCore.Property(float)
     def dep_periapsis_height(self): return format(self._dep_periapsis_height)
 
     @dep_periapsis_height.setter
@@ -151,9 +116,7 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
     
     # ? Arrival Periapsis Height [km]
     
-    arr_periapsis_height_changed = qtCore.Signal()
-    
-    @qtCore.Property(float, notify=arr_periapsis_height_changed)
+    @qtCore.Property(float)
     def arr_periapsis_height(self): return format(self._arr_periapsis_height)
 
     @arr_periapsis_height.setter
@@ -161,15 +124,13 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
     
     # ? Arrival Period [h]
     
-    arr_period_changed = qtCore.Signal()
-    
-    @qtCore.Property(float, notify=arr_period_changed)
+    @qtCore.Property(float)
     def arr_period(self): return format(self._arr_period)
 
     @arr_period.setter
     def arr_period(self, val : float): self._arr_period = val
     
-    # ! CONSTRUCTOR
+    # --- PUBLIC METHODS 
     
     def __init__(self, engine : qtQml.QQmlApplicationEngine) -> None:
         """Constructor
@@ -186,38 +147,34 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         
         # * Pork Chop Plot
         
-        self._pcp_planet_dep                = index_from_planet(Planet.EARTH)
-        self._pcp_planet_arr                = index_from_planet(Planet.NEPTUNE)
-        self._pcp_launch_window_beg         = '2020-01-01'
-        self._pcp_launch_window_end         = '2021-01-01'
-        self._pcp_arrival_window_beg        = '2031-01-01'
-        self._pcp_arrival_window_end        = '2032-06-01'
-        self._pcp_step                      = 10
-        self.figure_pork_chop_plot          = FigureCanvas()
-        self.pork_chop_plot                 = PorkChopPlot()
+        self._launch_window_beg             = '2020-01-01'                      # * Launch window begin
+        self._launch_window_end             = '2021-01-01'                      # * Launch window end
+        self._arrival_window_beg            = '2031-01-01'                      # * Arrival window begin
+        self._arrival_window_end            = '2032-06-01'                      # * Arrival window end
+        self._window_step                   = 10                                # * Windows step
+        self.figure_pork_chop_plot          = FigureCanvas()                    # * Pork chop plot figure
+        self.pork_chop_plot                 = PorkChopPlot()                    # * Pork chop plot thread
         
-        self.pork_chop_plot.status_changed.connect(self.updateStatus)
-        self.pork_chop_plot.finished.connect(self.operationCompleted)
+        self.pork_chop_plot.status_changed.connect(self.update_progress_bar)
+        self.pork_chop_plot.finished.connect(self.generation_completed)
         
         # * Interplanetary Leg
         
-        self._dep_planet                    = index_from_planet(Planet.EARTH)
-        self._arr_planet                    = index_from_planet(Planet.MARS)
-        self._dep_date                      = '1996-11-07 00:00:00'
-        self._arr_date                      = '1997-09-12 00:00:00'
-        self._dep_periapsis_height          = 180
-        self._arr_periapsis_height          = 300
-        self._arr_period                    = 48
-        self.figure_interplanetary_transfer = FigureCanvas(dof3=True)
+        self._dep_planet                    = index_from_planet(Planet.EARTH)   # * Departure planet
+        self._arr_planet                    = index_from_planet(Planet.MARS)    # * Arrival planet
+        self._dep_date                      = '1996-11-07 00:00:00'             # * Departure date
+        self._arr_date                      = '1997-09-12 00:00:00'             # * Arrival date
+        self._dep_periapsis_height          = 180                               # * Departure parking orbit height             [ km ]
+        self._arr_periapsis_height          = 300                               # * Arrival rendezvous orbit periapsis height  [ km ]
+        self._arr_period                    = 48                                # * Arrival rendezvous orbit period            [ h ]
+        self.figure_interplanetary_transfer = FigureCanvas(dof3=True)           # * Interplanetary transfer figure
         
         # * Context properties
         
         engine.rootContext().setContextProperty("__PorkChopPlotFigure", self.figure_pork_chop_plot)
         engine.rootContext().setContextProperty("__InterplanetaryTransferFigure", self.figure_interplanetary_transfer)
-        
-    # ! PUBLIC
     
-    def setUpdateWithCanvas(self, engine : qtQml.QQmlApplicationEngine) -> None:
+    def set_update_with_canvas(self, engine : qtQml.QQmlApplicationEngine) -> None:
         """Connects all the QML figures with the backend model
 
         Args:
@@ -229,88 +186,64 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         self.figure_pork_chop_plot.update_with_canvas(win.findChild(qtCore.QObject, "PorkChopPlotFigure"), win.findChild(qtCore.QObject, "PorkChopPlotFigureParent"))
         self.figure_interplanetary_transfer.update_with_canvas(win.findChild(qtCore.QObject, "InterplanetaryTransferFigure"), win.findChild(qtCore.QObject, "InterplanetaryTransferFigureParent"))
         
-        self.figure_interplanetary_transfer.figure.tight_layout()
-        self.figure_interplanetary_transfer.axes.set_aspect('equal', adjustable='box')
+        self.init_transfer_figure()
     
-    # ! SLOTS
-    
-    # ? Pork Chop Plot
+    # --- PUBLIC SLOTS 
     
     @qtCore.Slot()
-    def loadPorkChopPlotParameters(self) -> None:
-        """Loads the pork chop plot parameters
+    def generate_pork_chop_plot(self) -> None:
+        """Generates the Pork Chop Plot
         """
         
-        pass
-    
-    @qtCore.Slot()
-    def savePorkChopPlotParameters(self) -> None:
-        """Saves the pork chop plot parameters
-        """
+        self.pork_chop_plot.departure_planet = celestial_body_from_planet(planet_from_index(self._dep_planet))
         
-        pass
-    
-    @qtCore.Slot()
-    def calculatePorkChopPlot(self) -> None:
-        """Calculates the Pork Chop Plot
-        """
-        
-        self.pork_chop_plot.departure_planet = celestial_body_from_planet(planet_from_index(self._pcp_planet_dep))
-        
-        self.pork_chop_plot.arrival_planet = celestial_body_from_planet(planet_from_index(self._pcp_planet_arr))
+        self.pork_chop_plot.arrival_planet = celestial_body_from_planet(planet_from_index(self._arr_planet))
         
         self.pork_chop_plot.launch_window = [
-            datetime.strptime(self._pcp_launch_window_beg, '%Y-%m-%d'),
-            datetime.strptime(self._pcp_launch_window_end, '%Y-%m-%d')
+            datetime.strptime(self._launch_window_beg, '%Y-%m-%d'),
+            datetime.strptime(self._launch_window_end, '%Y-%m-%d')
         ]
         
         self.pork_chop_plot.arrival_window = [
-            datetime.strptime(self._pcp_arrival_window_beg, '%Y-%m-%d'),
-            datetime.strptime(self._pcp_arrival_window_end, '%Y-%m-%d')
+            datetime.strptime(self._arrival_window_beg, '%Y-%m-%d'),
+            datetime.strptime(self._arrival_window_end, '%Y-%m-%d')
         ]
         
-        self.pork_chop_plot.step = self._pcp_step
+        self.pork_chop_plot.step = self._window_step
         
         self.pork_chop_plot.start()
     
     @qtCore.Slot()
-    def stopCalculatePorkChopPlot(self) -> None:
-        """Stops the calculation of the Pork Chop Plot
+    def stop_generate_pork_chop_plot(self) -> None:
+        """Stops the generation of the Pork Chop Plot
         """
         
         self.pork_chop_plot.stop = True
     
     @qtCore.Slot()
-    def updateStatus(self, progress : float, text : str) -> None:
-        """Updates the status bar
+    def update_progress_bar(self, progress : float, text : str) -> None:
+        """Updates the progress bar and text
 
         Args:
             progress (float): Progress bar value
             text (str): Status description
         """
         
-        self.updateProgressBar.emit(progress)
+        self.signal_update_progress_bar.emit(progress)
     
     @qtCore.Slot()
-    def operationCompleted(self) -> None:
-        """Slot called when the dump manager has finished to load the data
+    def generation_completed(self) -> None:
+        """Slot called when the pork chop plot has been generated
         """
         
-        self.plotPorkChop()
-    
-    # ? Interplanetary Leg
+        self.plot_pork_chop()
     
     @qtCore.Slot()
-    def loadInterplanetaryParameters(self) -> None:
-        """Loads the interplanetary parameters
+    def simulate(self) -> None:
+        """Simulates the interplanetary transfer
         """
         
-        pass
-    
-    @qtCore.Slot()
-    def saveInterplanetaryParameters(self) -> None:
-        """Saves the interplanetary parameters
-        """
+        # ? Prepare parameters
         
         depPlanet = celestial_body_from_planet(planet_from_index(self._dep_planet))
         arrPlanet = celestial_body_from_planet(planet_from_index(self._arr_planet))
@@ -325,15 +258,84 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         
         if self._arr_periapsis_height == 0: r_p_A = 0
         
-        maneuver_1, maneuver_2, lambert_oe, theta_2 = InterplanetaryTrajectories.optimal_transfer(depPlanet, arrPlanet, depDate, arrDate, r_p_D, r_p_A, T, self.spacecraft._initial_mass)
+        # ? Optimal transfer calculation
+        
+        maneuver_1, maneuver_2, lambert_oe, theta_2 = InterplanetaryTrajectories.optimal_transfer(depPlanet,
+                                                                                                  arrPlanet,
+                                                                                                  depDate,
+                                                                                                  arrDate,
+                                                                                                  r_p_D,
+                                                                                                  r_p_A,
+                                                                                                  T,
+                                                                                                  self.spacecraft.initial_mass)
 
-        self.plotInterplanetaryTransfer(maneuver_1, maneuver_2, lambert_oe, theta_2)
+        # ? Integration
+        
+        ThreeDimensionalOrbit.set_celestial_body(CelestialBody.SUN)
+        TwoBodyProblem.set_celestial_body(CelestialBody.SUN)
+        Time.set_celestial_body(CelestialBody.SUN)
+        
+        result = self.integrate_maneuver(lambert_oe, lambert_oe.theta, theta_2)
+        
+        # ? Plot
+
+        self.plot_interplanetary_transfer(result)
     
-    # ! PRIVATE
+    # --- PRIVATE METHODS 
     
-    # ? Pork Chop Plot
+    def init_transfer_figure(self) -> None:
+        """Initializes the transfer figure canvas
+        """
+        
+        self.figure_interplanetary_transfer.reset_canvas()
+        
+        ThreeDimensionalOrbit.set_celestial_body(CelestialBody.SUN)
+        TwoBodyProblem.set_celestial_body(CelestialBody.SUN)
+        Time.set_celestial_body(CelestialBody.SUN)
+        
+        # ? Planets orbit
+        
+        depDate = datetime.strptime(self._dep_date, '%Y-%m-%d %H:%M:%S')
+        
+        r_mercury, v_mercury    = InterplanetaryTrajectories.ephemeris(CelestialBody.MERCURY, datetime.strptime(self._dep_date, '%Y-%m-%d %H:%M:%S'))
+        r_venus, v_venus        = InterplanetaryTrajectories.ephemeris(CelestialBody.VENUS, datetime.strptime(self._dep_date, '%Y-%m-%d %H:%M:%S'))
+        r_earth, v_earth        = InterplanetaryTrajectories.ephemeris(CelestialBody.EARTH, datetime.strptime(self._dep_date, '%Y-%m-%d %H:%M:%S'))
+        r_mars, v_mars          = InterplanetaryTrajectories.ephemeris(CelestialBody.MARS, datetime.strptime(self._dep_date, '%Y-%m-%d %H:%M:%S'))
+        
+        mercury = TwoBodyProblem.simulate_relative_motion(np.hstack([r_mercury, v_mercury]))
+        venus   = TwoBodyProblem.simulate_relative_motion(np.hstack([r_venus, v_venus]))
+        earth   = TwoBodyProblem.simulate_relative_motion(np.hstack([r_earth, v_earth]))
+        mars    = TwoBodyProblem.simulate_relative_motion(np.hstack([r_mars, v_mars]))
+        
+        self.figure_interplanetary_transfer.axes.plot(mercury['y'][0,:], mercury['y'][1,:], mercury['y'][2,:], color='#9E9E9E', linestyle='dashed', linewidth='2', label='Mercury')
+        self.figure_interplanetary_transfer.axes.plot(venus['y'][0,:], venus['y'][1,:], venus['y'][2,:], color='#4CAF50', linestyle='dashed', linewidth='2', label='Venus')
+        self.figure_interplanetary_transfer.axes.plot(earth['y'][0,:], earth['y'][1,:], earth['y'][2,:], color='#2196F3', linestyle='dashed', linewidth='2', label='Earth')
+        self.figure_interplanetary_transfer.axes.plot(mars['y'][0,:], mars['y'][1,:], mars['y'][2,:], color='#F44336', linestyle='dashed', linewidth='2', label='Mars')
+        self.figure_interplanetary_transfer.axes.scatter(0, 0, 0, c='#FFC107', s=500)
+        
+        # ? Settings
+        
+        self.figure_interplanetary_transfer.axes.grid(False)
+        self.figure_interplanetary_transfer.axes.legend()
+        self.figure_interplanetary_transfer.axes.set_xticks([])
+        self.figure_interplanetary_transfer.axes.set_yticks([])
+        self.figure_interplanetary_transfer.axes.set_zticks([])
+        self.figure_interplanetary_transfer.axes.set_xlim3d([np.min(mars['y'][0,:]) * 0.8, np.max(mars['y'][0,:]) * 0.8])
+        self.figure_interplanetary_transfer.axes.set_ylim3d([np.min(mars['y'][1,:]) * 0.8, np.max(mars['y'][1,:]) * 0.8])
+        self.figure_interplanetary_transfer.axes.set_zlim3d([np.min(mars['y'][2,:]) * 0.8, np.max(mars['y'][2,:]) * 0.8])
+        self.figure_interplanetary_transfer.axes.w_xaxis.line.set_color((1.0, 1.0, 1.0, 0.0))
+        self.figure_interplanetary_transfer.axes.w_yaxis.line.set_color((1.0, 1.0, 1.0, 0.0))
+        self.figure_interplanetary_transfer.axes.w_zaxis.line.set_color((1.0, 1.0, 1.0, 0.0))
+        self.figure_interplanetary_transfer.axes.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        self.figure_interplanetary_transfer.axes.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        self.figure_interplanetary_transfer.axes.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        self.figure_interplanetary_transfer.axes.xaxis._axinfo["grid"]['color'] = (1,1,1,0)
+        self.figure_interplanetary_transfer.axes.yaxis._axinfo["grid"]['color'] = (1,1,1,0)
+        self.figure_interplanetary_transfer.axes.zaxis._axinfo["grid"]['color'] = (1,1,1,0)
+        
+        self.figure_interplanetary_transfer.redraw_canvas()
     
-    def plotPorkChop(self) -> None:
+    def plot_pork_chop(self) -> None:
         """Plots the Pork Chop Plot
         """
         
@@ -374,40 +376,18 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         
         self.figure_pork_chop_plot.redraw_canvas()
         
-        self.porkChopPlotFinished.emit()
+        self.signal_pork_chop_plot_finished.emit()
     
-    # ? Interplanetary Leg
-    
-    def plotInterplanetaryTransfer(self, maneuver_1 : ManeuverResult, maneuver_2 : ManeuverResult, lambert_oe : OrbitalElements, theta_2 : float) -> None:
+    def plot_interplanetary_transfer(self, transfer_trajectory : np.ndarray) -> None:
         """Plots the interplanetary leg
 
         Args:
-            maneuver_1 (MANEUVER_RESULT): Maneuver to leave the departure planet
-            maneuver_2 (MANEUVER_RESULT): Maneuver to rendezvous with the arrival planet
-            lambert_oe (ORBITAL_ELEMENTS): Orbital elements of the lambert arc
-            theta_2 (float): Second true anomaly of the lambert arc [rad]
+            transfer_trajectory (np.ndarray): Transfer trajectory
         """
         
         self.figure_interplanetary_transfer.reset_canvas()
         
-        # * Integrate
-        
-        ThreeDimensionalOrbit.set_celestial_body(CelestialBody.SUN)
-        TwoBodyProblem.set_celestial_body(CelestialBody.SUN)
-        Time.set_celestial_body(CelestialBody.SUN)
-        
-        r, v = ThreeDimensionalOrbit.pf_2_gef(lambert_oe)
-        
-        parameters = TwoBodyProblem.calculate_orbital_parameters(r, v)
-        
-        t_0 = Time.calculate_elliptical_orbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=parameters.T, e=parameters.e, theta=lambert_oe.theta)
-        t_f = Time.calculate_elliptical_orbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=parameters.T, e=parameters.e, theta=theta_2)
-        
-        if theta_2 != 0.0 and t_0 > t_f: t_f += parameters.T
-        
-        result = TwoBodyProblem.simulate_relative_motion(np.hstack([r, v]), t_0, t_f)
-        
-        # * Planet 1
+        # ? Planets position from ephemeris
         
         r_1_x, r_1_y, r_1_z = [], [], []
         r_2_x, r_2_y, r_2_z = [], [], []
@@ -417,37 +397,80 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         depPlanet = celestial_body_from_planet(planet_from_index(self._dep_planet))
         arrPlanet = celestial_body_from_planet(planet_from_index(self._arr_planet))
         
-        for dt in np.linspace(0, np.abs(t_f - t_0), 1000):
+        for dt in np.linspace(0, np.abs(transfer_trajectory['dt']), 1000):
             
-            r, v = InterplanetaryTrajectories.ephemeris(depPlanet, start + timedelta(0, dt))
+            r, _ = InterplanetaryTrajectories.ephemeris(depPlanet, start + timedelta(0, dt))
             
             r_1_x.append(r[0])
             r_1_y.append(r[1])
             r_1_z.append(r[2])
             
-            r, v = InterplanetaryTrajectories.ephemeris(arrPlanet, start + timedelta(0, dt))
+            r, _ = InterplanetaryTrajectories.ephemeris(arrPlanet, start + timedelta(0, dt))
             
             r_2_x.append(r[0])
             r_2_y.append(r[1])
             r_2_z.append(r[2])
         
-        # * Celestial Bodies
+        # ? Orbits and positions
         
-        self.figure_interplanetary_transfer.axes.scatter(0, 0, 0, s=1000, c='y')
+        self.figure_interplanetary_transfer.axes.plot(r_1_x, r_1_y, r_1_z, color='#90CAF9', linestyle='dashed', linewidth='2', label='Departure Planet')
+        self.figure_interplanetary_transfer.axes.plot(r_2_x, r_2_y, r_2_z, color='#FFAB91', linestyle='dashed', linewidth='2', label='Arrival Planet')
+        self.figure_interplanetary_transfer.axes.plot(transfer_trajectory['y'][0,:], transfer_trajectory['y'][1,:], transfer_trajectory['y'][2,:], color='#A5D6A7', label='Orbit')
+        self.figure_interplanetary_transfer.axes.scatter(0, 0, 0, c='#FFC107', s=500)
+        self.figure_interplanetary_transfer.axes.scatter(r_1_x[0], r_1_y[0], r_1_z[0], marker='s', c='#90CAF9', s=50, label='Departure Planet Start')
+        self.figure_interplanetary_transfer.axes.scatter(r_1_x[-1], r_1_y[-1], r_1_z[-1], c='#90CAF9', s=50, label='Departure Planet End')
+        self.figure_interplanetary_transfer.axes.scatter(r_2_x[0], r_2_y[0], r_2_z[0], marker='s', c='#FFAB91', s=50, label='Arrival Planet Start')
+        self.figure_interplanetary_transfer.axes.scatter(r_2_x[-1], r_2_y[-1], r_2_z[-1], c='#FFAB91', s=50, label='Arrival Planet End')
         
-        # * Orbit
+        # ? Settings
         
-        self.figure_interplanetary_transfer.axes.plot(r_1_x, r_1_y, r_1_z, 'b--', label='Departure Planet')
-        self.figure_interplanetary_transfer.axes.plot(r_2_x, r_2_y, r_2_z, 'r--', label='Arrival Planet')
-        self.figure_interplanetary_transfer.axes.plot(result['y'][0,:], result['y'][1,:], result['y'][2,:], 'g', label='Orbit')
-        self.figure_interplanetary_transfer.axes.scatter(result['y'][0,0], result['y'][1,0], result['y'][2,0], c='b', label='Departure')
-        self.figure_interplanetary_transfer.axes.scatter(result['y'][0,-1], result['y'][1,-1], result['y'][2,-1], c='r', label='Arrival')
+        x_min = np.min([np.min(r_1_x), np.min(r_2_x), np.min(transfer_trajectory['y'][0,:])])
+        x_max = np.max([np.max(r_1_x), np.max(r_2_x), np.max(transfer_trajectory['y'][0,:])])
+        y_min = np.min([np.min(r_1_y), np.min(r_2_y), np.min(transfer_trajectory['y'][1,:])])
+        y_max = np.max([np.max(r_1_y), np.max(r_2_y), np.max(transfer_trajectory['y'][1,:])])
+        z_min = np.min([np.min(r_1_z), np.min(r_2_z), np.min(transfer_trajectory['y'][2,:])])
+        z_max = np.max([np.max(r_1_z), np.max(r_2_z), np.max(transfer_trajectory['y'][2,:])])
         
-        # * Labels
-        
-        self.figure_interplanetary_transfer.axes.set_xlabel('$x$ [km]')
-        self.figure_interplanetary_transfer.axes.set_ylabel('$y$ [km]')
-        self.figure_interplanetary_transfer.axes.set_zlabel('$z$ [km]')
-        self.figure_interplanetary_transfer.axes.legend(bbox_to_anchor=(-0.5, 0.5), loc='center left')
+        self.figure_interplanetary_transfer.axes.grid(False)
+        self.figure_interplanetary_transfer.axes.legend()
+        #self.figure_interplanetary_transfer.axes.legend(bbox_to_anchor=(-0.5, 0.5), loc='center left')
+        self.figure_interplanetary_transfer.axes.set_xticks([])
+        self.figure_interplanetary_transfer.axes.set_yticks([])
+        self.figure_interplanetary_transfer.axes.set_zticks([])
+        self.figure_interplanetary_transfer.axes.set_xlim3d([x_min * 0.8, x_max * 0.8])
+        self.figure_interplanetary_transfer.axes.set_ylim3d([y_min * 0.8, y_max * 0.8])
+        self.figure_interplanetary_transfer.axes.set_zlim3d([z_min * 0.8, z_max * 0.8])
+        self.figure_interplanetary_transfer.axes.w_xaxis.line.set_color((1.0, 1.0, 1.0, 0.0))
+        self.figure_interplanetary_transfer.axes.w_yaxis.line.set_color((1.0, 1.0, 1.0, 0.0))
+        self.figure_interplanetary_transfer.axes.w_zaxis.line.set_color((1.0, 1.0, 1.0, 0.0))
+        self.figure_interplanetary_transfer.axes.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        self.figure_interplanetary_transfer.axes.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        self.figure_interplanetary_transfer.axes.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        self.figure_interplanetary_transfer.axes.xaxis._axinfo["grid"]['color'] = (1,1,1,0)
+        self.figure_interplanetary_transfer.axes.yaxis._axinfo["grid"]['color'] = (1,1,1,0)
+        self.figure_interplanetary_transfer.axes.zaxis._axinfo["grid"]['color'] = (1,1,1,0)
         
         self.figure_interplanetary_transfer.redraw_canvas()
+    
+    def integrate_maneuver(self, oe : OrbitalElements, theta_0 : float, theta_f : float) -> dict:
+        """Integrates the trajectory from the intial True Anomaly to the final True Anomaly of the given Orbital Elements
+
+        Args:
+            oe (ORBITAL_ELEMENTS): Orbital Elements
+            theta_0 (float): Initial True Anomaly
+            theta_f (float): Final True Anomaly
+
+        Returns:
+            dict: Integration result
+        """
+        
+        r, v = ThreeDimensionalOrbit.pf_2_gef(oe)
+           
+        parameters = TwoBodyProblem.calculate_orbital_parameters(r, v)
+        
+        t_0 = Time.calculate_elliptical_orbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=parameters.T, e=oe.e, theta=theta_0)
+        t_f = Time.calculate_elliptical_orbit(DirectionType.MEAN_ANOMALY_TO_TIME, T=parameters.T, e=oe.e, theta=theta_f)
+        
+        if theta_f != 0.0 and t_0 > t_f: t_f += parameters.T
+        
+        return TwoBodyProblem.simulate_relative_motion(np.hstack([r, v]), t_0, t_f)

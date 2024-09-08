@@ -38,7 +38,7 @@ class MissionParameters(qtCore.QObject):
         
     # ! PUBLIC
     
-    def setUpdateWithCanvas(self, engine : qtQml.QQmlApplicationEngine) -> None:
+    def set_update_with_canvas(self, engine : qtQml.QQmlApplicationEngine) -> None:
         """Connects all the QML figures with the backend model
 
         Args:
@@ -49,6 +49,6 @@ class MissionParameters(qtCore.QObject):
         
         self.mission_orbit_propagation.set_update_with_canvas(engine)
         
-        self.mission_interplanetary_transfer.setUpdateWithCanvas(engine)
+        self.mission_interplanetary_transfer.set_update_with_canvas(engine)
         
         self.mission_atmospheric_entry.set_update_with_canvas(engine)

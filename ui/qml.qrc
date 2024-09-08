@@ -11,6 +11,7 @@
         <file>components/DialogParameter.qml</file>
         <file>components/Figure.qml</file>
         <file>components/Maneuver.qml</file>
+        <file>components/MaterialProgressBar.qml</file>
 
         <file>dialogs/qmldir</file>
         <file>dialogs/DialogAbout.qml</file>
@@ -25,8 +26,6 @@
         <file>dialogs/DialogOrbit.qml</file>
         <file>dialogs/DialogOrbitalPerturbations.js</file>
         <file>dialogs/DialogOrbitalPerturbations.qml</file>
-        <file>dialogs/DialogPorkChopPlot.js</file>
-        <file>dialogs/DialogPorkChopPlot.qml</file>
         <file>dialogs/DialogSpacecraft.js</file>
         <file>dialogs/DialogSpacecraft.qml</file>
 

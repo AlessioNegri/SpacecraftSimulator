@@ -7,6 +7,8 @@ import "../components"
 // ? The PageOrbitTransfer class manages the orbit transfer page.
 Page
 {
+    background: Rectangle { color: "#424242" }
+    
     header: Rectangle
     {
         id: _header_

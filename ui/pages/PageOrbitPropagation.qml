@@ -7,6 +7,8 @@ import "../components"
 // ? The PageOrbitalPerturbations class manages the orbital perturbations page.
 Page
 {
+    background: Rectangle { color: "#424242" }
+    
     header: Rectangle
     {
         id: _header_

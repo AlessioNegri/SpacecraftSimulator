@@ -42,8 +42,6 @@ ApplicationWindow
 
     DialogOrbitalPerturbations { id: _dlgOrbitalPerturbations_ }
 
-    DialogPorkChopPlot { id: _dlgPorkChopPlot_ }
-
     DialogInterplanetaryTransfer { id: _dlgInterplanetaryTransfer_ }
 
     DialogAtmosphericEntryConditions { id: _dlgAtmosphericEntryConditions_ }
@@ -139,8 +137,6 @@ ApplicationWindow
             {
                 title: "Interplanetary"
                 enabled: gp_CurrentMission === 2
-
-                Action { text: "Pork Chop Plot"; onTriggered: _dlgPorkChopPlot_.open() }
 
                 Action { text: "Interplanetary Transfer"; onTriggered: _dlgInterplanetaryTransfer_.open() }
             }

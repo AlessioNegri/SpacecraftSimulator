@@ -437,7 +437,7 @@ class MissionOrbitTransfer(qtCore.QObject):
         y = R * np.sin(u) * np.sin(v)
         z = R * np.cos(v)
         
-        self.tra_figure_orbit.axes.plot_wireframe(x, y, z, color='#F48FB1', lw=0.1)
+        self.tra_figure_orbit.axes.plot_wireframe(x, y, z, color='#FFFFFF', lw=0.1)
         
         # ? Settings
         
@@ -505,7 +505,7 @@ class MissionOrbitTransfer(qtCore.QObject):
         y = AstronomicalData.equatiorial_radius(celestialBody) * np.sin(u) * np.sin(v)
         z = AstronomicalData.equatiorial_radius(celestialBody) * np.cos(v)
         
-        orbitFigure.axes.plot_wireframe(x, y, z, color='#F48FB1', lw=0.1)
+        orbitFigure.axes.plot_wireframe(x, y, z, color='#FFFFFF', lw=0.1)
         
         # ? Orbit
         
@@ -622,13 +622,13 @@ class MissionOrbitTransfer(qtCore.QObject):
         y = R * np.sin(u) * np.sin(v)
         z = R * np.cos(v)
         
-        self.tra_figure_orbit.axes.plot_wireframe(x, y, z, color='#F48FB1', lw=0.1)
+        self.tra_figure_orbit.axes.plot_wireframe(x, y, z, color='#FFFFFF', lw=0.1)
         
         # ? Orbits and positions
         
         self.tra_figure_orbit.axes.scatter(dep[0,0], dep[1,0], dep[2,0], c='#90CAF9', s=50, label='Departure Position')
         self.tra_figure_orbit.axes.scatter(arr[0,0], arr[1,0], arr[2,0], c='#FFAB91', s=50, label='Arrival Position')
-        self.tra_figure_orbit.axes.scatter(tra[0,-1], tra[1,-1], tra[2,-1], c='#A5D6A7', s=50, label='Final Position')
+        if tra.size > 0: self.tra_figure_orbit.axes.scatter(tra[0,-1], tra[1,-1], tra[2,-1], c='#A5D6A7', s=50, label='Final Position')
         self.tra_figure_orbit.axes.plot(dep[0,:], dep[1,:], dep[2,:], color='#90CAF9', linestyle='dashed', linewidth='2', label='Departure Orbit')
         self.tra_figure_orbit.axes.plot(arr[0,:], arr[1,:], arr[2,:], color='#FFAB91', linestyle='dashed', linewidth='2', label='Arrival Orbit')
         #self.tra_figure_orbit.axes.plot(fin[0,:], fin[1,:], fin[2,:], color='#CE93D8', linestyle='dashed', linewidth='1', label='Final Orbit')
@@ -879,8 +879,6 @@ class MissionOrbitTransfer(qtCore.QObject):
                 
                 self.tra_orbital_elements.omega = self.arr_orbital_elements.omega
                 self.tra_orbital_elements.theta = maneuver_result.oe.theta
-                
-                print(self.tra_orbital_elements)
                 
                 # * Budget
                 

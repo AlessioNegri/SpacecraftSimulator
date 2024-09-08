@@ -1,4 +1,4 @@
-// ? Updates the parameters of the orbital perturbations.
+// ? Updates the parameters of the dialog.
 function saveParameters()
 {
     __MissionOrbitPropagation.angular_momentum                  = _angular_momentum_.text
@@ -17,7 +17,7 @@ function saveParameters()
     __MissionOrbitPropagation.end_date                          = _end_date_.displayText
 }
 
-// ? Restores the parameters of the spacecraft.
+// ? Restores the parameters of the dialog.
 function restoreParameters()
 {
     _angular_momentum_.text             = __MissionOrbitPropagation.angular_momentum

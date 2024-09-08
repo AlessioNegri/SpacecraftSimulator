@@ -1,4 +1,4 @@
-// ? Saves the parameters of the spacecraft.
+// ? Saves the parameters of the dialog.
 function saveParameters()
 {
     __Spacecraft.initial_mass                   = _initial_mass_.text
@@ -20,7 +20,7 @@ function saveParameters()
     __Spacecraft.capsule_reference_surface      = _capsule_reference_surface_.text
 }
 
-// ? Restores the parameters of the spacecraft.
+// ? Restores the parameters of the dialog.
 function restoreParameters()
 {
     _initial_mass_.text                     = __Spacecraft.initial_mass

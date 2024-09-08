@@ -83,14 +83,14 @@ class FigureCanvas(qtCore.QObject):
                 for c in range(0, self.cols):
                     
                     self.axes[r][c].grid(True)
-                    self.axes[r][c].set_facecolor('#424242' if self.figure_in_dialog else '#1C1B1F')
+                    self.axes[r][c].set_facecolor('#424242')# if self.figure_in_dialog else '#1C1B1F')
             
         else:
             
             self.axes = self.figure.add_subplot(111) if not self.dof3 else self.figure.add_subplot(111, projection='3d')
             
             self.axes.grid(True)
-            self.axes.set_facecolor('#424242' if self.figure_in_dialog else '#1C1B1F')
+            self.axes.set_facecolor('#424242')# if self.figure_in_dialog else '#1C1B1F')
         
         # ? Set Figure
         
@@ -108,7 +108,7 @@ class FigureCanvas(qtCore.QObject):
             
         self.figure.set_figwidth(self.figsize[0])
         self.figure.set_figheight(self.figsize[1])
-        self.figure.patch.set_facecolor('#424242' if self.figure_in_dialog else '#1C1B1F')
+        self.figure.patch.set_facecolor('#424242')# if self.figure_in_dialog else '#1C1B1F')
         
         # ? Set Canvas
         

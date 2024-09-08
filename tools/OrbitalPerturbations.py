@@ -29,6 +29,7 @@ class OrbitalPerturbations():
     
     # --- ASTRONOMICAL CONSTANTS 
     
+    body    = CelestialBody.EARTH
     mu      = AstronomicalData.gravitational_parameter(CelestialBody.EARTH)
     R_E     = AstronomicalData.equatiorial_radius(CelestialBody.EARTH)
     omega   = AstronomicalData.angular_velocity(CelestialBody.EARTH)
@@ -48,6 +49,7 @@ class OrbitalPerturbations():
             celestialBody (CelestialBody): Celestial body
         """
         
+        cls.body    = celestialBody
         cls.mu      = AstronomicalData.gravitational_parameter(celestialBody)
         cls.R_E     = AstronomicalData.equatiorial_radius(celestialBody)
         cls.omega   = AstronomicalData.angular_velocity(celestialBody)
@@ -636,7 +638,9 @@ class OrbitalPerturbations():
         if JD_f < JD_0 and t_0 == 0.0 and t_f == 0.0: raise Exception('Invalid integration time')
         
         t_span = [t_0, t_f] if JD_0 == 0.0 and JD_f == 0.0 else [JD_0, JD_f]
-            
+        
+        ThreeDimensionalOrbit.set_celestial_body(cls.body)
+        
         integrationResult = solve_ivp(fun=cls.gauss_variational_eom, t_span=t_span, y0=y_0, method='RK45', args=(drag, gravitational, SRP, MOON, SUN, B, B_SRP), rtol=1e-8, atol=1e-8)
             
         if not integrationResult['success']: Exception(integrationResult['message'])

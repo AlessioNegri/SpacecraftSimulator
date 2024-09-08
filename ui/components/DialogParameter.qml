@@ -16,7 +16,10 @@ TextField
     // ? True for float numbers.
     property bool p_FloatRegex: true
 
-    // !-----------------------------------------! //
+    // ? True for int numbers.
+    property bool p_IntRegex: false
+
+    // ! ----------------------------------------- ! //
     
     implicitWidth: 200
     implicitHeight: 40
@@ -25,6 +28,13 @@ TextField
 
     validator: RegularExpressionValidator
     {
-        regularExpression: p_FloatRegex ? /[+-]?([0-9]*[.])?[0-9]+/ : p_Regex
+        regularExpression:
+        {
+            if (p_IntRegex) return /[0-9]+/
+
+            if (p_FloatRegex) return /[+-]?([0-9]*[.])?[0-9]+/
+
+            return p_Regex
+        }
     }
 }

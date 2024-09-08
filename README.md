@@ -183,25 +183,25 @@ for a given set of initial orbital elements. By clicking on the `Save` button th
 
 To simulate the orbit propagation click on the `Run` button. The evolution of the orbital elements with respect to the initial values can be analyzed in the main window.
 
-![Orbital Propagation.](./images/orbit_propagation.png)
+<p align="center"><img src="./images/orbit_propagation.png" width="100%"></p>
 
 ## 6 Interplanetary Transfer
 
-### 6.1 Pork Chop Plot
+One of the most interesting aspect of space is space exploration. In this section I explain how the user can simulate an interplanetary transfer.
 
-Under the menu item `Missions \ Interplanetary \ Pork Chop Plot` it is possible to analyze the cost of the interplanetary transfer bewteen two planets of the Solar System, given a *Launch Window* and an *Arrival Window*. Once selected the parameters, by clicking on the `Generate` button the Pork Chop Plot is generated, and can be seen by clicking on the `Show` button.
+### 6.1 Analysis
 
-![Pork Chop Plot Design.](./images/pork_chop_plot_design.png)
+Under the menu item `Missions \ Interplanetary \ Interplanetary Transfer` it is possible to analyze/design the interplanetary transfer bewteen two planets of the Solar System, given a *Launch Window* and an *Arrival Window*. Once selected the parameters, by clicking on the `Generate` button the Pork Chop Plot is generated, and can be seen by clicking on the `Show` button. Use the `Stop` button to finish the generation before it ends.
 
-![Pork Chop Plot Design.](./images/pork_chop_plot.png)
+<p align="center"><img src="./images/interplanetary_transfer_design.png" width="100%"></p>
 
-### 6.2 Interplanetary Transfer
+<p align="center"><img src="./images/pork_chop_plot.png" width="100%"></p>
 
-After the analysis of the Pork Chop Plot, under the menu item `Missions \ Interplanetary \ Interplanetary Transfer` the actual transfer can be simulated, by choosing the effective departure and arrival dates, and the departure and arrival orbits around the planets.
+### 6.2 Transfer
 
-![Orbit Transfer.](./images/interplanetary_transfer_design.png)
+After the analysis of the Pork Chop Plot, the actual transfer can be simulated, by choosing the effective departure and arrival dates, and the departure and arrival orbits around the planets.
 
-![Orbit Transfer.](./images/interplanetary_transfer.png)
+<p align="center"><img src="./images/interplanetary_transfer.png" width="100%"></p>
 
 ## 7 Atmospheric Entry
 
