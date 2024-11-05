@@ -9,6 +9,7 @@ import PySide6.QtGui as qtGui
 import PySide6.QtQuick as qtQuick
 import numpy as np
 import mpl_toolkits.mplot3d.proj3d as proj3d
+import mpl_toolkits.mplot3d.axes3d as axes3d
 
 from lib.matplotlib_backend_qtquick.backend_qtquick import NavigationToolbar2QtQuick
 from lib.matplotlib_backend_qtquick.backend_qtquickagg import FigureCanvasQtQuickAgg
@@ -169,6 +170,52 @@ class FigureCanvas(qtCore.QObject):
 
         return d
     
+    def get_w_lims(self, axis):
+        '''Get 3D world limits.'''
+        minx, maxx = axis.get_xlim3d()
+        miny, maxy = axis.get_ylim3d()
+        minz, maxz = axis.get_zlim3d()
+        return minx, maxx, miny, maxy, minz, maxz
+    
+    def unit_cube(self, axis, vals=None):
+        minx, maxx, miny, maxy, minz, maxz = vals or self.get_w_lims(axis)
+        return [(minx, miny, minz),
+                (maxx, miny, minz),
+                (maxx, maxy, minz),
+                (minx, maxy, minz),
+                (minx, miny, maxz),
+                (maxx, miny, maxz),
+                (maxx, maxy, maxz),
+                (minx, maxy, maxz)]
+    
+    def tunit_cube(self, axis, vals=None, M=None):
+        #if M is None:
+        #    M = self.M
+        xyzs = self.unit_cube(axis, vals)
+        tcube = proj3d.proj_points(xyzs, M)
+        return tcube
+    
+    def tunit_edges(self, axis, vals=None, M=None):
+        #tc = self.tunit_cube(axis, vals, M)
+        
+        tc = axis._transformed_cube(axis.get_w_lims())
+        #print(tc)
+        edges = [(tc[0], tc[1]),
+                 (tc[1], tc[2]),
+                 (tc[2], tc[3]),
+                 (tc[3], tc[0]),
+
+                 (tc[0], tc[4]),
+                 (tc[1], tc[5]),
+                 (tc[2], tc[6]),
+                 (tc[3], tc[7]),
+
+                 (tc[4], tc[5]),
+                 (tc[5], tc[6]),
+                 (tc[6], tc[7]),
+                 (tc[7], tc[4])]
+        return edges
+    
     def xyz_data(self, event : qtGui.QMouseEvent, ax) -> list:
         """Retrieves the x-y-z coordinates in a 3D plot
 
@@ -186,7 +233,25 @@ class FigureCanvas(qtCore.QObject):
         
         p = (xd, yd)
         
-        edges = ax.tunit_edges()
+        #edges = self.tunit_edges(ax)#ax.tunit_edges()
+        
+        #print(ax.get_w_lims())
+        tc = ax._transformed_cube(ax.get_w_lims())
+        
+        edges = [(tc[0], tc[1]),
+                 (tc[1], tc[2]),
+                 (tc[2], tc[3]),
+                 (tc[3], tc[0]),
+
+                 (tc[0], tc[4]),
+                 (tc[1], tc[5]),
+                 (tc[2], tc[6]),
+                 (tc[3], tc[7]),
+
+                 (tc[4], tc[5]),
+                 (tc[5], tc[6]),
+                 (tc[6], tc[7]),
+                 (tc[7], tc[4])]
         
         ldists = [(self.line2d_seg_dist(p0, p1, p), i) for i, (p0, p1) in enumerate(edges)]
         
@@ -256,10 +321,10 @@ class FigureCanvas(qtCore.QObject):
             if event.inaxes == self.axes:
                 
                 if self.dof3:
-                
+                    #print('>>>', self.xyz_data(event, self.axes))
                     x, y, z = self.xyz_data(event, self.axes)
             
-                    self.coord = f'({x:.2f}, {y:.2f}, {z:.2f})'
+                    self.coord = f'({x[0]:.2f}, {y[0]:.2f}, {z[0]:.2f})'
                 
                 else:
                     

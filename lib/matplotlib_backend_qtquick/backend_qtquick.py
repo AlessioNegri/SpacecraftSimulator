@@ -8,7 +8,7 @@ import traceback
 import matplotlib
 
 from matplotlib import cbook
-from matplotlib.backend_bases import FigureCanvasBase, NavigationToolbar2, MouseButton
+from matplotlib.backend_bases import FigureCanvasBase, NavigationToolbar2, MouseButton, LocationEvent, MouseEvent, ResizeEvent, KeyEvent
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt import TimerQT, SPECIAL_KEYS, cursord
 #from matplotlib.backends.backend_qt5 import TimerQT, SPECIAL_KEYS, MODIFIER_KEYS, cursord
@@ -94,7 +94,8 @@ class FigureCanvasQtQuick(QtQuick.QQuickPaintedItem, FigureCanvasBase):
         self._is_drawing = False
         self._draw_rect_callback = lambda painter: None
 
-        self.resize(*self.get_width_height())
+        #>>>self.resize(*self.get_width_height())
+        #self.setSize(QtCore.QSize(*self.get_width_height()))
 
     def _update_figure_dpi(self):
         dpi = self.dpi_ratio * self.figure._original_dpi
@@ -197,7 +198,13 @@ class FigureCanvasQtQuick(QtQuick.QQuickPaintedItem, FigureCanvasBase):
         winch = w / dpival
         hinch = h / dpival
         self.figure.set_size_inches(winch, hinch, forward=False)
-        FigureCanvasBase.resize_event(self)
+        #>>>FigureCanvasBase.resize_event(self)
+        #!>
+        s = 'resize_event'
+        event = ResizeEvent(s, self)
+        self.callbacks.process(s, event)
+        self.draw_idle()
+        #!<
         self.draw_idle()
         QtQuick.QQuickPaintedItem.geometryChanged(self,
                                                   new_geometry,
@@ -216,11 +223,21 @@ class FigureCanvasQtQuick(QtQuick.QQuickPaintedItem, FigureCanvasBase):
         except AttributeError:
             # the event from PyQt4 does not include the position
             x = y = None
-        FigureCanvasBase.enter_notify_event(self, guiEvent=event, xy=(x, y))
+        #>>>FigureCanvasBase.enter_notify_event(self, guiEvent=event, xy=(x, y))
+        #!>
+        self._lastx, self._lasty = x, y
+        event = LocationEvent('figure_enter_event', self, x, y, event)
+        self.callbacks.process('figure_enter_event', event)
+        #!<
 
     def hoverLeaveEvent(self, event):
         QtWidgets.QApplication.restoreOverrideCursor()
-        FigureCanvasBase.leave_notify_event(self, guiEvent=event)
+        #>>>FigureCanvasBase.leave_notify_event(self, guiEvent=event)
+        #!>
+        self.callbacks.process('figure_leave_event', LocationEvent.lastevent)
+        LocationEvent.lastevent = None
+        self._lastx, self._lasty = None, None
+        #!<
 
     def mouseEventCoords(self, pos):
         """Calculate mouse coordinates in physical pixels
@@ -239,36 +256,70 @@ class FigureCanvasQtQuick(QtQuick.QQuickPaintedItem, FigureCanvasBase):
         return x * dpi_ratio, y * dpi_ratio
 
     def hoverMoveEvent(self, event):
-        x, y = self.mouseEventCoords(event.pos())
-        FigureCanvasBase.motion_notify_event(self, x, y, guiEvent=event)
+        x, y = self.mouseEventCoords(event.pos())       
+        #>>>FigureCanvasBase.motion_notify_event(self, x, y, guiEvent=event)
+        #!>
+        self._lastx, self._lasty = x, y
+        s = 'motion_notify_event'
+        event = MouseEvent(s, self, x, y, self._button, self._key,
+                           guiEvent=event)
+        self.callbacks.process(s, event)
+        #!<
 
     # hoverMoveEvent kicks in when no mouse buttons are pressed
     # otherwise mouseMoveEvent are emitted
     def mouseMoveEvent(self, event):
         x, y = self.mouseEventCoords(event.pos())
-        FigureCanvasBase.motion_notify_event(self, x, y, guiEvent=event)
+        #>>>FigureCanvasBase.motion_notify_event(self, x, y, guiEvent=event)
+        #!>
+        self._lastx, self._lasty = x, y
+        s = 'motion_notify_event'
+        event = MouseEvent(s, self, x, y, self._button, self._key,
+                           guiEvent=event)
+        self.callbacks.process(s, event)
+        #!<
 
     def mousePressEvent(self, event):
         x, y = self.mouseEventCoords(event.pos())
         button = self.buttond.get(event.button())
-        if button is not None:
-            FigureCanvasBase.button_press_event(self, x, y, button,
-                                                guiEvent=event)
+        #>>>if button is not None:
+        #>>>    FigureCanvasBase.button_press_event(self, x, y, button,
+        #>>>                                        guiEvent=event)
+        #!>
+        self._button = button
+        s = 'button_press_event'
+        mouseevent = MouseEvent(s, self, x, y, button, self._key,
+                                dblclick=False, guiEvent=event)
+        self.callbacks.process(s, mouseevent)
+        #!<
 
     def mouseReleaseEvent(self, event):
         x, y = self.mouseEventCoords(event.pos())
         button = self.buttond.get(event.button())
-        if button is not None:
-            FigureCanvasBase.button_release_event(self, x, y, button,
-                                                  guiEvent=event)
+        #>>>if button is not None:
+        #>>>    FigureCanvasBase.button_release_event(self, x, y, button,
+        #>>>                                          guiEvent=event)
+        #!>
+        s = 'button_release_event'
+        event = MouseEvent(s, self, x, y, button, self._key, guiEvent=event)
+        self.callbacks.process(s, event)
+        self._button = None
+        #!<
 
     def mouseDoubleClickEvent(self, event):
         x, y = self.mouseEventCoords(event.pos())
         button = self.buttond.get(event.button())
-        if button is not None:
-            FigureCanvasBase.button_press_event(self, x, y,
-                                                button, dblclick=True,
-                                                guiEvent=event)
+        #>>>if button is not None:
+        #>>>    FigureCanvasBase.button_press_event(self, x, y,
+        #>>>                                        button, dblclick=True,
+        #>>>                                        guiEvent=event)
+        #!>
+        self._button = button
+        s = 'button_press_event'
+        mouseevent = MouseEvent(s, self, x, y, button, self._key,
+                                dblclick=True, guiEvent=event)
+        self.callbacks.process(s, mouseevent)
+        #!<
 
     def wheelEvent(self, event):
         x, y = self.mouseEventCoords(event.position())
@@ -278,17 +329,41 @@ class FigureCanvasQtQuick(QtQuick.QQuickPaintedItem, FigureCanvasBase):
         else:
             steps = event.pixelDelta().y()
         if steps:
-            FigureCanvasBase.scroll_event(self, x, y, steps, guiEvent=event)
+            #>>>FigureCanvasBase.scroll_event(self, x, y, steps, guiEvent=event)
+            #!>
+            if steps >= 0:
+                self._button = 'up'
+            else:
+                self._button = 'down'
+            s = 'scroll_event'
+            mouseevent = MouseEvent(s, self, x, y, self._button, self._key,
+                                    step=steps, guiEvent=event)
+            self.callbacks.process(s, mouseevent)
+            #!<
 
     def keyPressEvent(self, event):
         key = self._get_key(event)
         if key is not None:
-            FigureCanvasBase.key_press_event(self, key, guiEvent=event)
+            #>>>FigureCanvasBase.key_press_event(self, key, guiEvent=event)
+            #!>
+            self._key = key
+            s = 'key_press_event'
+            event = KeyEvent(
+                s, self, key, self._lastx, self._lasty, guiEvent=event)
+            self.callbacks.process(s, event)
+            #!<
 
     def keyReleaseEvent(self, event):
         key = self._get_key(event)
         if key is not None:
-            FigureCanvasBase.key_release_event(self, key, guiEvent=event)
+            #>>>FigureCanvasBase.key_release_event(self, key, guiEvent=event)
+            #!>
+            s = 'key_release_event'
+            event = KeyEvent(
+                s, self, key, self._lastx, self._lasty, guiEvent=event)
+            self.callbacks.process(s, event)
+            self._key = None
+            #!<
 
     def _get_key(self, event):
         # if event.isAutoRepeat():
