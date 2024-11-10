@@ -3,9 +3,11 @@ Render to qtquick from agg.
 """
 
 import os
+# >>> Importing from outside
 import sys
 
 sys.path.append(os.path.dirname(__file__))
+# >>>
 
 import numpy as np
 
@@ -13,7 +15,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 
 from backend_qtquick import QtCore, QtGui, FigureCanvasQtQuick
 
-#from .backend_qtquick import QtCore, QtGui, FigureCanvasQtQuick
+# ! from .backend_qtquick import QtCore, QtGui, FigureCanvasQtQuick
 
 
 class FigureCanvasQtQuickAgg(FigureCanvasAgg, FigureCanvasQtQuick):

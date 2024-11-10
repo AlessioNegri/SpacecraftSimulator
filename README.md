@@ -14,14 +14,16 @@ For the Graphical User Interface (GUI) I decided to rely on the *QML* language (
 
 ### 1.1 Languages & Libraries
 
-The application is developed in `Python 3.11.2` and uses the following main libraries:
+The application is developed in `Python 3.11.9` and uses the following main libraries:
 
-- `numpy 1.24.2` for linear algebra and matrix manipulation
-- `matplotlib 3.7.1` for data visualization
-- `scipy 1.10.1` for numerical intergration
-- `PySide6 6.7.0` for the Grafical User Interface
+- `matplotlib 3.9.2` for data visualization
+- `mplcyberpunk 0.7.1` for nice matplotlib plots
+- `numpy 2.0.2` for linear algebra and matrix manipulation
+- `scipy 1.14.1` for numerical intergration
+- `PySide6 6.8.0.2` for the Grafical User Interface
+- `qbstyles 0.1.4` for nice matplotlib plots
 
-The front-end is developed in `Qt 6.7.0` using the `QML` language.
+The front-end is developed in `Qt 6.8.0` using the `QML` language.
 
 ### 1.2 Project's Structure
 

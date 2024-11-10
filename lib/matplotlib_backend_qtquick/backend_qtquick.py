@@ -1,21 +1,32 @@
 import os
+# >>> Importing from outside
 import sys
 
 sys.path.append(os.path.dirname(__file__))
+# >>>
 
 import traceback
 
 import matplotlib
 
 from matplotlib import cbook
-from matplotlib.backend_bases import FigureCanvasBase, NavigationToolbar2, MouseButton, LocationEvent, MouseEvent, ResizeEvent, KeyEvent
+from matplotlib.backend_bases import FigureCanvasBase, NavigationToolbar2, MouseButton
+# >>> Importing for new matplotlib version
+from matplotlib.backend_bases import LocationEvent, MouseEvent, ResizeEvent, KeyEvent
+# >>>
 from matplotlib.figure import Figure
+# >>> Importing for qt 6 backend
 from matplotlib.backends.backend_qt import TimerQT, SPECIAL_KEYS, cursord
-#from matplotlib.backends.backend_qt5 import TimerQT, SPECIAL_KEYS, MODIFIER_KEYS, cursord
+# ! from matplotlib.backends.backend_qt5 import TimerQT, SPECIAL_KEYS, MODIFIER_KEYS, cursord
+# >>>
 
+# >>> PySide6 compatible import
 import functools
 import operator
 import PySide6.QtCore as QtCore
+import PySide6.QtGui as QtGui
+import PySide6.QtQuick as QtQuick
+import PySide6.QtWidgets as QtWidgets
 
 QT_API = 'PySide6'
 
@@ -39,13 +50,8 @@ MODIFIER_KEYS = [
     ]
 ]
 
-import PySide6.QtCore as QtCore
-import PySide6.QtGui as QtGui
-import PySide6.QtQuick as QtQuick
-import PySide6.QtWidgets as QtWidgets
-
-#from .qt_compat import QtCore, QtGui, QtQuick, QtWidgets, QT_API, QT_API_PYSIDE2
-
+# ! from .qt_compat import QtCore, QtGui, QtQuick, QtWidgets, QT_API, QT_API_PYSIDE2
+# >>>
 
 class FigureCanvasQtQuick(QtQuick.QQuickPaintedItem, FigureCanvasBase):
     """ This class creates a QtQuick Item encapsulating a Matplotlib
@@ -94,8 +100,8 @@ class FigureCanvasQtQuick(QtQuick.QQuickPaintedItem, FigureCanvasBase):
         self._is_drawing = False
         self._draw_rect_callback = lambda painter: None
 
-        #>>>self.resize(*self.get_width_height())
-        #self.setSize(QtCore.QSize(*self.get_width_height()))
+        # ! self.resize(*self.get_width_height())
+        # >>> self.setSize(QtCore.QSize(*self.get_width_height()))
 
     def _update_figure_dpi(self):
         dpi = self.dpi_ratio * self.figure._original_dpi
@@ -186,6 +192,163 @@ class FigureCanvasQtQuick(QtQuick.QQuickPaintedItem, FigureCanvasBase):
             except Exception:
                 # Uncaught exceptions are fatal for PyQt5, so catch them.
                 traceback.print_exc()
+                
+    # >>> Deprecated functions
+    def resize_event(self):
+        """Pass a `ResizeEvent` to all functions connected to ``resize_event``.
+        """
+        s = 'resize_event'
+        event = ResizeEvent(s, self)
+        self.callbacks.process(s, event)
+        self.draw_idle()
+        
+    def enter_notify_event(self, guiEvent=None, xy=None):
+        """
+        Backend derived classes should call this function when entering
+        canvas
+
+        Parameters
+        ----------
+        guiEvent
+            the native UI event that generated the mpl event
+        xy : (float, float)
+            the coordinate location of the pointer when the canvas is
+            entered
+
+        """
+        if xy is not None:
+            x, y = xy
+            self._lastx, self._lasty = x, y
+        else:
+            x = None
+            y = None
+            cbook.warn_deprecated(
+                '3.0', message='enter_notify_event expects a location but '
+                'your backend did not pass one.')
+
+        event = LocationEvent('figure_enter_event', self, x, y, guiEvent)
+        self.callbacks.process('figure_enter_event', event)
+    
+    def leave_notify_event(self, guiEvent=None):
+        """
+        Backend derived classes should call this function when leaving
+        canvas
+
+        Parameters
+        ----------
+        guiEvent
+            the native UI event that generated the mpl event
+
+        """
+
+        self.callbacks.process('figure_leave_event', LocationEvent.lastevent)
+        LocationEvent.lastevent = None
+        self._lastx, self._lasty = None, None
+        
+    def motion_notify_event(self, x, y, guiEvent=None):
+        """
+        Backend derived classes should call this function on any
+        motion-notify-event.
+
+        This method will call all functions connected to the
+        'motion_notify_event' with a :class:`MouseEvent` instance.
+
+        Parameters
+        ----------
+        x : scalar
+            the canvas coordinates where 0=left
+
+        y : scalar
+            the canvas coordinates where 0=bottom
+
+        guiEvent
+            the native UI event that generated the mpl event
+
+        """
+        self._lastx, self._lasty = x, y
+        s = 'motion_notify_event'
+        event = MouseEvent(s, self, x, y, self._button, self._key,
+                           guiEvent=guiEvent)
+        self.callbacks.process(s, event)
+        
+    def button_press_event(self, x, y, button, dblclick=False, guiEvent=None):
+        """
+        Backend derived classes should call this function on any mouse
+        button press.  x,y are the canvas coords: 0,0 is lower, left.
+        button and key are as defined in :class:`MouseEvent`.
+
+        This method will be call all functions connected to the
+        'button_press_event' with a :class:`MouseEvent` instance.
+        """
+        self._button = button
+        s = 'button_press_event'
+        mouseevent = MouseEvent(s, self, x, y, button, self._key,
+                                dblclick=dblclick, guiEvent=guiEvent)
+        self.callbacks.process(s, mouseevent)
+
+    def button_release_event(self, x, y, button, guiEvent=None):
+        """
+        Backend derived classes should call this function on any mouse
+        button release.
+
+        This method will call all functions connected to the
+        'button_release_event' with a :class:`MouseEvent` instance.
+
+        Parameters
+        ----------
+        x : scalar
+            the canvas coordinates where 0=left
+
+        y : scalar
+            the canvas coordinates where 0=bottom
+
+        guiEvent
+            the native UI event that generated the mpl event
+
+        """
+        s = 'button_release_event'
+        event = MouseEvent(s, self, x, y, button, self._key, guiEvent=guiEvent)
+        self.callbacks.process(s, event)
+        self._button = None
+        
+    def scroll_event(self, x, y, step, guiEvent=None):
+        """
+        Backend derived classes should call this function on any
+        scroll wheel event.  x,y are the canvas coords: 0,0 is lower,
+        left.  button and key are as defined in MouseEvent.
+
+        This method will be call all functions connected to the
+        'scroll_event' with a :class:`MouseEvent` instance.
+        """
+        if step >= 0:
+            self._button = 'up'
+        else:
+            self._button = 'down'
+        s = 'scroll_event'
+        mouseevent = MouseEvent(s, self, x, y, self._button, self._key,
+                                step=step, guiEvent=guiEvent)
+        self.callbacks.process(s, mouseevent)
+        
+    def key_press_event(self, key, guiEvent=None):
+        """Pass a `KeyEvent` to all functions connected to ``key_press_event``.
+        """
+        self._key = key
+        s = 'key_press_event'
+        event = KeyEvent(
+            s, self, key, self._lastx, self._lasty, guiEvent=guiEvent)
+        self.callbacks.process(s, event)
+
+
+    def key_release_event(self, key, guiEvent=None):
+        """
+        Pass a `KeyEvent` to all functions connected to ``key_release_event``.
+        """
+        s = 'key_release_event'
+        event = KeyEvent(
+            s, self, key, self._lastx, self._lasty, guiEvent=guiEvent)
+        self.callbacks.process(s, event)
+        self._key = None
+    # >>>
 
     def geometryChanged(self, new_geometry, old_geometry):
         w = new_geometry.width() * self.dpi_ratio
@@ -198,13 +361,9 @@ class FigureCanvasQtQuick(QtQuick.QQuickPaintedItem, FigureCanvasBase):
         winch = w / dpival
         hinch = h / dpival
         self.figure.set_size_inches(winch, hinch, forward=False)
-        #>>>FigureCanvasBase.resize_event(self)
-        #!>
-        s = 'resize_event'
-        event = ResizeEvent(s, self)
-        self.callbacks.process(s, event)
-        self.draw_idle()
-        #!<
+        # >>> Deprecated function
+        self.resize_event()
+        # ! FigureCanvasBase.resize_event(self)
         self.draw_idle()
         QtQuick.QQuickPaintedItem.geometryChanged(self,
                                                   new_geometry,
@@ -223,21 +382,15 @@ class FigureCanvasQtQuick(QtQuick.QQuickPaintedItem, FigureCanvasBase):
         except AttributeError:
             # the event from PyQt4 does not include the position
             x = y = None
-        #>>>FigureCanvasBase.enter_notify_event(self, guiEvent=event, xy=(x, y))
-        #!>
-        self._lastx, self._lasty = x, y
-        event = LocationEvent('figure_enter_event', self, x, y, event)
-        self.callbacks.process('figure_enter_event', event)
-        #!<
+        # >>> Deprecated function
+        self.enter_notify_event(guiEvent=event, xy=(x, y))
+        # ! FigureCanvasBase.enter_notify_event(self, guiEvent=event, xy=(x, y))
 
     def hoverLeaveEvent(self, event):
         QtWidgets.QApplication.restoreOverrideCursor()
-        #>>>FigureCanvasBase.leave_notify_event(self, guiEvent=event)
-        #!>
-        self.callbacks.process('figure_leave_event', LocationEvent.lastevent)
-        LocationEvent.lastevent = None
-        self._lastx, self._lasty = None, None
-        #!<
+        # >>> Deprecated function
+        self.leave_notify_event(guiEvent=event)
+        # ! FigureCanvasBase.leave_notify_event(self, guiEvent=event)
 
     def mouseEventCoords(self, pos):
         """Calculate mouse coordinates in physical pixels
@@ -256,70 +409,42 @@ class FigureCanvasQtQuick(QtQuick.QQuickPaintedItem, FigureCanvasBase):
         return x * dpi_ratio, y * dpi_ratio
 
     def hoverMoveEvent(self, event):
-        x, y = self.mouseEventCoords(event.pos())       
-        #>>>FigureCanvasBase.motion_notify_event(self, x, y, guiEvent=event)
-        #!>
-        self._lastx, self._lasty = x, y
-        s = 'motion_notify_event'
-        event = MouseEvent(s, self, x, y, self._button, self._key,
-                           guiEvent=event)
-        self.callbacks.process(s, event)
-        #!<
+        x, y = self.mouseEventCoords(event.pos())
+        # >>> Deprecated function
+        self.motion_notify_event(x, y, guiEvent=event)
+        # ! FigureCanvasBase.motion_notify_event(self, x, y, guiEvent=event)
 
     # hoverMoveEvent kicks in when no mouse buttons are pressed
     # otherwise mouseMoveEvent are emitted
     def mouseMoveEvent(self, event):
         x, y = self.mouseEventCoords(event.pos())
-        #>>>FigureCanvasBase.motion_notify_event(self, x, y, guiEvent=event)
-        #!>
-        self._lastx, self._lasty = x, y
-        s = 'motion_notify_event'
-        event = MouseEvent(s, self, x, y, self._button, self._key,
-                           guiEvent=event)
-        self.callbacks.process(s, event)
-        #!<
+        # >>> Deprecated function
+        self.motion_notify_event(x, y, guiEvent=event)
+        # ! FigureCanvasBase.motion_notify_event(self, x, y, guiEvent=event)
 
     def mousePressEvent(self, event):
         x, y = self.mouseEventCoords(event.pos())
         button = self.buttond.get(event.button())
-        #>>>if button is not None:
-        #>>>    FigureCanvasBase.button_press_event(self, x, y, button,
-        #>>>                                        guiEvent=event)
-        #!>
-        self._button = button
-        s = 'button_press_event'
-        mouseevent = MouseEvent(s, self, x, y, button, self._key,
-                                dblclick=False, guiEvent=event)
-        self.callbacks.process(s, mouseevent)
-        #!<
+        if button is not None:
+            # >>> Deprecated function
+            self.button_press_event(x, y, button, guiEvent=event)
+            # ! FigureCanvasBase.button_press_event(self, x, y, button, guiEvent=event)
 
     def mouseReleaseEvent(self, event):
         x, y = self.mouseEventCoords(event.pos())
         button = self.buttond.get(event.button())
-        #>>>if button is not None:
-        #>>>    FigureCanvasBase.button_release_event(self, x, y, button,
-        #>>>                                          guiEvent=event)
-        #!>
-        s = 'button_release_event'
-        event = MouseEvent(s, self, x, y, button, self._key, guiEvent=event)
-        self.callbacks.process(s, event)
-        self._button = None
-        #!<
+        if button is not None:
+            # >>> Deprecated function
+            self.button_release_event(x, y, button, guiEvent=event)
+            #! FigureCanvasBase.button_release_event(self, x, y, button, guiEvent=event)
 
     def mouseDoubleClickEvent(self, event):
         x, y = self.mouseEventCoords(event.pos())
         button = self.buttond.get(event.button())
-        #>>>if button is not None:
-        #>>>    FigureCanvasBase.button_press_event(self, x, y,
-        #>>>                                        button, dblclick=True,
-        #>>>                                        guiEvent=event)
-        #!>
-        self._button = button
-        s = 'button_press_event'
-        mouseevent = MouseEvent(s, self, x, y, button, self._key,
-                                dblclick=True, guiEvent=event)
-        self.callbacks.process(s, mouseevent)
-        #!<
+        if button is not None:
+            # >>> Deprecated function
+            self.button_press_event(x, y, button, dblclick=True, guiEvent=event)
+            # ! FigureCanvasBase.button_press_event(self, x, y, button, dblclick=True, guiEvent=event)
 
     def wheelEvent(self, event):
         x, y = self.mouseEventCoords(event.position())
@@ -329,41 +454,23 @@ class FigureCanvasQtQuick(QtQuick.QQuickPaintedItem, FigureCanvasBase):
         else:
             steps = event.pixelDelta().y()
         if steps:
-            #>>>FigureCanvasBase.scroll_event(self, x, y, steps, guiEvent=event)
-            #!>
-            if steps >= 0:
-                self._button = 'up'
-            else:
-                self._button = 'down'
-            s = 'scroll_event'
-            mouseevent = MouseEvent(s, self, x, y, self._button, self._key,
-                                    step=steps, guiEvent=event)
-            self.callbacks.process(s, mouseevent)
-            #!<
+            # >>> Deprecated function
+            self.scroll_event(x, y, steps, guiEvent=event)
+            # ! FigureCanvasBase.scroll_event(self, x, y, steps, guiEvent=event)
 
     def keyPressEvent(self, event):
         key = self._get_key(event)
         if key is not None:
-            #>>>FigureCanvasBase.key_press_event(self, key, guiEvent=event)
-            #!>
-            self._key = key
-            s = 'key_press_event'
-            event = KeyEvent(
-                s, self, key, self._lastx, self._lasty, guiEvent=event)
-            self.callbacks.process(s, event)
-            #!<
+            # >>> Deprecated function
+            self.key_press_event(key, guiEvent=event)
+            # ! FigureCanvasBase.key_press_event(self, key, guiEvent=event)
 
     def keyReleaseEvent(self, event):
         key = self._get_key(event)
         if key is not None:
-            #>>>FigureCanvasBase.key_release_event(self, key, guiEvent=event)
-            #!>
-            s = 'key_release_event'
-            event = KeyEvent(
-                s, self, key, self._lastx, self._lasty, guiEvent=event)
-            self.callbacks.process(s, event)
-            self._key = None
-            #!<
+            # >>> Deprecated function
+            self.key_release_event(key, guiEvent=event)
+            # ! FigureCanvasBase.key_release_event(self, key, guiEvent=event)
 
     def _get_key(self, event):
         # if event.isAutoRepeat():
