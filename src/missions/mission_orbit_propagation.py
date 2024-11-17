@@ -11,9 +11,9 @@ import mplcyberpunk
 
 from datetime import datetime
 
-from Utility import format
+from utility import format
 from FigureCanvas import FigureCanvas
-from Spacecraft import Spacecraft
+from systems.spacecraft import Spacecraft
 
 from tools.AstronomicalData import CelestialBody
 from tools.OrbitalPerturbations import OrbitalPerturbations
@@ -193,6 +193,8 @@ class MissionOrbitPropagation(qtCore.QObject):
         # ? Simulation
         
         OrbitalPerturbations.set_celestial_body(CelestialBody.EARTH)
+        
+        OrbitDetermination.set_celestial_body(CelestialBody.EARTH)
         
         y_0 = np.array([self.angular_momentum, self.eccentricity, self.true_anomaly, self.right_ascension_ascending_node, self.inclination, self.periapsis_anomaly])
         

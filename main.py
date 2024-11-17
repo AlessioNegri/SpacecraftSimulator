@@ -47,7 +47,7 @@ import matplotlib.pyplot as plt
 # ! Sources
 
 from src.MissionParameters import MissionParameters
-from src.QmlLog import QmlLog
+from src.qml_log import QmlLog
 
 # ! Material
 
@@ -57,7 +57,7 @@ qtQC2.QQuickStyle.setStyle('Material')
 
 app = qtGui.QGuiApplication(sys.argv)
 
-app.setWindowIcon(qtGui.QIcon(':/images/img/icon.ico'))
+app.setWindowIcon(qtGui.QIcon(':/img/icon.ico'))
 
 # ! Engine
 

@@ -9,9 +9,9 @@ import PySide6.QtQml as qtQml
 import numpy as np
 import mplcyberpunk
 
-from Utility import format
+from utility import format
 from FigureCanvas import FigureCanvas
-from Spacecraft import Spacecraft
+from systems.capsule import Capsule
 
 from tools.AtmosphericEntry import AtmosphericEntry
 
@@ -83,7 +83,7 @@ class MissionAtmosphericEntry(qtCore.QObject):
         
         engine.rootContext().setContextProperty("__MissionAtmosphericEntry", self)
         
-        self.spacecraft = Spacecraft(engine)
+        self.capsule = Capsule(engine)
         
         # ? Entry Condition
         
@@ -125,11 +125,11 @@ class MissionAtmosphericEntry(qtCore.QObject):
         
         # ? Simulation
         
-        AtmosphericEntry.set_capsule_parameters(0, 300, 0, self.spacecraft.capsule_lift_coefficient, self.spacecraft.capsule_drag_coefficient, self.spacecraft.capsule_reference_surface)
+        AtmosphericEntry.set_capsule_parameters(0, 300, 0, self.capsule.capsule_lift_coefficient, self.capsule.capsule_drag_coefficient, self.capsule.capsule_reference_surface)
         
-        AtmosphericEntry.set_parachute_parameters(self.use_parachute, self.spacecraft.parachute_drag_coefficient, self.spacecraft.parachute_reference_surface)
+        AtmosphericEntry.set_parachute_parameters(self.use_parachute, self.capsule.parachute_drag_coefficient, self.capsule.parachute_reference_surface)
         
-        y_0 = np.array([self.entry_velocity, np.deg2rad(self.entry_flight_path_angle), self.entry_altitude, 0, self.spacecraft.capsule_mass])
+        y_0 = np.array([self.entry_velocity, np.deg2rad(self.entry_flight_path_angle), self.entry_altitude, 0, self.capsule.capsule_mass])
         
         result = AtmosphericEntry.simulate_atmospheric_entry(y_0, t_f=self.final_integration_time * 60)
         
@@ -140,7 +140,7 @@ class MissionAtmosphericEntry(qtCore.QObject):
         m       = result['y'][4, :]
         t       = result['t']
         
-        C       = (1.7415 * 1e-4 * 1 / np.sqrt(self.spacecraft.capsule_nose_radius))
+        C       = (1.7415 * 1e-4 * 1 / np.sqrt(self.capsule.capsule_nose_radius))
         q_t_c   = np.array([C * np.sqrt(1.225 * np.exp(-(r[i] - AtmosphericEntry.R_E) / AtmosphericEntry.H)) * (V[i] * 1e3)**3 for i in range(0, len(t))])
         a       = np.array([(V[i] - V[i - 1]) / (t[i] - t[i - 1]) for i in range(1, len(t))])
         

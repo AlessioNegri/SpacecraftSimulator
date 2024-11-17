@@ -6,3 +6,4 @@ DialogParameter 1.0 DialogParameter.qml
 Figure 1.0 Figure.qml
 Maneuver 1.0 Maneuver.qml
 MaterialProgressBar 1.0 MaterialProgressBar.qml
+SettingsMenuItem 1.0 SettingsMenuItem.qml

@@ -5,9 +5,10 @@ import PySide6.QtQml as qtQml
 
 sys.path.append(os.path.dirname(__file__))
 
-from Spacecraft import Spacecraft
-from MissionOrbitTransfer import MissionOrbitTransfer
-from MissionOrbitPropagation import MissionOrbitPropagation
+from systems.spacecraft import Spacecraft
+from systems.capsule import Capsule
+from src.missions.mission_orbit_transfer import MissionOrbitTransfer
+from src.missions.mission_orbit_propagation import MissionOrbitPropagation
 from MissionInterplanetaryTransfer import MissionInterplanetaryTransfer
 from MissionAtmosphericEntry import MissionAtmosphericEntry
 
@@ -27,6 +28,8 @@ class MissionParameters(qtCore.QObject):
         qtCore.QObject.__init__(self)
         
         self.spacecraft = Spacecraft(engine)
+        
+        self.capsule = Capsule(engine)
         
         self.mission_orbit_transfer = MissionOrbitTransfer(engine)
         

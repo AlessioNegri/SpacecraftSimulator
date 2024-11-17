@@ -16,7 +16,7 @@ Rectangle
     // !-----------------------------------------! //
 
     objectName: p_ObjectName + "Parent"
-    anchors.fill: parent
+    //anchors.fill: parent
     color: "transparent"
     //radius: 5
     //border.width: 2
@@ -46,7 +46,7 @@ Rectangle
             Button
             {
                 text: "Restore"
-                icon.source: "/images/img/home.svg"
+                icon.source: "/svg/home.svg"
                 Material.background: "#FF5722"
                 Material.foreground: "#FFFFFF"
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
@@ -62,7 +62,7 @@ Rectangle
             Button
             {
                 text: "Back"
-                icon.source: "/images/img/arrow_back.svg"
+                icon.source: "/svg/arrow_back.svg"
                 Material.background: "#FF5722"
                 Material.foreground: "#FFFFFF"
                 Layout.alignment: Qt.AlignHCenter
@@ -78,7 +78,7 @@ Rectangle
             Button
             {
                 text: "Next"
-                icon.source: "/images/img/arrow_forward.svg"
+                icon.source: "/svg/arrow_forward.svg"
                 Material.background: "#FF5722"
                 Material.foreground: "#FFFFFF"
                 Layout.alignment: Qt.AlignHCenter
@@ -96,7 +96,7 @@ Rectangle
                 id: _departure_pan_
                 checkable: true
                 text: "Pan"
-                icon.source: "/images/img/pan_tool.svg"
+                icon.source: "/svg/pan_tool.svg"
                 Material.background: _departure_pan_.checked ? "#3F51B5" : "#FF5722"
                 Material.foreground: "#FFFFFF"
                 Material.accent: "#FFFFFF"
@@ -121,7 +121,7 @@ Rectangle
                 id: _departure_zoom_
                 checkable: true
                 text: "Zoom"
-                icon.source: "/images/img/zoom_in.svg"
+                icon.source: "/svg/zoom_in.svg"
                 Material.background: _departure_zoom_.checked ? "#3F51B5" : "#FF5722"
                 Material.foreground: "#FFFFFF"
                 Material.accent: "#FFFFFF"

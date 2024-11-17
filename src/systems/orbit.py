@@ -8,10 +8,23 @@ import PySide6.QtCore as qtCore
 import PySide6.QtQml as qtQml
 import numpy as np
 
-from Utility import format, singleton
+from enum import IntEnum
+
+from utility import format, singleton
 
 from tools.TwoBodyProblem import OrbitalParameters
 from tools.ThreeDimensionalOrbit import OrbitalElements
+
+# --- ENUM 
+
+class StateType(IntEnum):
+    """List of state selection type"""
+    
+    CARTESIAN           = 0
+    KEPLERIAN           = 1
+    MODIFIED_KEPLERIAN  = 2
+
+# --- CLASS 
 
 @singleton
 class Orbit(qtCore.QObject):
@@ -192,22 +205,22 @@ class Orbit(qtCore.QObject):
         
         engine.rootContext().setContextProperty("__Orbit", self)
         
-        self._body                              : int = 0
-        self._state                             : int = 0
-        self._r_x                               : float = 0.0
-        self._r_y                               : float = 0.0
-        self._r_z                               : float = 0.0
-        self._v_x                               : float = 0.0
-        self._v_y                               : float = 0.0
-        self._v_z                               : float = 0.0
-        self._semi_major_axis                   : float = 0.0
-        self._eccentricity                      : float = 0.0
-        self._inclination                       : float = 0.0
-        self._right_ascension_ascending_node    : float = 0.0
-        self._periapsis_anomaly                 : float = 0.0
-        self._true_anomaly                      : float = 0.0
-        self._periapsis_radius                  : float = 0.0
-        self._apoapsis_radius                   : float = 0.0
+        self._body                              : int = 0                   # * Celestial body                                                  [ ]
+        self._state                             : int = StateType.CARTESIAN # * Selected state among CARTESIAN - KEPLERIAN - MODIFIED_KEPLERIAN [ ]
+        self._r_x                               : float = 0.0               # * Position vector component x                                     [ km ]
+        self._r_y                               : float = 0.0               # * Position vector component y                                     [ km ]
+        self._r_z                               : float = 0.0               # * Position vector component z                                     [ km ]
+        self._v_x                               : float = 0.0               # * Velocity vector component x                                     [ km / s ]
+        self._v_y                               : float = 0.0               # * Velocity vector component y                                     [ km / s ]
+        self._v_z                               : float = 0.0               # * Velocity vector component z                                     [ km / s ]
+        self._semi_major_axis                   : float = 0.0               # * Semi-major axis                                                 [ km ]
+        self._eccentricity                      : float = 0.0               # * Eccentricity                                                    [ ]
+        self._inclination                       : float = 0.0               # * Inclination                                                     [ rad ]
+        self._right_ascension_ascending_node    : float = 0.0               # * Right Ascension of the Ascending Node (RAAN)                    [ rad ]
+        self._periapsis_anomaly                 : float = 0.0               # * Periapsis anomaly                                               [ rad ]
+        self._true_anomaly                      : float = 0.0               # * True anomaly                                                    [ rad ]
+        self._periapsis_radius                  : float = 0.0               # * Periapsis radius                                                [ km ]
+        self._apoapsis_radius                   : float = 0.0               # * Apoapsis radius                                                 [ km ]
     
     def get_keplerian_parameters(self) -> OrbitalElements:
         """Retrieves the Keplerian parameters

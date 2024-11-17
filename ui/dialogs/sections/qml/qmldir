@@ -1,0 +1,12 @@
+module Material.Extras
+
+singleton CelestialBody 1.0 CelestialBody.qml
+singleton StateRepresentation 1.0 StateRepresentation.qml
+
+CelestialBodyIcon 1.0 CelestialBodyIcon.qml
+SectionCapsule 1.0 SectionCapsule.qml
+SectionHeader 1.0 SectionHeader.qml
+SectionItemname 1.0 SectionItemName.qml
+SectionItemValue 1.0 SectionItemValue.qml
+SectionOrbitTransfer 1.0 SectionOrbitTransfer.qml
+SectionSpacecraft 1.0 SectionSpacecraft.qml

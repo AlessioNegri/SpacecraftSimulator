@@ -10,9 +10,9 @@ import numpy as np
 
 from datetime import datetime, timedelta
 
-from Utility import format
+from utility import format
 from FigureCanvas import FigureCanvas
-from Spacecraft import Spacecraft
+from systems.spacecraft import Spacecraft
 from PorkChopPlot import PorkChopPlot
 
 from tools.AstronomicalData import AstronomicalData, CelestialBody, Planet, index_from_planet, planet_from_index, celestial_body_from_planet

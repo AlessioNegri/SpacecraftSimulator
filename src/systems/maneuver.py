@@ -8,7 +8,7 @@ import PySide6.QtCore as qtCore
 
 from enum import IntEnum
 
-from Utility import format
+from utility import format
 
 # --- ENUM 
 

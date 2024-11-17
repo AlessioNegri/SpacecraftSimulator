@@ -42,7 +42,7 @@ Page
                 Button
                 {
                     text: "Run"
-                    icon.source: "/images/img/play_arrow.svg"
+                    icon.source: "/svg/play_arrow.svg"
                     font.pointSize: 10
                     font.bold: true
                     Material.background: "#4CAF50"

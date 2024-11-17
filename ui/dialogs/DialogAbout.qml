@@ -42,7 +42,7 @@ Dialog
 
             Image
             {
-                source: "/images/img/icon.png"
+                source: "/img/icon.png"
                 fillMode: Image.PreserveAspectFit
                 width: 200
                 height: width

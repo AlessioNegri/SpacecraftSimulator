@@ -4,9 +4,16 @@ import QtQuick.Layouts
 
 import "../components"
 
+import "js/PageOrbitTransfer.js" as Script
+
 // ? The PageOrbitTransfer class manages the orbit transfer page.
 Page
 {
+    // * Reference to the Maneuvers array.
+    property var r_Maneuvers: []
+
+    // ! ----------------------------------------- ! //
+
     background: Rectangle { color: "#424242" }
     
     header: Rectangle
@@ -42,13 +49,18 @@ Page
                 Button
                 {
                     text: "Run"
-                    icon.source: "/images/img/play_arrow.svg"
+                    icon.source: "/svg/play_arrow.svg"
                     font.pointSize: 10
                     font.bold: true
                     Material.background: "#4CAF50"
                     Material.foreground: "#FFFFFF"
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                    onClicked: __MissionOrbitTransfer.simulate()
+                    onClicked: {
+
+                        __MissionOrbitTransfer.simulate()
+
+                        Script.loadManeuvers()
+                    }
 
                     HoverHandler
                     {
@@ -97,11 +109,43 @@ Page
         width: parent.width
         color: "transparent"
 
+        Rectangle
+        {
+            id: _box_
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            anchors.margins: 10
+            width: parent.width * 0.25
+            color: "transparent"
+            border.color: Material.color(Material.Orange)
+            border.width: 3
+            radius: 10
+
+            ScrollView
+            {
+                anchors.fill: parent
+                padding: 20
+                //contentWidth: _container_.width
+                contentHeight: _container_.height
+
+                ColumnLayout
+                {
+                    id: _container_
+                    spacing: 20
+                    width: parent.width
+                }
+            }
+        }
+
         Figure
         {
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.left: _box_.right
             p_ObjectName: "OrbitTransferFigure"
             r_Model: __OrbitTransferFigure
-            anchors.fill: parent
         }
     }
 }

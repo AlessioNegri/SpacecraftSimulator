@@ -32,15 +32,7 @@ ApplicationWindow
 
     DialogAbout { id: _dlgAbout_ }
 
-    DialogSpacecraft { id: _dlgSpacecraft_ }
-
-    DialogOrbit { id: _dlgOrbitDeparture_; p_Departure: true }
-
-    DialogOrbit { id: _dlgOrbitArrival_; p_Departure: false }
-
-    DialogManeuvers { id: _dlgManeuvers_ }
-
-    DialogOrbitalPerturbations { id: _dlgOrbitalPerturbations_ }
+    DialogMissionSettings { id: _dlgMissionSettings_ }
 
     DialogInterplanetaryTransfer { id: _dlgInterplanetaryTransfer_ }
 
@@ -58,18 +50,29 @@ ApplicationWindow
 
             MenuSeparator {}
 
-            Action { text: "Exit"; shortcut: "Ctrl+E"; onTriggered: Qt.quit() }
+            Action
+            {
+                text: "Exit"
+                shortcut: "Ctrl+E"
+                onTriggered: Qt.quit()
+            }
+        }
+
+        Menu
+        {
+            title: "Edit"
+
+            Action
+            {
+                text: "Mission Settings"
+                shortcut: "Ctrl+M"
+                onTriggered: _dlgMissionSettings_.open()
+            }
         }
 
         Menu
         {
             title: "Missions"
-
-            Action
-            {
-                text: "Spacecraft Properties"
-                onTriggered: _dlgSpacecraft_.open()
-            }
 
             Menu
             {
@@ -113,24 +116,16 @@ ApplicationWindow
 
             MenuSeparator {}
             
-            Menu
+            Action
             {
-                title: "Orbit Transfer"
+                text: "Orbit Transfer"
                 enabled: gp_CurrentMission === 0
-
-                Action { text: "Departure Orbit"; onTriggered: _dlgOrbitDeparture_.open() }
-
-                Action { text: "Arrival Orbit"; onTriggered: _dlgOrbitArrival_.open() }
-
-                Action { text: "Maneuvers"; onTriggered: _dlgManeuvers_.open() }
             }
             
-            Menu
+            Action
             {
-                title: "Orbit Propagation"
+                text: "Orbit Propagation"
                 enabled: gp_CurrentMission === 1
-
-                Action { text: "Orbital Perturbations"; onTriggered: { _dlgOrbitalPerturbations_.open() } }
             }
             
             Menu

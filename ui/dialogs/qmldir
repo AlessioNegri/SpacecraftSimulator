@@ -4,7 +4,5 @@ DialogAbout 1.0 DialogAbout.qml
 DialogAtmosphericEntryConditions 1.0 DialogAtmosphericEntryConditions.qml
 DialogFigure 1.0 DialogFigure.qml
 DialogInterplanetaryTransfer 1.0 DialogInterplanetaryTransfer.qml
-DialogManeuvers 1.0 DialogManeuvers.qml
-DialogOrbit 1.0 DialogOrbit.qml
+DialogMissionSettings 1.0 DialogMissionSettings.qml
 DialogOrbitalPerturbations 1.0 DialogOrbitalPerturbations.qml
-DialogSpacecraft 1.0 DialogSpacecraft.qml
