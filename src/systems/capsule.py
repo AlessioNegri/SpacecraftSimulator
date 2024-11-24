@@ -7,7 +7,7 @@ __maintainer__  = "Alessio Negri"
 import PySide6.QtCore as qtCore
 import PySide6.QtQml as qtQml
 
-from utility import format, singleton
+from common import format, singleton
 
 @singleton
 class Capsule(qtCore.QObject):

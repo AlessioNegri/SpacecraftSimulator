@@ -62,7 +62,7 @@ class PorkChopPlot(core.QThread):
         
         awBeg, awEnd = self.arrival_window
         
-        # >>> 2. Cycle of time windows
+        # >>> 2. Prepare structures
         
         self.dv_1   = np.zeros(shape=(daterange_length(awBeg, awEnd, self.step), daterange_length(lwBeg, lwEnd, self.step)), dtype=float)
         self.dv_2   = np.zeros(shape=(daterange_length(awBeg, awEnd, self.step), daterange_length(lwBeg, lwEnd, self.step)), dtype=float)
@@ -70,11 +70,24 @@ class PorkChopPlot(core.QThread):
         self.X      = np.empty(shape=(daterange_length(awBeg, awEnd, self.step), daterange_length(lwBeg, lwEnd, self.step)), dtype='datetime64[s]')
         self.Y      = np.empty(shape=(daterange_length(awBeg, awEnd, self.step), daterange_length(lwBeg, lwEnd, self.step)), dtype='datetime64[s]')
 
+        # >>> 3. Cycle of time windows
+
+        previous_percentage = -1
+        
+        current_percentage = 0
+
         self.status_changed.emit(0, 'Start')
         
         for lwIndex, lwDate in enumerate(daterange(lwBeg, lwEnd, self.step)):
             
-            self.status_changed.emit(lwIndex / float(daterange_length(lwBeg, lwEnd, self.step)), 'Processing...')
+            current_percentage = lwIndex / float(daterange_length(lwBeg, lwEnd, self.step))
+            
+            if (int(current_percentage * 100) != previous_percentage):
+            
+                previous_percentage = int(current_percentage)
+            
+                self.status_changed.emit(current_percentage, 'Processing...')
+                
             #printProgressBar(lwIndex, daterangeLength(lwBeg, lwEnd, self.step), prefix = 'Progress:', suffix = 'Processing...', length = 50)
             
             for awIndex, awDate in enumerate(daterange(awBeg, awEnd, self.step)):

@@ -16,14 +16,12 @@
 
         <file>dialogs/qmldir</file>
         <file>dialogs/DialogAbout.qml</file>
-        <file>dialogs/DialogAtmosphericEntryConditions.js</file>
-        <file>dialogs/DialogAtmosphericEntryConditions.qml</file>
         <file>dialogs/DialogFigure.qml</file>
-        <file>dialogs/DialogInterplanetaryTransfer.js</file>
-        <file>dialogs/DialogInterplanetaryTransfer.qml</file>
         <file>dialogs/DialogMissionSettings.qml</file>
 
+        <file>dialogs/sections/js/SectionAtmosphericEntry.js</file>
         <file>dialogs/sections/js/SectionCapsule.js</file>
+        <file>dialogs/sections/js/SectionInterplanetaryTransfer.js</file>
         <file>dialogs/sections/js/SectionOrbitPropagation.js</file>
         <file>dialogs/sections/js/SectionOrbitTransfer.js</file>
         <file>dialogs/sections/js/SectionSpacecraft.js</file>
@@ -31,8 +29,11 @@
         <file>dialogs/sections/qml/qmldir</file>
         <file>dialogs/sections/qml/CelestialBody.qml</file>
         <file>dialogs/sections/qml/CelestialBodyIcon.qml</file>
+        <file>dialogs/sections/qml/Planet.qml</file>
+        <file>dialogs/sections/qml/SectionAtmosphericEntry.qml</file>
         <file>dialogs/sections/qml/SectionCapsule.qml</file>
         <file>dialogs/sections/qml/SectionHeader.qml</file>
+        <file>dialogs/sections/qml/SectionInterplanetaryTransfer.qml</file>
         <file>dialogs/sections/qml/SectionItemName.qml</file>
         <file>dialogs/sections/qml/SectionItemValue.qml</file>
         <file>dialogs/sections/qml/SectionOrbitPropagation.qml</file>
@@ -58,11 +59,12 @@
 
     <qresource prefix="/png">
         <file alias="aerodynamics.png">../img/png/aerodynamics.png</file>
-        <file alias="arrival_orbit.png">../img/png/arrival_orbit.png</file>
+        <file alias="arrival.png">../img/png/arrival.png</file>
         <file alias="atmospheric_entry.png">../img/png/atmospheric_entry.png</file>
         <file alias="capsule.png">../img/png/capsule.png</file>
-        <file alias="departure_orbit.png">../img/png/departure_orbit.png</file>
+        <file alias="departure.png">../img/png/departure.png</file>
         <file alias="earth.png">../img/png/earth.png</file>
+        <file alias="entry.png">../img/png/entry.png</file>
         <file alias="interplanetary_transfer.png">../img/png/interplanetary_transfer.png</file>
         <file alias="jupiter.png">../img/png/jupiter.png</file>
         <file alias="launcher.png">../img/png/launcher.png</file>
@@ -76,10 +78,13 @@
         <file alias="orbit_propagation.png">../img/png/orbit_propagation.png</file>
         <file alias="orbit_transfer.png">../img/png/orbit_transfer.png</file>
         <file alias="parachute.png">../img/png/parachute.png</file>
+        <file alias="parameters.png">../img/png/parameters.png</file>
         <file alias="perturbations.png">../img/png/perturbations.png</file>
         <file alias="planets.png">../img/png/planets.png</file>
+        <file alias="plot.png">../img/png/plot.png</file>
         <file alias="pluto.png">../img/png/pluto.png</file>
         <file alias="propulsion.png">../img/png/propulsion.png</file>
+        <file alias="results.png">../img/png/results.png</file>
         <file alias="saturn.png">../img/png/saturn.png</file>
         <file alias="solar_radiation_pressure.png">../img/png/solar_radiation_pressure.png</file>
         <file alias="spacecraft.png">../img/png/spacecraft.png</file>

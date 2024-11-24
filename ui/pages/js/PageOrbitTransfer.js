@@ -26,6 +26,8 @@ function loadManeuvers()
 
         var maneuver = __MissionOrbitTransfer.maneuver(i)
 
+        console.log(maneuver)
+
         // * Create QML component
 
         let component = Qt.createComponent("../qml/ManeuverInfo.qml")

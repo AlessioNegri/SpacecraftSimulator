@@ -14,10 +14,10 @@ import copy
 
 from PIL import Image
 
-from FigureCanvas import FigureCanvas
+from src.utility.figure_canvas import FigureCanvas
 from systems.spacecraft import Spacecraft
-from systems.orbit import Orbit, StateType
-from src.systems.maneuver import Maneuver, ManeuverType
+from src.utility.orbit import Orbit, StateType
+from src.utility.maneuver import Maneuver, ManeuverType
 
 from tools.AstronomicalData import AstronomicalData, CelestialBody, index_from_celestial_body, celestial_body_from_index
 from tools.TwoBodyProblem import TwoBodyProblem, OrbitalParameters
@@ -562,10 +562,8 @@ class MissionOrbitTransfer(qtCore.QObject):
         
         orbitFigure.axes.scatter(ra[0], dec[0], c='#E6EE9C', label='Start', s=50)
         orbitFigure.axes.scatter(ra[-1], dec[-1], c='#F48FB1', label='Finish', s=50)
-        #orbitFigure.axes.set_xlabel('Right Ascension [deg]')
-        #orbitFigure.axes.set_ylabel('Declination [deg]')
-        orbitFigure.axes.set_xlabel(' ')
-        orbitFigure.axes.set_title('Declination [deg] vs Right Ascension [deg]')
+        orbitFigure.axes.set_xlabel('Right Ascension [deg]')
+        orbitFigure.axes.set_ylabel('Declination [deg]')
         orbitFigure.axes.legend(facecolor='#1C1B1F', framealpha=0.75)
         orbitFigure.axes.set_xticks([-180, -135, -90, -45, 0, 45, 90, 135, 180])
         orbitFigure.axes.set_yticks([-90, -75, -60, -45, -30, -15, 0, 15, 30, 45, 60, 75, 90])

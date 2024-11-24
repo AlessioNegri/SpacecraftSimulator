@@ -85,61 +85,61 @@ The project is structured in the following folders.
 > **mplcyberpunk**
 > - `URL` https://github.com/dhaitz/mplcyberpunk
 
-## 2. Spacecraft Properties
+## 2. Mission Settings
 
-Under the menu item `Missions \ Spacecraft Properties` it is possible to configure the **Spacecraft Properties**.
+Under the menu item `Edit \ Mission Settings` it is possible to configure the all the properties of the systems and the missions.
 
-In the **Propulsion** section you can set:
+This dialog contains in the left the list of all sections. The sections are divided into two parts (differentiated by their color):
 
-- **Initial Mass**
-- **Specific Impulse**
-- **Thrust**
+- **Systems Settings** comprising all the properties of the different systems: <br/><br/>
+    - `Launcher` (TODO)
+    - `Spacecraft`
+    - `Re-Entry Capsule` <br/><br/>
 
-<p align="center"><img src="./images/spacecraft_properties_propulsion.png" width="100%"></p>
+<p align="center"><img src="./images/spacecraft.png" width="100%"></p>
 
-In the **Aerodynamics** section you can set:
+<p align="center"><img src="./images/re_entry_capsule.png" width="100%"></p>
 
-- **Lift Coefficient**
-- **Drag Coefficient**
-- **Reference Surface**
-- **Radiation Pressure Coefficient** (1 => absorbing surface, 2 => reflective surface)
-- **Absorbing Surface**
+- **Mission Settings** comprising the parameters to configure the different types of mission: <br/><br/>
+    - `Orbit Insertion` (TODO) <br/>
+    <br/><br/>
+    - `Orbit Transfer` <br/>
+    Simulate the cost in terms of $\Delta v$, $\Delta t$, and $\Delta m$ of the transfer between a departure and an arrival orbit <br/><br/>
+    - `Orbit Propagation` <br/>
+    Simulate the propagation of an orbit around Earth due to perturbations <br/><br/>
+    - `Interplanetary Transfer` <br/>
+    Simulate the transfer between two planets of the Solar System <br/><br/>
+    - `Atmospheric Entry` <br/>
+    Simulate the re-entry of a capsule
 
-<p align="center"><img src="./images/spacecraft_properties_aerodynamics.png" width="100%"></p>
+By clicking on a section, the right part of the dialog populates with the corresponding parameters that can be configured. All these missions will be discussed in detail in the following sections.
 
-In the **Atmospheric Entry** section you can set:
-
-- **Capsule** (Nose Radius - Mass - Drag / Lift Coefficients - Reference Surface)
-- **Parachute** (Drag Coefficient - Reference Surface)
-
-<p align="center"><img src="./images/spacecraft_properties_atmospheric_entry.png" width="100%"></p>
-
-## 3. Missions
-
-Under the menu item `Missions \ Current Mission` it is possible to select the mission to analyze:
-- **Orbit Transfer** to simulate the cost in terms of $\Delta v$, $\Delta t$, and $\Delta m$ of the transfer between a departure and an arrival orbit.
-- **Orbit Propagation** to simulate the propagation of an orbit around Earth due to perturbations.
-- **Interplanetary Transfer** to simulate the transfer between two planets of the Solar System.
-- **Atmospheric Entry** to simulate the re-entry of a capsule with the addition of a parachute if required.
-
-All these missions will be discussed in detail in the following sections.
+## 3 Orbit Insertion (TODO)
 
 ## 4 Orbit Transfer
 
 An orbit transfer consists of a set of maneuvers to move a spacecraft from a departure orbit towards an arrival orbit. The user can decide the two orbits and the list of maneuver to simulate an orbit transfer.
 
-### 4.1 Departure & Arrival Orbits
+<p align="center"><img src="./images/orbit_transfer_1.png" width="100%"></p>
 
-Under the menu item `Missions \ Orbit Transfer \ Departure Orbit` it is possible to configure the **Departure Orbit**. The same discussion is valid for the **Arrival Orbit**. The orbit can be configured using one of the following representations:
-- **Cartesian** based on the *position vector* and the *velocity vector*
-- **Keplerian** based on the orbital elements
+<p align="center"><img src="./images/orbit_transfer_2.png" width="100%"></p>
+
+### 4.1 Celestial Body
+
+First choose among the given celestial bodies.
+
+### 4.2 Departure & Arrival Orbits
+
+The second step consists of configuring the **Departure Orbit** and **Arrival Orbit**. The orbits can be configured using one of the following representations: <br/>
+- **Cartesian** based on the *position vector* and the *velocity vector* <br/><br/>
+- **Keplerian** based on the orbital elements <br/><br/>
     - *Semi-major axis*
     - *Eccentricity*
     - *Inclination*
     - *Right Ascension of the Ascending Node*
     - *Anomaly of the Perigee*
     - *True Anomaly*
-- **Modified Keplerian** based on the following elements
+- **Modified Keplerian** based on the following elements <br/><br/>
     - *Periapsis Radius*
     - *Apoapsis Radius*
     - *Inclination*
@@ -147,25 +147,21 @@ Under the menu item `Missions \ Orbit Transfer \ Departure Orbit` it is possible
     - *Anomaly of the Perigee*
     - *True Anomaly*
 
-<p align="center"><img src="./images/departure_orbit.png" width="100%"></p>
-
-The user can select the planet that will be considered as the central body. In addition, a preview of the **Orbit** and the **Ground Track** can be visioned by the available buttons.
+A preview of the **Orbit** and the **Ground Track** can be visioned by clicking on the available buttons.
 
 <p align="center"><img src="./images/orbit_preview.png" width="100%"></p>
 
 <p align="center"><img src="./images/ground_track_preview.png" width="100%"></p>
 
-### 4.2 Maneuvers
+### 4.3 Maneuvers
 
-Under the menu item `Missions \ Orbit Transfer \ Maneuvers` it is possible to configure the maneuvers for the transfer between the departure and the arrival orbits, among the following ones:
+At this point it is possible to configure the maneuvers for the transfer between the departure and the arrival orbits, among the following ones:
 - **Hohmann Transfer**
 - **Bi-Elliptic Hohmann Transfer**
 - **Plane Change Maneuver**
 - **Apse Line Rotation From Eta**
 
-After the transfer has been evaluated, the values of $\Delta v$, $\Delta t$, and $\Delta m$ for each transfer are calculated for a detailed analysis of the cost of the transfer. Click the `Save` button to update the parameters.
-
-<p align="center"><img src="./images/maneuvers.png" width="100%"></p>
+After the transfer has been evaluated, the values of $\Delta v$, $\Delta t$, and $\Delta m$ for each transfer are calculated for a detailed analysis of the cost of the transfer.
 
 By clicking on the `Run` button, the transfer is simulated and becomes visible in the chart.
 
@@ -173,15 +169,15 @@ By clicking on the `Run` button, the transfer is simulated and becomes visible i
 
 ## 5 Orbit Propagation
 
-Under the menu item `Missions \ Orbit Propagation \ Orbital Perturbations` it is possible to analyze the effects of the following perturbations on an orbit around Earth in a range of dates:
+In the Orbit Propagation mission it is possible to analyze the effects of the following perturbations on an orbit around Earth in a range of dates:
 - **Drag**
 - **Gravitational**
 - **Solar Radiation Pressure**
 - **Third Body**: the user shall select the third body between *Moon* and *Sun*
 
-for a given set of initial orbital elements. By clicking on the `Save` button the parameters are updated.
+for a given set of initial orbital elements.
 
-<p align="center"><img src="./images/orbital_perturbations.png" width="100%"></p>
+<p align="center"><img src="./images/orbit_propagation_1.png" width="100%"></p>
 
 To simulate the orbit propagation click on the `Run` button. The evolution of the orbital elements with respect to the initial values can be analyzed in the main window.
 
@@ -193,15 +189,17 @@ One of the most interesting aspect of space is space exploration. In this sectio
 
 ### 6.1 Analysis
 
-Under the menu item `Missions \ Interplanetary \ Interplanetary Transfer` it is possible to analyze/design the interplanetary transfer bewteen two planets of the Solar System, given a *Launch Window* and an *Arrival Window*. Once selected the parameters, by clicking on the `Generate` button the Pork Chop Plot is generated, and can be seen by clicking on the `Show` button. Use the `Stop` button to finish the generation before it ends.
+Under the section `Interplanetary Transfer` it is possible to analyze/design the interplanetary transfer bewteen two planets of the Solar System, given a *Launch Window* and an *Arrival Window*. Once selected the parameters, by clicking on the `Generate` button the Pork Chop Plot is generated, and can be seen by clicking on the `Show` button. Use the `Stop` button to finish the generation before it ends.
 
-<p align="center"><img src="./images/interplanetary_transfer_design.png" width="100%"></p>
+<p align="center"><img src="./images/interplanetary_transfer_1.png" width="100%"></p>
+
+This is a Pork Chop Plot between *Earth* and *Neptune*.
 
 <p align="center"><img src="./images/pork_chop_plot.png" width="100%"></p>
 
 ### 6.2 Transfer
 
-After the analysis of the Pork Chop Plot, the actual transfer can be simulated, by choosing the effective departure and arrival dates, and the departure and arrival orbits around the planets.
+After the analysis of the Pork Chop Plot, the actual transfer can be simulated, by choosing the effective departure and arrival dates, and the departure and arrival orbits around the planets. The following is a simulation for a tansfer between *Earth* and *Mars*.
 
 <p align="center"><img src="./images/interplanetary_transfer.png" width="100%"></p>
 
@@ -211,19 +209,9 @@ The **Atmospheric Entry** problem studies what happens when an object (e.g. caps
 
 ### 7.1 Entry Conditions
 
-Under the menu item `Missions \ Atmospheric Entry \ Entry Conditions` it is possible to set up the parameters needed to simulate a capsule re-entry: some of the data are also present in the *Spacecraft Properties* dialog.
+Under the section `Atmospheric Entry` it is possible to set up the parameters needed to simulate a capsule re-entry: some of the data are also present in the *Capsule* section. The user can activate / deactivate the usage of the parachute. Under the results sub-section the user can analyze the **Impact Velocity** at ground.
 
-- **Entry Velocity**
-- **Entry Flight Path Angle**
-- **Entry Altitude**
-- **Final Integration Time**
-- **Use Parachute** to simulate the parachute deployment
-
-Under the results section the user can analyze the **Impact Velocity** at ground.
-
-Click the `Save` button to update the parameters.
-
-<p align="center"><img src="./images/entry_conditions.png" width="100%"></p>
+<p align="center"><img src="./images/atmospheric_entry_1.png" width="100%"></p>
 
 ### 7.2 Simulation
 

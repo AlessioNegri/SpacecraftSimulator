@@ -9,8 +9,8 @@ from systems.spacecraft import Spacecraft
 from systems.capsule import Capsule
 from src.missions.mission_orbit_transfer import MissionOrbitTransfer
 from src.missions.mission_orbit_propagation import MissionOrbitPropagation
-from MissionInterplanetaryTransfer import MissionInterplanetaryTransfer
-from MissionAtmosphericEntry import MissionAtmosphericEntry
+from src.missions.mission_interplanetary_transfer import MissionInterplanetaryTransfer
+from src.missions.mission_atmospheric_entry import MissionAtmosphericEntry
 
 class MissionParameters(qtCore.QObject):
     """Class that manages the mission parameters

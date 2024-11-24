@@ -263,6 +263,4 @@ function saveManeuvers()
     {
         __MissionOrbitTransfer.add_maneuver(r_Maneuvers[i].p_Type, r_Maneuvers[i].p_Option, r_Maneuvers[i].p_OptionValue)
     }
-
-    close()
 }

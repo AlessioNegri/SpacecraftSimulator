@@ -22,6 +22,10 @@ Dialog
         _section_orbit_transfer_.load()
 
         _section_orbit_propagation_.load()
+
+        _section_interplanetary_transfer_.load()
+
+        _section_atmospheric_entry_.load()
     }
 
     // ! ----------------------------------------- ! //
@@ -66,6 +70,10 @@ Dialog
 
             _section_orbit_propagation_.save()
 
+            _section_interplanetary_transfer_.save()
+
+            _section_atmospheric_entry_.save()
+
             close()
         }
 
@@ -78,6 +86,10 @@ Dialog
             _section_orbit_transfer_.save()
 
             _section_orbit_propagation_.save()
+
+            _section_interplanetary_transfer_.save()
+
+            _section_atmospheric_entry_.save()
         }
     }
 
@@ -214,9 +226,15 @@ Dialog
                 id: _section_orbit_propagation_
             }
 
-            Item {}
+            SectionInterplanetaryTransfer
+            {
+                id: _section_interplanetary_transfer_
+            }
 
-            Item {}
+            SectionAtmosphericEntry
+            {
+                id: _section_atmospheric_entry_
+            }
         }
     }
 
@@ -250,5 +268,13 @@ Dialog
         title: "Arrival Ground Track Preview"
         p_FigureCanvasName: "ArrivalGroundTrackFigure"
         p_FigureCanvasModel: __ArrivalGroundTrackFigure
+    }
+
+    DialogFigure
+    {
+        id: _porkChopPlot_
+        title: "Pork Chop Plot"
+        p_FigureCanvasName: "PorkChopPlotFigure"
+        p_FigureCanvasModel: __PorkChopPlotFigure
     }
 }

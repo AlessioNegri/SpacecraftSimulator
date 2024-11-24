@@ -134,7 +134,7 @@ ScrollView
         SectionHeader
         {
             id: _solar_radiation_pressure_
-            p_Title: "Solare Radiation Pressure"
+            p_Title: "Solar Radiation Pressure"
             p_Icon: "/png/solar_radiation_pressure.png"
         }
 

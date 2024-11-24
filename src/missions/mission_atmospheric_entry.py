@@ -9,8 +9,8 @@ import PySide6.QtQml as qtQml
 import numpy as np
 import mplcyberpunk
 
-from utility import format
-from FigureCanvas import FigureCanvas
+from common import format
+from src.utility.figure_canvas import FigureCanvas
 from systems.capsule import Capsule
 
 from tools.AtmosphericEntry import AtmosphericEntry

@@ -10,7 +10,7 @@ import numpy as np
 
 from enum import IntEnum
 
-from utility import format, singleton
+from common import format, singleton
 
 from tools.TwoBodyProblem import OrbitalParameters
 from tools.ThreeDimensionalOrbit import OrbitalElements

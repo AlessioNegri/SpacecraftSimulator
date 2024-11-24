@@ -46,7 +46,7 @@ import matplotlib.pyplot as plt
 
 # ! Sources
 
-from src.MissionParameters import MissionParameters
+from src.mission_parameters import MissionParameters
 from src.qml_log import QmlLog
 
 # ! Material

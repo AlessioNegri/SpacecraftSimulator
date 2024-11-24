@@ -9,11 +9,13 @@ import PySide6.QtQml as qtQml
 import numpy as np
 
 from datetime import datetime, timedelta
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+from matplotlib.colorbar import Colorbar
 
-from utility import format
-from FigureCanvas import FigureCanvas
+from common import format
+from src.utility.figure_canvas import FigureCanvas
 from systems.spacecraft import Spacecraft
-from PorkChopPlot import PorkChopPlot
+from src.utility.pork_chop_plot import PorkChopPlot
 
 from tools.AstronomicalData import AstronomicalData, CelestialBody, Planet, index_from_planet, planet_from_index, celestial_body_from_planet
 from tools.TwoBodyProblem import TwoBodyProblem
@@ -26,7 +28,11 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
     
     # --- SIGNALS 
     
+    # ? Signal emitted when the pork chop plot is finished
+    
     signal_pork_chop_plot_finished = qtCore.Signal()
+    
+    # ? Signal emitted to update the progress bar
     
     signal_update_progress_bar = qtCore.Signal(float)
     
@@ -186,6 +192,7 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         self.figure_pork_chop_plot.update_with_canvas(win.findChild(qtCore.QObject, "PorkChopPlotFigure"), win.findChild(qtCore.QObject, "PorkChopPlotFigureParent"))
         self.figure_interplanetary_transfer.update_with_canvas(win.findChild(qtCore.QObject, "InterplanetaryTransferFigure"), win.findChild(qtCore.QObject, "InterplanetaryTransferFigureParent"))
         
+        self.init_pork_chop_figure()
         self.init_transfer_figure()
     
     # --- PUBLIC SLOTS 
@@ -283,6 +290,27 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
     
     # --- PRIVATE METHODS 
     
+    def init_pork_chop_figure(self) -> None:
+        """Initializes the pork chop figure canvas
+        """
+        
+        self.figure_pork_chop_plot.reset_canvas()
+        
+        divider = make_axes_locatable(self.figure_pork_chop_plot.axes)
+        
+        self.cax_1 = divider.append_axes('right', size='1%', pad=0.25)
+        self.cax_2 = divider.append_axes('right', size='1%', pad=1.00)
+        self.cax_3 = divider.append_axes('right', size='1%', pad=1.00)
+        
+        #self.cb_1 = self.figure_pork_chop_plot.figure.colorbar([0,0;0,0], cax=self.cax_1, orientation='vertical', label='$\Delta V_{TOT}$ $[km / s]$', shrink=0.9)
+        #self.cb_2 = self.figure_pork_chop_plot.figure.colorbar([0], cax=self.cax_2,  orientation='vertical', label='$\Delta V_1$ $[km / s]$', shrink=0.9)
+        #self.cb_3 = self.figure_pork_chop_plot.figure.colorbar([0], cax=self.cax_3,  orientation='vertical', label='$TOF$ $[days]$', shrink=0.9)
+        
+        self.figure_pork_chop_plot.axes.set_xlabel('Launch Window')
+        self.figure_pork_chop_plot.axes.set_ylabel('Arrival Window')
+        
+        self.figure_pork_chop_plot.redraw_canvas()
+    
     def init_transfer_figure(self) -> None:
         """Initializes the transfer figure canvas
         """
@@ -341,12 +369,9 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         
         self.figure_pork_chop_plot.reset_canvas()
         
-        # if (len(self.figure_pork_chop_plot.figure.axes) > 1):
-            
-        #     return
-            
-        #     self.figure_pork_chop_plot.figure.delaxes(self.figure_pork_chop_plot.figure.axes[2])
-        #     self.figure_pork_chop_plot.figure.delaxes(self.figure_pork_chop_plot.figure.axes[1])
+        #self.cb_1.remove()
+        #self.cb_2.remove()
+        #self.cb_3.remove()
         
         dv_1    = self.pork_chop_plot.dv_1
         dv_2    = self.pork_chop_plot.dv_2
@@ -366,11 +391,11 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         
         self.figure_pork_chop_plot.axes.clabel(contourVelocityConstraint, inline=1, fontsize=10)
         self.figure_pork_chop_plot.axes.clabel(contourTimeOfFlight, inline=1, fontsize=10)
+
+        self.cb_1 = self.figure_pork_chop_plot.figure.colorbar(contourVelocity, cax=self.cax_1, orientation='vertical', label='$\Delta V_{TOT}$ $[km / s]$', shrink=0.9)
+        self.cb_2 = self.figure_pork_chop_plot.figure.colorbar(contourVelocityConstraint, cax=self.cax_2,  orientation='vertical', label='$\Delta V_1$ $[km / s]$', shrink=0.9)
+        self.cb_3 = self.figure_pork_chop_plot.figure.colorbar(contourTimeOfFlight, cax=self.cax_3,  orientation='vertical', label='$TOF$ $[days]$', shrink=0.9)
         
-        # self.figure_pork_chop_plot.figure.colorbar(contourVelocity, label='$\Delta V_{TOT}$ $[km / s]$', shrink=0.5)
-        # self.figure_pork_chop_plot.figure.colorbar(contourVelocityConstraint, label='$\Delta V_1$ $[km / s]$', orientation='vertical', shrink=0.5)
-        
-        self.figure_pork_chop_plot.axes.set_title('Pork Chop')
         self.figure_pork_chop_plot.axes.set_xlabel('Launch Window')
         self.figure_pork_chop_plot.axes.set_ylabel('Arrival Window')
         

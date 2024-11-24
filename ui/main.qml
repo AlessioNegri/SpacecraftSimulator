@@ -34,10 +34,6 @@ ApplicationWindow
 
     DialogMissionSettings { id: _dlgMissionSettings_ }
 
-    DialogInterplanetaryTransfer { id: _dlgInterplanetaryTransfer_ }
-
-    DialogAtmosphericEntryConditions { id: _dlgAtmosphericEntryConditions_ }
-
     // ? Menu Bar
 
     menuBar: MenuBar
@@ -128,20 +124,16 @@ ApplicationWindow
                 enabled: gp_CurrentMission === 1
             }
             
-            Menu
+            Action
             {
-                title: "Interplanetary"
+                text: "Interplanetary"
                 enabled: gp_CurrentMission === 2
-
-                Action { text: "Interplanetary Transfer"; onTriggered: _dlgInterplanetaryTransfer_.open() }
             }
 
-            Menu
+            Action
             {
-                title: "Atmospheric Entry"
+                text: "Atmospheric Entry"
                 enabled: gp_CurrentMission === 3
-
-                Action { text: "Entry Conditions"; onTriggered: _dlgAtmosphericEntryConditions_.open() }
             }
         }
         

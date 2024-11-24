@@ -105,7 +105,7 @@ class FigureCanvas(qtCore.QObject):
             
         
             self.figure.subplots_adjust(wspace=0.4, hspace=0.4)
-            self.figure.set_layout_engine('constrained')
+            self.figure.set_layout_engine('tight')
             
         self.figure.set_figwidth(self.figsize[0])
         self.figure.set_figheight(self.figsize[1])

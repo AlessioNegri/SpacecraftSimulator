@@ -173,7 +173,7 @@ ScrollView
         {
             id: _departure_orbit_
             p_Title: "Departure Orbit"
-            p_Icon: "/png/departure_orbit.png"
+            p_Icon: "/png/departure.png"
 
             RowLayout
             {
@@ -425,7 +425,7 @@ ScrollView
         {
             id: _arrival_orbit_
             p_Title: "Arrival Orbit"
-            p_Icon: "/png/arrival_orbit.png"
+            p_Icon: "/png/arrival.png"
 
             RowLayout
             {
