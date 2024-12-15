@@ -11,6 +11,8 @@ import numpy as np
 import mpl_toolkits.mplot3d.proj3d as proj3d
 import mpl_toolkits.mplot3d.axes3d as axes3d
 
+from matplotlib import dates
+
 from lib.matplotlib_backend_qtquick.backend_qtquick import NavigationToolbar2QtQuick
 from lib.matplotlib_backend_qtquick.backend_qtquickagg import FigureCanvasQtQuickAgg
 
@@ -28,10 +30,27 @@ class FigureCanvas(qtCore.QObject):
 
     @coord.setter
     def coord(self, val : str): self._coord = val; self.coord_changed.emit()
+    
+    # ? Show Coordinates
+    
+    show_coord_changed = qtCore.Signal()
+    
+    @qtCore.Property(bool, notify=show_coord_changed)
+    def showCoord(self): return self._show_coord
+
+    @showCoord.setter
+    def showCoord(self, val : bool): self._show_coord = val; self.show_coord_changed.emit()
 
     # --- METHODS 
 
-    def __init__(self, parent : qtCore.QObject = None, dof3 : bool = False, rows : int = 1, cols : int = 1, figure_in_dialog : bool = False) -> None:
+    def __init__(self,
+                 parent : qtCore.QObject = None,
+                 dof3 : bool = False,
+                 rows : int = 1,
+                 cols : int = 1,
+                 x_date : bool = False,
+                 y_date : bool = False,
+                 figure_in_dialog : bool = False) -> None:
         """Constructor
 
         Args:
@@ -39,6 +58,8 @@ class FigureCanvas(qtCore.QObject):
             dof3 (bool, optional): True for 3D figures. Defaults to False.
             rows (int, optional): Subplots configuration along row. Defaults to 1.
             cols (int, optional): Subplots configuration along column. Defaults to 1.
+            x_date (bool, optional): True for x-axis in date format. Defaults to False.
+            y_date (bool, optional): True for y-axis in date format. Defaults to False.
         """
         
         super().__init__(parent)
@@ -54,9 +75,13 @@ class FigureCanvas(qtCore.QObject):
         self.rows               = rows
         self.cols               = cols
         self.multiplot          = rows != 1 or cols != 1
+        self.x_date             = x_date
+        self.y_date             = y_date
         self.figure_in_dialog   = figure_in_dialog
+        self.vert_lines         = {}
         
-        self._coord     = '(0.00, 0.00)' if not dof3 else '(0.00, 0.00, 0.00)'
+        self.coord              = '(0.00, 0.00)' if not dof3 else '(0.00, 0.00, 0.00)'
+        self.showCoord          = True if not dof3 else False
 
     def update_with_canvas(self, canvas : FigureCanvasQtQuickAgg, qml_object_parent : qtQuick.QQuickItem) -> None:
         """Initializes the canvas for the figure
@@ -85,6 +110,8 @@ class FigureCanvas(qtCore.QObject):
                     
                     self.axes[r][c].grid(True)
                     self.axes[r][c].set_facecolor('#424242')# if self.figure_in_dialog else '#1C1B1F')
+                    
+                    #self.vert_lines[str(r) + str(c)] = self.axes[r][c].axvline(x=0, linewidth=2, linestyle='dashdot', color='w')
             
         else:
             
@@ -92,6 +119,7 @@ class FigureCanvas(qtCore.QObject):
             
             self.axes.grid(True)
             self.axes.set_facecolor('#424242')# if self.figure_in_dialog else '#1C1B1F')
+            #self.vert_lines['00'] = self.axes.axvline(x=0, linewidth=2, linestyle='dashdot', color='w')
         
         # ? Set Figure
         
@@ -136,6 +164,14 @@ class FigureCanvas(qtCore.QObject):
     def redraw_canvas(self) -> None:
         """Redraws the figure canvas
         """
+        
+        # if self.multiplot:
+            
+        #     for r in range(0, self.rows):
+                
+        #         for c in range(0, self.cols):
+            
+        #             self.vert_lines[str(r) + str(c)].set_xdata([0])
         
         self.canvas.draw_idle()
     
@@ -315,6 +351,10 @@ class FigureCanvas(qtCore.QObject):
                     if event.inaxes == self.axes[r][c]:
             
                         self.coord = f'({event.xdata:.2f}, {event.ydata:.2f})'
+                        
+                        #self.vert_lines[str(r) + str(c)].set_xdata([event.xdata])
+                        #print(self.vert_lines[str(r) + str(c)].get_xdata())
+                        #self.redraw_canvas()
             
         else:
             
@@ -328,7 +368,32 @@ class FigureCanvas(qtCore.QObject):
                 
                 else:
                     
-                    self.coord = f'({event.xdata:.2f}, {event.ydata:.2f})'
+                    if self.x_date and self.y_date:
+                        
+                        x_date_val = dates.num2date(event.xdata).strftime("%Y-%m-%d %H:%M:%S")
+                        y_date_val = dates.num2date(event.ydata).strftime("%Y-%m-%d %H:%M:%S")
+                        
+                        self.coord = f'({x_date_val}, {y_date_val})'
+                    
+                    elif self.x_date and not self.y_date:
+                        
+                        x_date_val = dates.num2date(event.xdata).strftime("%Y-%m-%d %H:%M:%S")
+                        
+                        self.coord = f'({x_date_val}, {event.ydata:.2f})'
+                        
+                    elif not self.x_date and self.y_date:
+                        
+                        y_date_val = dates.num2date(event.ydata).strftime("%Y-%m-%d %H:%M:%S")
+                        
+                        self.coord = f'({event.xdata:.2f}, {y_date_val})'
+                        
+                    else:
+                    
+                        self.coord = f'({event.xdata:.2f}, {event.ydata:.2f})'
+                        
+                    self.axes.axvline(x=event.xdata, linewidth=3, color='r')
+                    
+                    self.redraw_canvas()
  
     @qtCore.Slot()
     def pan(self, *args):

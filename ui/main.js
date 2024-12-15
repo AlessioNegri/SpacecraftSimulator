@@ -5,8 +5,9 @@ function missionChanged(mission)
 
     _view_.setCurrentIndex(mission)
 
-    _orbitTransferCheckBox_.checked             = mission === 0
-    _orbitPropagationCheckBox_.checked          = mission === 1
-    _interplanetaryTransferCheckBox_.checked    = mission === 2
-    _atmosphericEntryCheckBox_.checked          = mission === 3
+    _orbitInsertionCheckBox_.checked            = mission === 0
+    _orbitTransferCheckBox_.checked             = mission === 1
+    _orbitPropagationCheckBox_.checked          = mission === 2
+    _interplanetaryTransferCheckBox_.checked    = mission === 3
+    _atmosphericEntryCheckBox_.checked          = mission === 4
 }

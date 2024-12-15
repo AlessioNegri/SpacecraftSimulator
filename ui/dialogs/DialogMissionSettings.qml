@@ -10,14 +10,18 @@ import "../components"
 Dialog
 {
     // * Menu item source icon.
-    property int p_CurrentIndex: 1
+    property int p_CurrentIndex: 0
 
     // * Loads all the sections.
     function load()
     {
+        _section_launcher_.load()
+
         _section_spacecraft_.load()
 
         _section_capsule_.load()
+
+        _section_orbit_insertion_.load()
 
         _section_orbit_transfer_.load()
 
@@ -62,26 +66,20 @@ Dialog
 
         function f_Save()
         {
-            _section_spacecraft_.save()
-
-            _section_capsule_.save()
-
-            _section_orbit_transfer_.save()
-
-            _section_orbit_propagation_.save()
-
-            _section_interplanetary_transfer_.save()
-
-            _section_atmospheric_entry_.save()
+            f_Update()
 
             close()
         }
 
         function f_Update()
         {
+            _section_launcher_.save()
+
             _section_spacecraft_.save()
 
             _section_capsule_.save()
+
+            _section_orbit_insertion_.save()
 
             _section_orbit_transfer_.save()
 
@@ -202,7 +200,10 @@ Dialog
             width: parent.width - _menu_scroll_view_.width
             currentIndex: p_CurrentIndex
 
-            Item {}
+            SectionLauncher
+            {
+                id: _section_launcher_
+            }
 
             SectionSpacecraft
             {
@@ -214,7 +215,10 @@ Dialog
                 id: _section_capsule_
             }
 
-            Item {}
+            SectionOrbitInsertion
+            {
+                id: _section_orbit_insertion_
+            }
 
             SectionOrbitTransfer
             {

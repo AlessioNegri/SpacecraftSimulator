@@ -22,6 +22,8 @@
         <file>dialogs/sections/js/SectionAtmosphericEntry.js</file>
         <file>dialogs/sections/js/SectionCapsule.js</file>
         <file>dialogs/sections/js/SectionInterplanetaryTransfer.js</file>
+        <file>dialogs/sections/js/SectionLauncher.js</file>
+        <file>dialogs/sections/js/SectionOrbitInsertion.js</file>
         <file>dialogs/sections/js/SectionOrbitPropagation.js</file>
         <file>dialogs/sections/js/SectionOrbitTransfer.js</file>
         <file>dialogs/sections/js/SectionSpacecraft.js</file>
@@ -34,8 +36,11 @@
         <file>dialogs/sections/qml/SectionCapsule.qml</file>
         <file>dialogs/sections/qml/SectionHeader.qml</file>
         <file>dialogs/sections/qml/SectionInterplanetaryTransfer.qml</file>
+        <file>dialogs/sections/qml/SectionItemCaption.qml</file>
         <file>dialogs/sections/qml/SectionItemName.qml</file>
         <file>dialogs/sections/qml/SectionItemValue.qml</file>
+        <file>dialogs/sections/qml/SectionLauncher.qml</file>
+        <file>dialogs/sections/qml/SectionOrbitInsertion.qml</file>
         <file>dialogs/sections/qml/SectionOrbitPropagation.qml</file>
         <file>dialogs/sections/qml/SectionOrbitTransfer.qml</file>
         <file>dialogs/sections/qml/SectionSpacecraft.qml</file>
@@ -48,6 +53,7 @@
         <file>pages/qmldir</file>
         <file>pages/PageAtmosphericEntry.qml</file>
         <file>pages/PageInterplanetaryTransfer.qml</file>
+        <file>pages/PageOrbitInsertion.qml</file>
         <file>pages/PageOrbitPropagation.qml</file>
         <file>pages/PageOrbitTransfer.qml</file>
     </qresource>
@@ -79,6 +85,7 @@
         <file alias="orbit_transfer.png">../img/png/orbit_transfer.png</file>
         <file alias="parachute.png">../img/png/parachute.png</file>
         <file alias="parameters.png">../img/png/parameters.png</file>
+        <file alias="payload.png">../img/png/payload.png</file>
         <file alias="perturbations.png">../img/png/perturbations.png</file>
         <file alias="planets.png">../img/png/planets.png</file>
         <file alias="plot.png">../img/png/plot.png</file>
@@ -88,6 +95,7 @@
         <file alias="saturn.png">../img/png/saturn.png</file>
         <file alias="solar_radiation_pressure.png">../img/png/solar_radiation_pressure.png</file>
         <file alias="spacecraft.png">../img/png/spacecraft.png</file>
+        <file alias="stage.png">../img/png/stage.png</file>
         <file alias="structure.png">../img/png/structure.png</file>
         <file alias="sun.png">../img/png/sun.png</file>
         <file alias="uranus.png">../img/png/uranus.png</file>
@@ -106,6 +114,7 @@
         <file alias="home.svg">../img/svg/home.svg</file>
         <file alias="pan_tool.svg">../img/svg/pan_tool.svg</file>
         <file alias="play_arrow.svg">../img/svg/play_arrow.svg</file>
+        <file alias="settings.svg">../img/svg/settings.svg</file>
         <file alias="warning.svg">../img/svg/warning.svg</file>
         <file alias="zoom_in.svg">../img/svg/zoom_in.svg</file>
     </qresource>

@@ -10,6 +10,9 @@ Rectangle
     // ? Object name for backend accessibility.
     property string p_ObjectName: ""
 
+    // ? Shows the buttons.
+    property bool p_ShowButtons: false
+
     // ? Reference to model.
     property var r_Model: null
 
@@ -45,8 +48,24 @@ Rectangle
 
             Button
             {
+                icon.source: "/svg/settings.svg"
+                Material.background: p_ShowButtons ? "#808080": "#FF5722"
+                Material.foreground: "#FFFFFF"
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                onClicked: p_ShowButtons = !p_ShowButtons
+
+                HoverHandler
+                {
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                    cursorShape: Qt.PointingHandCursor
+                }
+            }
+
+            Button
+            {
                 text: "Restore"
                 icon.source: "/svg/home.svg"
+                visible: p_ShowButtons
                 Material.background: "#FF5722"
                 Material.foreground: "#FFFFFF"
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
@@ -63,6 +82,7 @@ Rectangle
             {
                 text: "Back"
                 icon.source: "/svg/arrow_back.svg"
+                visible: p_ShowButtons
                 Material.background: "#FF5722"
                 Material.foreground: "#FFFFFF"
                 Layout.alignment: Qt.AlignHCenter
@@ -79,6 +99,7 @@ Rectangle
             {
                 text: "Next"
                 icon.source: "/svg/arrow_forward.svg"
+                visible: p_ShowButtons
                 Material.background: "#FF5722"
                 Material.foreground: "#FFFFFF"
                 Layout.alignment: Qt.AlignHCenter
@@ -97,6 +118,7 @@ Rectangle
                 checkable: true
                 text: "Pan"
                 icon.source: "/svg/pan_tool.svg"
+                visible: p_ShowButtons
                 Material.background: _departure_pan_.checked ? "#3F51B5" : "#FF5722"
                 Material.foreground: "#FFFFFF"
                 Material.accent: "#FFFFFF"
@@ -122,6 +144,7 @@ Rectangle
                 checkable: true
                 text: "Zoom"
                 icon.source: "/svg/zoom_in.svg"
+                visible: p_ShowButtons
                 Material.background: _departure_zoom_.checked ? "#3F51B5" : "#FF5722"
                 Material.foreground: "#FFFFFF"
                 Material.accent: "#FFFFFF"
@@ -150,6 +173,7 @@ Rectangle
                 font.pointSize: 12
                 font.bold: true
                 readOnly: true
+                visible: r_Model.showCoord
             }
 
             Item { width: 10 }

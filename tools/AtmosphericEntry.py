@@ -22,8 +22,8 @@ class AtmosphericEntry:
     # --- MEMBERS 
     
     g_E     = AstronomicalData.gravity(CelestialBody.EARTH, km=True)        # * Sea Level Gravity           [ km / s^2 ]
-    R_E     = AstronomicalData.equatiorial_radius(CelestialBody.EARTH)       # * Planet Equatiorial Radius   [ km ]
-    k       = AstronomicalData.gravitational_parameter(CelestialBody.EARTH)  # * Gravitational Parameter     [ km^3 / s^2 ]
+    R_E     = AstronomicalData.equatiorial_radius(CelestialBody.EARTH)      # * Planet Equatiorial Radius   [ km ]
+    k       = AstronomicalData.gravitational_parameter(CelestialBody.EARTH) # * Gravitational Parameter     [ km^3 / s^2 ]
     m       = 0.0                                                           # * Initial Mass                [ kg ]
     F       = 0.0                                                           # * Thrust                      [ kg * m / s^2 ]
     I_sp    = 300.0                                                         # * Specific Impulse            [ s ]
@@ -87,7 +87,7 @@ class AtmosphericEntry:
         """Atmospheric entry equations of motion\n
         
         (1) dV/dt     = ( F cos(csi) ) / m - D / m - ( k sin(gamma) ) / r^2\n
-        (2) dgamma/dt = ( F sin(csi) ) / (m V) + L / (m V) - ( k cos(gamma) ) / ( m r^2 ) + ( V cos(gamma) ) / r\n
+        (2) dgamma/dt = ( F sin(csi) ) / (m V) + L / (m V) - ( k cos(gamma) ) / ( V r^2 ) + ( V cos(gamma) ) / r\n
         (3) dr/dt     = V sin(gamma)\n
         (4) dx/dt     = ( V cos(gamma) ) / r\n
         (5) dm/dt     = - F / ( g_E I_sp )
@@ -169,7 +169,7 @@ class AtmosphericEntry:
             
         # >>> 1. Integrate ODE 
     
-        def terminal_condition(t : float, X : np.ndarray): return X[2] - cls.R_E
+        def terminal_condition(t : float, X : np.ndarray) -> bool: return X[2] - cls.R_E
         
         terminal_condition.terminal = True
         
@@ -202,7 +202,7 @@ class AtmosphericEntry:
             
             fig, axes = plt.subplots(2, 3, constrained_layout=True)
             
-            fig.suptitle(f"ATMOSPHERIC ENTRY: $V_e = {y_0[0]}\;\;km/s$   $\gamma_e = {np.rad2deg(y_0[1])}\;\;°$   $z_e = {y_0[2] - cls.R_E}\;\;km$   $R_N = {cls.R_N}\;\;m$   $V_f = {V[-1] * 1e3}$")
+            fig.suptitle(f"ATMOSPHERIC ENTRY: $V_e = {y_0[0]}\;\;km/s$   $\gamma_e = {np.rad2deg(y_0[1])}\;\;°$   $z_e = {y_0[2] - cls.R_E}\;\;km$   $R_N = {cls.R_N}\;\;m$   $V_f = {V[-1] * 1e3}\;\;m/s$")
             
             axes[0,0].set_xlabel("Time [$s$]")
             axes[0,0].set_ylabel("$V$ [$km / s$]")

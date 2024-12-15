@@ -153,13 +153,13 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         
         # * Pork Chop Plot
         
-        self._launch_window_beg             = '2020-01-01'                      # * Launch window begin
-        self._launch_window_end             = '2021-01-01'                      # * Launch window end
-        self._arrival_window_beg            = '2031-01-01'                      # * Arrival window begin
-        self._arrival_window_end            = '2032-06-01'                      # * Arrival window end
-        self._window_step                   = 10                                # * Windows step
-        self.figure_pork_chop_plot          = FigureCanvas()                    # * Pork chop plot figure
-        self.pork_chop_plot                 = PorkChopPlot()                    # * Pork chop plot thread
+        self._launch_window_beg             = '2020-01-01'                              # * Launch window begin
+        self._launch_window_end             = '2021-01-01'                              # * Launch window end
+        self._arrival_window_beg            = '2031-01-01'                              # * Arrival window begin
+        self._arrival_window_end            = '2032-06-01'                              # * Arrival window end
+        self._window_step                   = 10                                        # * Windows step
+        self.figure_pork_chop_plot          = FigureCanvas(x_date=True, y_date=True)    # * Pork chop plot figure
+        self.pork_chop_plot                 = PorkChopPlot()                            # * Pork chop plot thread
         
         self.pork_chop_plot.status_changed.connect(self.update_progress_bar)
         self.pork_chop_plot.finished.connect(self.generation_completed)

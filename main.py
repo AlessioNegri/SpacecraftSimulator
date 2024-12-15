@@ -16,6 +16,7 @@ local_var_name.
 
 # ! PySide6
 
+import PySide6.QtWidgets as qtWidgets
 import PySide6.QtGui as qtGui
 import PySide6.QtQml as qtQml
 import PySide6.QtCore as qtCore
@@ -55,9 +56,11 @@ qtQC2.QQuickStyle.setStyle('Material')
 
 # ! APP
 
-app = qtGui.QGuiApplication(sys.argv)
+app = qtWidgets.QApplication(sys.argv)
+#app = qtGui.QGuiApplication(sys.argv)
 
 app.setWindowIcon(qtGui.QIcon(':/img/icon.ico'))
+app.setFont('Calibri')
 
 # ! Engine
 

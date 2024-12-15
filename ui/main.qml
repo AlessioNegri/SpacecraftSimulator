@@ -78,11 +78,19 @@ ApplicationWindow
 
                 MenuItem
                 {
-                    id: _orbitTransferCheckBox_
-                    text: "Orbit Transfer"
+                    id: _orbitInsertionCheckBox_
+                    text: "Orbit Insertion"
                     checkable: true
                     checked: true
                     onTriggered: Script.missionChanged(0)
+                }
+
+                MenuItem
+                {
+                    id: _orbitTransferCheckBox_
+                    text: "Orbit Transfer"
+                    checkable: true
+                    onTriggered: Script.missionChanged(1)
                 }
                 
                 MenuItem
@@ -90,7 +98,7 @@ ApplicationWindow
                     id: _orbitPropagationCheckBox_
                     text: "Orbit Propagation"
                     checkable: true
-                    onTriggered: Script.missionChanged(1)
+                    onTriggered: Script.missionChanged(2)
                 }
                 
                 MenuItem
@@ -98,7 +106,7 @@ ApplicationWindow
                     id: _interplanetaryTransferCheckBox_
                     text: "Interplanetary Transfer"
                     checkable: true
-                    onTriggered: Script.missionChanged(2)
+                    onTriggered: Script.missionChanged(3)
                 }
 
                 MenuItem
@@ -106,34 +114,40 @@ ApplicationWindow
                     id: _atmosphericEntryCheckBox_
                     text: "Atmospheric Entry"
                     checkable: true
-                    onTriggered: Script.missionChanged(3)
+                    onTriggered: Script.missionChanged(4)
                 }
             }
 
             MenuSeparator {}
-            
+
             Action
             {
-                text: "Orbit Transfer"
+                text: "Orbit Insertion"
                 enabled: gp_CurrentMission === 0
             }
             
             Action
             {
-                text: "Orbit Propagation"
+                text: "Orbit Transfer"
                 enabled: gp_CurrentMission === 1
             }
             
             Action
             {
-                text: "Interplanetary"
+                text: "Orbit Propagation"
                 enabled: gp_CurrentMission === 2
+            }
+            
+            Action
+            {
+                text: "Interplanetary"
+                enabled: gp_CurrentMission === 3
             }
 
             Action
             {
                 text: "Atmospheric Entry"
-                enabled: gp_CurrentMission === 3
+                enabled: gp_CurrentMission === 4
             }
         }
         
@@ -153,6 +167,8 @@ ApplicationWindow
         currentIndex: 0
         interactive: false
         anchors.fill: parent
+
+        PageOrbitInsertion { width: window.width; height: window.height - _menu_bar_.height }
 
         PageOrbitTransfer { width: window.width; height: window.height - _menu_bar_.height }
 

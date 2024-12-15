@@ -7,6 +7,7 @@ sys.path.append(os.path.dirname(__file__))
 
 from systems.spacecraft import Spacecraft
 from systems.capsule import Capsule
+from src.missions.mission_orbit_insertion import MissionOrbitInsertion
 from src.missions.mission_orbit_transfer import MissionOrbitTransfer
 from src.missions.mission_orbit_propagation import MissionOrbitPropagation
 from src.missions.mission_interplanetary_transfer import MissionInterplanetaryTransfer
@@ -31,6 +32,8 @@ class MissionParameters(qtCore.QObject):
         
         self.capsule = Capsule(engine)
         
+        self.mission_orbit_insertion = MissionOrbitInsertion(engine)
+        
         self.mission_orbit_transfer = MissionOrbitTransfer(engine)
         
         self.mission_orbit_propagation = MissionOrbitPropagation(engine)
@@ -47,6 +50,8 @@ class MissionParameters(qtCore.QObject):
         Args:
             engine (qtQml.QQmlApplicationEngine): QML engine
         """
+        
+        self.mission_orbit_insertion.set_update_with_canvas(engine)
         
         self.mission_orbit_transfer.set_update_with_canvas(engine)
         
