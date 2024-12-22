@@ -34,6 +34,26 @@ class MissionOrbitInsertion(qtCore.QObject):
     @pitchover_flight_path_angle.setter
     def pitchover_flight_path_angle(self, val : float): self._pitchover_flight_path_angle = val
     
+    # ? Circular parking orbit height [km]
+    
+    @qtCore.Property(float)
+    def circular_parking_orbit_height(self): return format(self._circular_parking_orbit_height)
+    
+    @circular_parking_orbit_height.setter
+    def circular_parking_orbit_height(self, val : float):
+        
+        self._circular_parking_orbit_height = val
+        
+        self._circular_parking_orbit_velocity = np.sqrt(Launcher.k / (Launcher.R_E + val))
+    
+    # ? Circular parking orbit velocity [km/s]
+    
+    @qtCore.Property(float)
+    def circular_parking_orbit_velocity(self): return format(self._circular_parking_orbit_velocity)
+    
+    @circular_parking_orbit_velocity.setter
+    def circular_parking_orbit_velocity(self, val : float): self._circular_parking_orbit_velocity = val
+    
     # ? Final Integration Time [s]
     
     @qtCore.Property(float)
@@ -41,6 +61,30 @@ class MissionOrbitInsertion(qtCore.QObject):
     
     @final_integration_time.setter
     def final_integration_time(self, val : float): self._final_integration_time = val
+    
+    # ? Use Stage 1
+    
+    @qtCore.Property(bool)
+    def use_stage_1(self): return self._use_stage_1
+    
+    @use_stage_1.setter
+    def use_stage_1(self, val : bool): self._use_stage_1 = val
+    
+    # ? Use Stage 2
+    
+    @qtCore.Property(bool)
+    def use_stage_2(self): return self._use_stage_2
+    
+    @use_stage_2.setter
+    def use_stage_2(self, val : bool): self._use_stage_2 = val
+    
+    # ? Use Stage 3
+    
+    @qtCore.Property(bool)
+    def use_stage_3(self): return self._use_stage_3
+    
+    @use_stage_3.setter
+    def use_stage_3(self, val : bool): self._use_stage_3 = val
     
     # ? Stage 1
     
@@ -89,13 +133,16 @@ class MissionOrbitInsertion(qtCore.QObject):
         
         # ? Entry Condition
         
-        self._pitchover_height              : float = 130   # * Pitchover Height            [ m ]
-        self._pitchover_flight_path_angle   : float = 89.85 # * Pitchover Flight Path Angle [ deg ]
-        self._final_integration_time        : float = 300   # * Final Integration Time      [ s ]
+        self._pitchover_height                  : float = 130                                           # * Pitchover Height                [ m ]
+        self._pitchover_flight_path_angle       : float = 89.85                                         # * Pitchover Flight Path Angle     [ deg ]
+        self._circular_parking_orbit_height     : float = 300                                           # * Circular Parking Orbit Height   [ km ]
+        self._circular_parking_orbit_velocity   : float = np.sqrt(Launcher.k / (Launcher.R_E + 300))    # * Circular Parking Orbit Velocity [ km / s ]
+        self._final_integration_time            : float = 300                                           # * Final Integration Time          [ s ]
         
         # ? Stage 1
         
-        self._stage_1 = Stage()
+        self._use_stage_1   = True
+        self._stage_1       = Stage()
         
         #self._stage_1.mass(68_000 / 15, 68_000 - 68_000 / 15, 0)
         #self._stage_1.motor(933.913 * 1e3, 390, 0.0)
@@ -109,7 +156,8 @@ class MissionOrbitInsertion(qtCore.QObject):
         
         # ? Stage 2
         
-        self._stage_2 = Stage()
+        self._use_stage_2   = True
+        self._stage_2       = Stage()
         
         self._stage_2.mass(4_238, 36_239, 13_558)
         self._stage_2.motor(1_304 * 1e3, 293.5, 0.0)
@@ -118,7 +166,8 @@ class MissionOrbitInsertion(qtCore.QObject):
         
         # ? Stage 3
         
-        self._stage_3 = Stage()
+        self._use_stage_3   = True
+        self._stage_3       = Stage()
         
         self._stage_3.mass(1_433, 10_567, 1_558)
         self._stage_3.motor(317 * 1e3, 295.9, 0.0)
@@ -167,13 +216,29 @@ class MissionOrbitInsertion(qtCore.QObject):
         
         # ? Stage 2
         
-        self._stage_2.m_payload = self._stage_3.m_0
+        if self._use_stage_3:
+            
+            self._stage_2.m_payload = self._stage_3.m_0
+            
+        else:
+        
+          self._stage_2.m_payload = self.payload_mass
         
         self._stage_2.calc()
         
         # ? Stage 1
         
-        self._stage_1.m_payload = self._stage_2.m_0
+        if self._use_stage_2:
+            
+            self._stage_1.m_payload = self._stage_2.m_0
+            
+        elif self._use_stage_3:
+            
+            self._stage_1.m_payload = self._stage_3.m_0
+            
+        else:
+        
+          self._stage_1.m_payload = self.payload_mass
         
         self._stage_1.calc()
     
@@ -190,58 +255,75 @@ class MissionOrbitInsertion(qtCore.QObject):
         a       = np.zeros(shape=(1))
         t_a     = np.zeros(shape=(1))
         
-        # * Stage 1
+        # * Integration Parameters
         
         y_0 = np.array([0, np.deg2rad(self.pitchover_flight_path_angle), 0, 0, 0, 0, 0])
+        h_t = self.pitchover_height
+        t_0 = 0
+        t_f = self.final_integration_time
         
-        Launcher.stage = self._stage_1
+        # * Stage 1
         
-        integration_time = min(self.final_integration_time, self._stage_1.t_burn)
-        
-        result_1 = Launcher.simulate_launch(y_0, h_t=self.pitchover_height, t_0=0, t_f=integration_time)
-        
-        result['y'] = np.append(result['y'], result_1['y'], axis=1)
-        result['t'] = np.append(result['t'], result_1['t'])
-        a           = np.append(a, np.array([(result_1['y'][0, i] - result_1['y'][0, i - 1]) / (result_1['t'][i] - result_1['t'][i - 1]) for i in range(1, len(result_1['t']))]))
-        t_a         = np.append(t_a, result_1['t'][1:])
+        if self._use_stage_1:
+            
+            Launcher.stage = self._stage_1
+            
+            t_f = min(self.final_integration_time, self._stage_1.t_burn)
+            
+            if t_f > t_0:
+            
+                result_1 = Launcher.simulate_launch(y_0, h_t=h_t, t_0=t_0, t_f=t_f)
+                
+                result['y'] = np.append(result['y'], result_1['y'], axis=1)
+                result['t'] = np.append(result['t'], result_1['t'])
+                a           = np.append(a, np.array([(result_1['y'][0, i] - result_1['y'][0, i - 1]) / (result_1['t'][i] - result_1['t'][i - 1]) for i in range(1, len(result_1['t']))]))
+                t_a         = np.append(t_a, result_1['t'][1:])
+                
+                y_0 = result_1['y'][:, -1]
+                h_t = 0
+                t_0 = t_f
+                
+                y_0[2] -= Launcher.R_E
         
         # * Stage 2
         
-        Launcher.stage = self._stage_2
+        if self._use_stage_2:
         
-        prev_intergration_time = integration_time
-        
-        integration_time = min(self.final_integration_time, self._stage_1.t_burn + self._stage_2.t_burn)
-        
-        if self.final_integration_time > self._stage_1.t_burn:
-        
-            result_1['y'][2, -1] -= Launcher.R_E
+            Launcher.stage = self._stage_2
             
-            result_2 = Launcher.simulate_launch(result_1['y'][:, -1], t_0=prev_intergration_time, t_f=integration_time)
+            t_f = min(self.final_integration_time, self._stage_1.t_burn * self._use_stage_1 + self._stage_2.t_burn)
             
-            result['y'] = np.append(result['y'], result_2['y'], axis=1)
-            result['t'] = np.append(result['t'], result_2['t'])
-            a           = np.append(a, np.array([(result_2['y'][0, i] - result_2['y'][0, i - 1]) / (result_2['t'][i] - result_2['t'][i - 1]) for i in range(1, len(result_2['t']))]))
-            t_a         = np.append(t_a, result_2['t'][1:])
+            if t_f > t_0:
+                
+                result_2 = Launcher.simulate_launch(y_0, h_t=h_t, t_0=t_0, t_f=t_f)
+                
+                result['y'] = np.append(result['y'], result_2['y'], axis=1)
+                result['t'] = np.append(result['t'], result_2['t'])
+                a           = np.append(a, np.array([(result_2['y'][0, i] - result_2['y'][0, i - 1]) / (result_2['t'][i] - result_2['t'][i - 1]) for i in range(1, len(result_2['t']))]))
+                t_a         = np.append(t_a, result_2['t'][1:])
+                
+                y_0 = result_2['y'][:, -1]
+                h_t = 0
+                t_0 = t_f
+                
+                y_0[2] -= Launcher.R_E
             
         # * Stage 3
         
-        Launcher.stage = self._stage_3
-        
-        prev_intergration_time = integration_time
-        
-        integration_time = min(self.final_integration_time, self._stage_1.t_burn + self._stage_2.t_burn + self._stage_3.t_burn)
-        
-        if self.final_integration_time > (self._stage_1.t_burn + self._stage_2.t_burn):
-        
-            result_2['y'][2, -1] -= Launcher.R_E
+        if self._use_stage_3:
             
-            result_3 = Launcher.simulate_launch(result_2['y'][:, -1], t_0=prev_intergration_time, t_f=integration_time)
+            Launcher.stage = self._stage_3
             
-            result['y'] = np.append(result['y'], result_3['y'], axis=1)
-            result['t'] = np.append(result['t'], result_3['t'])
-            a           = np.append(a, np.array([(result_3['y'][0, i] - result_3['y'][0, i - 1]) / (result_3['t'][i] - result_3['t'][i - 1]) for i in range(1, len(result_3['t']))]))
-            t_a         = np.append(t_a, result_3['t'][1:])
+            t_f = min(self.final_integration_time, self._stage_1.t_burn * self._use_stage_1 + self._stage_2.t_burn * self._use_stage_2 + self._stage_3.t_burn)
+            
+            if t_f > t_0:
+                
+                result_3 = Launcher.simulate_launch(y_0, h_t=h_t, t_0=t_0, t_f=t_f)
+                
+                result['y'] = np.append(result['y'], result_3['y'], axis=1)
+                result['t'] = np.append(result['t'], result_3['t'])
+                a           = np.append(a, np.array([(result_3['y'][0, i] - result_3['y'][0, i - 1]) / (result_3['t'][i] - result_3['t'][i - 1]) for i in range(1, len(result_3['t']))]))
+                t_a         = np.append(t_a, result_3['t'][1:])
         
         # * Removes the first element
         
@@ -317,6 +399,23 @@ class MissionOrbitInsertion(qtCore.QObject):
         mplcyberpunk.make_lines_glow(self.figure.axes[1,1])
         
         self.figure.redraw_canvas()
+    
+    @qtCore.Slot()
+    def calculate_staging(self) -> None:
+        """Calculates all the parameters of the staging
+        """
+        
+        if self._use_stage_1 and self._use_stage_2 and self._use_stage_3:
+            
+            Launcher.three_stage_vehicle_to_orbit()
+        
+        elif self._use_stage_1 and self._use_stage_2 and not self._use_stage_3:
+            
+            Launcher.two_stage_vehicle_to_orbit()
+        
+        elif self._use_stage_1 and not self._use_stage_2 and not self._use_stage_3:
+            
+            Launcher.single_stage_vehicle_to_orbit()
     
     # --- PRIVATE METHODS 
     

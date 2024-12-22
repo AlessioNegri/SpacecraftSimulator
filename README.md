@@ -35,6 +35,9 @@ The project is structured in the following folders.
     - `lib\matplotlib_backend_qtquick`: library for integrating *matplotlib* in *QML*
     - `lib\pyextrema`: library implementing Matlab extrema function
 - `src`: back-end of the application
+    - `missions`: available missions
+    - `systems`: available systems
+    - `utility`: list of supporting classes
 - `tools`: algorithms
     - `tools\texture`: list of images for different astronomical objects
 - `ui`: front-end of the application
@@ -85,23 +88,24 @@ The project is structured in the following folders.
 > **mplcyberpunk**
 > - `URL` https://github.com/dhaitz/mplcyberpunk
 
-## 2. Mission Settings
+## 2. Settings
 
-Under the menu item `Edit \ Mission Settings` it is possible to configure the all the properties of the systems and the missions.
-
-This dialog contains in the left the list of all sections. The sections are divided into two parts (differentiated by their color):
+Under the menu item `Edit` it is possible to configure all the properties of the systems and the missions. The two dialogs contain in the left the list of all sections:
 
 - **Systems Settings** comprising all the properties of the different systems: <br/><br/>
-    - `Launcher` (TODO)
+    - `Launcher`
     - `Spacecraft`
     - `Re-Entry Capsule` <br/><br/>
+
+<p align="center"><img src="./images/launcher.png" width="100%"></p>
 
 <p align="center"><img src="./images/spacecraft.png" width="100%"></p>
 
 <p align="center"><img src="./images/re_entry_capsule.png" width="100%"></p>
 
 - **Mission Settings** comprising the parameters to configure the different types of mission: <br/><br/>
-    - `Orbit Insertion` (TODO) <br/>
+    - `Orbit Insertion` <br/>
+    Simulate the launch phase when the spacecraft reaches the orbit from ground thanks to a launcher
     <br/><br/>
     - `Orbit Transfer` <br/>
     Simulate the cost in terms of $\Delta v$, $\Delta t$, and $\Delta m$ of the transfer between a departure and an arrival orbit <br/><br/>
@@ -114,7 +118,15 @@ This dialog contains in the left the list of all sections. The sections are divi
 
 By clicking on a section, the right part of the dialog populates with the corresponding parameters that can be configured. All these missions will be discussed in detail in the following sections.
 
-## 3 Orbit Insertion (TODO)
+## 3 Orbit Insertion
+
+The first phase of a mission is to bring the spacecraft to space from Earth. This can be done thanks to a launcher. It is possible to simulate up to 3 **stages** in series activating them through the switch buttons. The **pitchover conditions** establish the altitude at which the rocket starts turning with a flight path angle slightly different from the 90 degress at launch.
+
+<p align="center"><img src="./images/orbit_insertion_1.png" width="100%"></p>
+
+Under the menu item `Missions / Orbit Insertion / Simulation`, the launcher trajectory and data can be visualized and analyzed from the main window.
+
+<p align="center"><img src="./images/orbit_insertion.png" width="100%"></p>
 
 ## 4 Orbit Transfer
 
@@ -163,7 +175,7 @@ At this point it is possible to configure the maneuvers for the transfer between
 
 After the transfer has been evaluated, the values of $\Delta v$, $\Delta t$, and $\Delta m$ for each transfer are calculated for a detailed analysis of the cost of the transfer.
 
-By clicking on the `Run` button, the transfer is simulated and becomes visible in the chart.
+Under the menu item `Missions / Orbit Transfer / Simulation`, the transfer is simulated and becomes visible in the chart.
 
 <p align="center"><img src="./images/orbit_transfer.png" width="100%"></p>
 
@@ -179,7 +191,7 @@ for a given set of initial orbital elements.
 
 <p align="center"><img src="./images/orbit_propagation_1.png" width="100%"></p>
 
-To simulate the orbit propagation click on the `Run` button. The evolution of the orbital elements with respect to the initial values can be analyzed in the main window.
+Under the menu item `Missions / Orbit Propagation / Simulation` you can simulate the orbit propagation. The evolution of the orbital elements with respect to the initial values can be analyzed in the main window.
 
 <p align="center"><img src="./images/orbit_propagation.png" width="100%"></p>
 
@@ -215,7 +227,7 @@ Under the section `Atmospheric Entry` it is possible to set up the parameters ne
 
 ### 7.2 Simulation
 
-After you have decided the *Entry Conditions*, by clicking on the `Run` button, the simulation is executed and the results shown on the charts below. Each chart represents a peculiar parameter of the analysis:
+After you have decided the *Entry Conditions*, by clicking on the menu item `Missions / Atmospheric Entry / Simulation`, the simulation is executed and the results shown on the charts below. Each chart represents a peculiar parameter of the analysis:
 
 - **Velocity vs Time**
 - **Acceleration g's vs Time**

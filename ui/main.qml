@@ -5,11 +5,12 @@ import QtQuick.Layouts
 import "main.js" as Script
 
 import "dialogs"
-import "pages"
+import "pages/qml"
 
+// * Main window application
 ApplicationWindow
 {
-    // ? Current mission selected.
+    // * Current mission selected.
     property int gp_CurrentMission: 0
 
     // ! ----------------------------------------- ! //
@@ -28,13 +29,15 @@ ApplicationWindow
         console.error("Error")
     }
 
-    // ? Dialogs
+    // * Dialogs
 
     DialogAbout { id: _dlgAbout_ }
 
+    DialogSystemSettings { id: _dlgSystemSettings_ }
+
     DialogMissionSettings { id: _dlgMissionSettings_ }
 
-    // ? Menu Bar
+    // * Menu Bar
 
     menuBar: MenuBar
     {
@@ -57,6 +60,13 @@ ApplicationWindow
         Menu
         {
             title: "Edit"
+
+            Action
+            {
+                text: "System Settings"
+                shortcut: "Ctrl+S"
+                onTriggered: _dlgSystemSettings_.open()
+            }
 
             Action
             {
@@ -120,34 +130,74 @@ ApplicationWindow
 
             MenuSeparator {}
 
-            Action
+            Menu
             {
-                text: "Orbit Insertion"
+                title: "Orbit Insertion"
                 enabled: gp_CurrentMission === 0
+
+                MenuItem
+                {
+                    text: "Simulation"
+                    icon.name: "sim"
+                    icon.source: "/svg/play_arrow.svg"
+                    onTriggered: __MissionOrbitInsertion.simulate()
+                }
             }
             
-            Action
+            Menu
             {
-                text: "Orbit Transfer"
+                title: "Orbit Transfer"
                 enabled: gp_CurrentMission === 1
+
+                MenuItem
+                {
+                    text: "Simulation"
+                    icon.name: "sim"
+                    icon.source: "/svg/play_arrow.svg"
+                    onTriggered: {__MissionOrbitTransfer.simulate(); _page_orbit_transfer_.update() }
+                }
             }
             
-            Action
+            Menu
             {
-                text: "Orbit Propagation"
+                title: "Orbit Propagation"
                 enabled: gp_CurrentMission === 2
+
+                MenuItem
+                {
+                    text: "Simulation"
+                    icon.name: "sim"
+                    icon.source: "/svg/play_arrow.svg"
+                    onTriggered: __MissionOrbitPropagation.simulate()
+                }
             }
             
-            Action
+            Menu
             {
-                text: "Interplanetary"
+                title: "Interplanetary"
                 enabled: gp_CurrentMission === 3
+
+                MenuItem
+                {
+                    text: "Simulation"
+                    icon.name: "sim"
+                    icon.source: "/svg/play_arrow.svg"
+                    onTriggered: __MissionInterplanetaryTransfer.simulate()
+                }
             }
 
-            Action
+            Menu
             {
-                text: "Atmospheric Entry"
+                title: "Atmospheric Entry"
                 enabled: gp_CurrentMission === 4
+
+                MenuItem
+                {
+                    text: "Simulation"
+                    icon.name: "sim"
+                    icon.source: "/svg/play_arrow.svg"
+                    onTriggered: __MissionAtmosphericEntry.simulate()
+                }
             }
         }
         
@@ -159,7 +209,7 @@ ApplicationWindow
         }
     }
 
-    // ? Swipe View
+    // * Swipe View
 
     SwipeView
     {
@@ -168,23 +218,14 @@ ApplicationWindow
         interactive: false
         anchors.fill: parent
 
-        PageOrbitInsertion { width: window.width; height: window.height - _menu_bar_.height }
+        PageOrbitInsertion { id: _page_orbit_insertion_; width: window.width; height: window.height - _menu_bar_.height }
 
-        PageOrbitTransfer { width: window.width; height: window.height - _menu_bar_.height }
+        PageOrbitTransfer { id: _page_orbit_transfer_; width: window.width; height: window.height - _menu_bar_.height }
 
-        PageOrbitPropagation { width: window.width; height: window.height - _menu_bar_.height }
+        PageOrbitPropagation { id: _page_orbit_propagation_; width: window.width; height: window.height - _menu_bar_.height }
 
-        PageInterplanetaryTransfer { width: window.width; height: window.height - _menu_bar_.height }
+        PageInterplanetaryTransfer { id: _page_interplanetary_trensfer_; width: window.width; height: window.height - _menu_bar_.height }
 
-        PageAtmosphericEntry { width: window.width; height: window.height - _menu_bar_.height }
+        PageAtmosphericEntry { id: _page_atmospheric_entry_; width: window.width; height: window.height - _menu_bar_.height }
     }
-
-    /*PageIndicator
-    {
-        id: _indicator_
-        count: _view_.count
-        currentIndex: _view_.currentIndex
-        anchors.bottom: _view_.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-    }*/
 }

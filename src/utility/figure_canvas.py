@@ -391,9 +391,9 @@ class FigureCanvas(qtCore.QObject):
                     
                         self.coord = f'({event.xdata:.2f}, {event.ydata:.2f})'
                         
-                    self.axes.axvline(x=event.xdata, linewidth=3, color='r')
+                    #self.axes.axvline(x=event.xdata, linewidth=3, color='r')
                     
-                    self.redraw_canvas()
+                    #self.redraw_canvas()
  
     @qtCore.Slot()
     def pan(self, *args):

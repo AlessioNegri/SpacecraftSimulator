@@ -30,7 +30,7 @@ function loadManeuvers()
 
         // * Create QML component
 
-        let component = Qt.createComponent("../qml/ManeuverInfo.qml")
+        let component = Qt.createComponent("../../components/maneuver/ManeuverInfo.qml")
 
         if (component.status == Component.Ready)
         {
@@ -55,7 +55,7 @@ function loadManeuvers()
         }
         else if (component.status == Component.Error)
         {
-            console.error("Error loading component:" + component.errorString())
+            console.error("Error loading component: " + component.errorString())
         }
     }
 }

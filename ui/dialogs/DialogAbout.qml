@@ -2,9 +2,9 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import "../components"
+import "../components/dialog"
 
-// ? The DialogAbout class manages the about dialog.
+// * The DialogAbout class manages the about dialog.
 Dialog
 {
     // ! ----------------------------------------- ! //
@@ -13,20 +13,21 @@ Dialog
     title: "About - Spacecraft Simulator"
     anchors.centerIn: parent
     modal: true
-    closePolicy: Popup.NoAutoClose
-    font.pointSize: 14
-    width: 700
-    height: 400
+    font.pointSize: 12
+    width: 625
+    height: 275
+
+    Shortcut
+    {
+        sequence: StandardKey.Escape
+        context: Qt.ApplicationShortcut
+        onActivated: close()
+    }
 
     header: DialogHeader
     {
         p_Title: "About - Spacecraft Simulator"
-    }
 
-    footer: DialogFooter
-    {
-        p_ShowSaveButton: false
-        
         function f_Close()
         {
             close()
@@ -35,40 +36,43 @@ Dialog
 
     contentItem: Item
     {
-        Row
+        RowLayout
         {
-            padding: 10
             spacing: 100
 
-            Image
+            Rectangle
             {
-                source: "/img/icon.png"
-                fillMode: Image.PreserveAspectFit
-                width: 200
-                height: width
+                width: 150
+                height: 150
+                color: "transparent"
+
+                Image
+                {
+                    source: "/img/icon.png"
+                    fillMode: Image.PreserveAspectFit
+                    anchors.fill: parent
+                }
             }
 
             ColumnLayout
             {
                 spacing: 10
+                Layout.alignment: Qt.AlignVCenter
 
                 Label
                 {
-                    text: "Spacecraft Simulator 1.0"
-                    font.pointSize: 16
+                    text: "Spacecraft Simulator 1.0.0"
                     font.bold: true
                 }
 
                 Label
                 {
                     text: "Released on Jan 01 2025"
-                    font.pointSize: 12
                 }
 
                 Label
                 {
                     text: "Copyright 2025 Alessio Negri. All rights reserved."
-                    font.pointSize: 12
                 }
             }
         }

@@ -64,6 +64,22 @@ class Stage(qtCore.QObject, lm.Stage):
     @total_mass.setter
     def total_mass(self, val : float): self.m_0 = val
     
+    # ? Propellant fraction []
+    
+    @qtCore.Property(float)
+    def propellant_fraction(self): return format(self.k_p)
+
+    @propellant_fraction.setter
+    def propellant_fraction(self, val : float): self.k_p = val
+    
+    # ? Structure fraction []
+    
+    @qtCore.Property(float)
+    def structure_fraction(self): return format(self.k_s)
+
+    @structure_fraction.setter
+    def structure_fraction(self, val : float): self.k_s = val
+    
     # ? Vacuum Specific Impulse [s]
     
     @qtCore.Property(float)
@@ -79,6 +95,14 @@ class Stage(qtCore.QObject, lm.Stage):
 
     @vacuum_thrust.setter
     def vacuum_thrust(self, val : float): self.F_vac = val
+    
+    # ? Thrust To Weight Ratio []
+    
+    @qtCore.Property(float)
+    def thrust_to_weight_ratio(self): return format(self.F_to_W)
+
+    @thrust_to_weight_ratio.setter
+    def thrust_to_weight_ratio(self, val : float): self.F_to_W = val
     
     # ? Propellant Mass Flow Rate [kg/s]
     

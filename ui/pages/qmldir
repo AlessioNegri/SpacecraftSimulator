@@ -1,6 +1,0 @@
-module Material.Extras
-
-PageAtmosphericEntry 1.0 PageAtmosphericEntry.qml
-PageInterplanetaryTransfer 1.0 PageInterplanetaryTransfer.qml
-PageOrbitPropagation 1.0 PageOrbitPropagation.qml
-PageOrbitTransfer 1.0 PageOrbitTransfer.qml

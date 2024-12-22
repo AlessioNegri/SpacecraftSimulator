@@ -2,15 +2,16 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import "../components"
+import "../components/dialog"
+import "../components/figure"
 
-// ? The DialogFigure class manages the generic figure dialog.
+// * The DialogFigure class manages the generic figure dialog.
 Dialog
 {
-    // ? Name of the backend figure canvas.
+    // * Name of the backend figure canvas.
     property string p_FigureCanvasName: ""
 
-    // ? Reference of the backend figure canvas.
+    // * Reference of the backend figure canvas.
     property var p_FigureCanvasModel: null
 
     // ! ----------------------------------------- ! //
@@ -18,19 +19,20 @@ Dialog
     id: root
     anchors.centerIn: parent
     modal: true
-    width: window.width * 0.8
-    height: window.height * 0.8
-    closePolicy: Popup.NoAutoClose
+    width: parent.width
+    height: parent.height
     font.pointSize: 12
+
+    Shortcut
+    {
+        sequence: StandardKey.Cancel
+        context: Qt.ApplicationShortcut
+        onActivated: close()
+    }
   
     header: DialogHeader
     {
         p_Title: root.title
-    }
-
-    footer: DialogFooter
-    {
-        p_ShowSaveButton: false
 
         function f_Close()
         {
@@ -38,10 +40,8 @@ Dialog
         }
     }
 
-    contentItem: Rectangle
+    contentItem: Item
     {
-        color: "transparent"
-
         Figure
         {
             p_ObjectName: p_FigureCanvasName

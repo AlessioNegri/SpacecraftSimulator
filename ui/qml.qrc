@@ -1,73 +1,96 @@
 <!DOCTYPE RCC><RCC version="1.0">
+
+    <!-- * QML / JS  -->
+
     <qresource prefix="/">
+
         <file>qtquickcontrols2.conf</file>
 
         <file>main.qml</file>
         <file>main.js</file>
 
-        <file>components/qmldir</file>
-        <file>components/DialogFooter.qml</file>
-        <file>components/DialogHeader.qml</file>
-        <file>components/DialogParameter.qml</file>
-        <file>components/Figure.qml</file>
-        <file>components/Maneuver.qml</file>
-        <file>components/MaterialProgressBar.qml</file>
-        <file>components/SettingsMenuItem.qml</file>
+        <!-- >>> COMPONENTS -->
 
-        <file>dialogs/qmldir</file>
+        <file>components/dialog/DialogHeader.qml</file>
+        <file>components/dialog/SettingsMenuItem.qml</file>
+
+        <file>components/figure/Figure.qml</file>
+
+        <file>components/material/MaterialIcon.qml</file>
+        <file>components/material/MaterialProgressBar.qml</file>
+        <file>components/material/MaterialScrollBar.qml</file>
+
+        <file>components/maneuver/Maneuver.qml</file>
+        <file>components/maneuver/ManeuverInfo.qml</file>
+
+        <file>components/page/PageHeader.qml</file>
+        <file>components/page/PageFooter.qml</file>
+        
+        <!-- >>> DIALOGS -->
+
         <file>dialogs/DialogAbout.qml</file>
         <file>dialogs/DialogFigure.qml</file>
         <file>dialogs/DialogMissionSettings.qml</file>
+        <file>dialogs/DialogSystemSettings.qml</file>
 
-        <file>dialogs/sections/js/SectionAtmosphericEntry.js</file>
-        <file>dialogs/sections/js/SectionCapsule.js</file>
-        <file>dialogs/sections/js/SectionInterplanetaryTransfer.js</file>
-        <file>dialogs/sections/js/SectionLauncher.js</file>
-        <file>dialogs/sections/js/SectionOrbitInsertion.js</file>
-        <file>dialogs/sections/js/SectionOrbitPropagation.js</file>
-        <file>dialogs/sections/js/SectionOrbitTransfer.js</file>
-        <file>dialogs/sections/js/SectionSpacecraft.js</file>
+        <file>dialogs/common/qmldir</file>
+        <file>dialogs/common/CelestialBody.qml</file>
+        <file>dialogs/common/CelestialBodyIcon.qml</file>
+        <file>dialogs/common/Planet.qml</file>
+        <file>dialogs/common/SectionHeader.qml</file>
+        <file>dialogs/common/SectionItemName.qml</file>
+        <file>dialogs/common/SectionItemValue.qml</file>
+        <file>dialogs/common/StateRepresentation.qml</file>
 
-        <file>dialogs/sections/qml/qmldir</file>
-        <file>dialogs/sections/qml/CelestialBody.qml</file>
-        <file>dialogs/sections/qml/CelestialBodyIcon.qml</file>
-        <file>dialogs/sections/qml/Planet.qml</file>
-        <file>dialogs/sections/qml/SectionAtmosphericEntry.qml</file>
-        <file>dialogs/sections/qml/SectionCapsule.qml</file>
-        <file>dialogs/sections/qml/SectionHeader.qml</file>
-        <file>dialogs/sections/qml/SectionInterplanetaryTransfer.qml</file>
-        <file>dialogs/sections/qml/SectionItemCaption.qml</file>
-        <file>dialogs/sections/qml/SectionItemName.qml</file>
-        <file>dialogs/sections/qml/SectionItemValue.qml</file>
-        <file>dialogs/sections/qml/SectionLauncher.qml</file>
-        <file>dialogs/sections/qml/SectionOrbitInsertion.qml</file>
-        <file>dialogs/sections/qml/SectionOrbitPropagation.qml</file>
-        <file>dialogs/sections/qml/SectionOrbitTransfer.qml</file>
-        <file>dialogs/sections/qml/SectionSpacecraft.qml</file>
-        <file>dialogs/sections/qml/StateRepresentation.qml</file>
+        <file>dialogs/mission/js/SectionAtmosphericEntry.js</file>
+        <file>dialogs/mission/js/SectionInterplanetaryTransfer.js</file>
+        <file>dialogs/mission/js/SectionOrbitInsertion.js</file>
+        <file>dialogs/mission/js/SectionOrbitPropagation.js</file>
+        <file>dialogs/mission/js/SectionOrbitTransfer.js</file>
+
+        <file>dialogs/mission/qml/SectionAtmosphericEntry.qml</file>
+        <file>dialogs/mission/qml/SectionInterplanetaryTransfer.qml</file>
+        <file>dialogs/mission/qml/SectionOrbitInsertion.qml</file>
+        <file>dialogs/mission/qml/SectionOrbitPropagation.qml</file>
+        <file>dialogs/mission/qml/SectionOrbitTransfer.qml</file>
+
+
+        <file>dialogs/system/js/SectionCapsule.js</file>
+        <file>dialogs/system/js/SectionLauncher.js</file>
+        <file>dialogs/system/js/SectionSpacecraft.js</file>
+
+        <file>dialogs/system/qml/SectionCapsule.qml</file>
+        <file>dialogs/system/qml/SectionLauncher.qml</file>
+        <file>dialogs/system/qml/SectionSpacecraft.qml</file>
+
+        <!-- >>> PAGES -->
 
         <file>pages/js/PageOrbitTransfer.js</file>
 
-        <file>pages/qml/ManeuverInfo.qml</file>
+        <file>pages/qml/PageAtmosphericEntry.qml</file>
+        <file>pages/qml/PageInterplanetaryTransfer.qml</file>
+        <file>pages/qml/PageOrbitInsertion.qml</file>
+        <file>pages/qml/PageOrbitPropagation.qml</file>
+        <file>pages/qml/PageOrbitTransfer.qml</file>
 
-        <file>pages/qmldir</file>
-        <file>pages/PageAtmosphericEntry.qml</file>
-        <file>pages/PageInterplanetaryTransfer.qml</file>
-        <file>pages/PageOrbitInsertion.qml</file>
-        <file>pages/PageOrbitPropagation.qml</file>
-        <file>pages/PageOrbitTransfer.qml</file>
     </qresource>
 
+    <!-- * IMAGES  -->
+
     <qresource prefix="/img">
+
         <file alias="icon.ico">../img/icon.ico</file>
         <file alias="icon.png">../img/icon.png</file>
+
     </qresource>
 
     <qresource prefix="/png">
+
         <file alias="aerodynamics.png">../img/png/aerodynamics.png</file>
         <file alias="arrival.png">../img/png/arrival.png</file>
         <file alias="atmospheric_entry.png">../img/png/atmospheric_entry.png</file>
         <file alias="capsule.png">../img/png/capsule.png</file>
+        <file alias="close.png">../img/png/close.png</file>
         <file alias="departure.png">../img/png/departure.png</file>
         <file alias="earth.png">../img/png/earth.png</file>
         <file alias="entry.png">../img/png/entry.png</file>
@@ -93,29 +116,37 @@
         <file alias="propulsion.png">../img/png/propulsion.png</file>
         <file alias="results.png">../img/png/results.png</file>
         <file alias="saturn.png">../img/png/saturn.png</file>
+        <file alias="save.png">../img/png/save.png</file>
         <file alias="solar_radiation_pressure.png">../img/png/solar_radiation_pressure.png</file>
         <file alias="spacecraft.png">../img/png/spacecraft.png</file>
         <file alias="stage.png">../img/png/stage.png</file>
         <file alias="structure.png">../img/png/structure.png</file>
         <file alias="sun.png">../img/png/sun.png</file>
+        <file alias="update.png">../img/png/update.png</file>
         <file alias="uranus.png">../img/png/uranus.png</file>
         <file alias="venus.png">../img/png/venus.png</file>
+
     </qresource>
 
     <qresource prefix="/svg">
+
         <file alias="add.svg">../img/svg/add.svg</file>
         <file alias="arrow_back.svg">../img/svg/arrow_back.svg</file>
         <file alias="arrow_drop_down.svg">../img/svg/arrow_drop_down.svg</file>
         <file alias="arrow_drop_up.svg">../img/svg/arrow_drop_up.svg</file>
         <file alias="arrow_forward.svg">../img/svg/arrow_forward.svg</file>
-        <file alias="lear.svg">../img/svg/clear.svg</file>
+        <file alias="clear.svg">../img/svg/clear.svg</file>
         <file alias="delete.svg">../img/svg/delete.svg</file>
         <file alias="error.svg">../img/svg/error.svg</file>
         <file alias="home.svg">../img/svg/home.svg</file>
         <file alias="pan_tool.svg">../img/svg/pan_tool.svg</file>
         <file alias="play_arrow.svg">../img/svg/play_arrow.svg</file>
+        <file alias="save.svg">../img/svg/save.svg</file>
         <file alias="settings.svg">../img/svg/settings.svg</file>
+        <file alias="update.svg">../img/svg/update.svg</file>
         <file alias="warning.svg">../img/svg/warning.svg</file>
         <file alias="zoom_in.svg">../img/svg/zoom_in.svg</file>
+
     </qresource>
+
 </RCC>

@@ -14,6 +14,8 @@ import scipy.integrate as ode
 
 sys.path.append(os.path.dirname(__file__))
 
+from scipy.optimize import newton
+
 from AstronomicalData import AstronomicalData, CelestialBody
 
 # --- STAGE CLASS 
@@ -30,9 +32,12 @@ class Stage:
         self.m_s        = 0.0   # * Structure + Engine Mass     [ kg ]
         self.m_p        = 0.0   # * Propellant Mass             [ kg ]
         self.m_payload  = 0.0   # * Payload Mass                [ kg ]
+        self.k_p        = 0.0   # * Propellant Fraction         [ ]
+        self.k_s        = 0.0   # * Structure Fraction          [ ]
         
         self.F_vac      = 0.0   # * Vacuum Thrust               [ kg * m / s^2 ]
         self.I_sp_vac   = 0.0   # * Vacuum Specific Impulse     [ s ]
+        self.F_to_W     = 0.0   # * Thrust To Weight Ratio      [ ]
         self.t_burn     = 0.0   # * Burn Time                   [ s ]
         self.csi        = 0.0   # * Thrust Angle                [ rad ]
         self.m_p_dot    = 0.0   # * Propellant Mass Flow Rate   [ kg /s ]
@@ -117,6 +122,10 @@ class Stage:
         self.m_0        = self.m_g + self.m_payload
         self.m_p_dot    = self.F_vac / (self.I_sp_vac * AstronomicalData.gravity(CelestialBody.EARTH))
         self.t_burn     = self.m_p / self.m_p_dot
+        
+        self.F_to_W     = self.F_vac / (self.m_0 * AstronomicalData.gravity(CelestialBody.EARTH))
+        self.k_p        = self.F_to_W / self.I_sp_vac
+        self.k_s        = self.m_s / self.m_p
         
         #print(f'm_p_dot = {self.m_p_dot}')
         #print(f't_burn = {self.t_burn}')
@@ -331,6 +340,289 @@ class Launcher:
         axes[1,1].set_ylabel("$dV/dt\;\;(g_E)$")
         axes[1,1].grid()
         axes[1,1].plot(t[1:], a / cls.g_E)
+    
+    #! SECTION 7.5
+    
+    @classmethod
+    def single_stage_vehicle_to_orbit(cls,
+                                      stage : Stage,
+                                      V_bo : float,
+                                      m_payload : float,
+                                      F_W_1 : float,
+                                      I_sp_1 : float,
+                                      gamma_avg_1 : float = 30,
+                                      k_s_1 : float = 0.062) -> Stage:
+        """Evaluate the stage parameters for a single stage vehicle to orbit
+
+        Args:
+            stage (Stage): Stage
+            V_bo (float): Final burnout velocity for orbit insertion [km/s]
+            m_payload (float): Payload mass [kg]
+            F_W_1 (float): Thrust to weight ratio
+            I_sp_1 (float): Specific impulse [s]
+            gamma_avg_1 (float, optional): Average value of flight path angle. Defaults to 30.
+            k_s_1 (float, optional): Structural fraction. Defaults to 0.062.
+
+        Returns:
+            Stage: Updated stage parameters
+        """
+        
+        
+        # >>> Propellant fraction
+        
+        k_p_1 = F_W_1 / I_sp_1
+        
+        # >>> Burnout time
+        
+        f = lambda t: V_bo + cls.g_E * I_sp_1 * np.log(1 - k_p_1 * t) + cls.g_E * t * np.sin(np.deg2rad(gamma_avg_1))
+        
+        f_dot = lambda t: - cls.g_E * I_sp_1 * k_p_1 * 1 / (1 - k_p_1 * t) + cls.g_E * np.sin(np.deg2rad(gamma_avg_1))
+        
+        t_bo_1 = newton(f, 1 / k_p_1 - 1, f_dot)
+        
+        # >>> Stack mass
+        
+        dt_1 = t_bo_1 - 0
+        
+        m_0_I = m_payload / (1 - (1 + k_s_1) * k_p_1 * dt_1)
+        
+        # >>> Thrust
+        
+        F_1 = F_W_1 * m_0_I * cls.g_E * 1e3
+        
+        # >>> Propellant mass
+        
+        m_p_1 = k_p_1 * dt_1 * m_0_I
+        
+        # >>> Structural mass
+        
+        m_s_1 = k_s_1 * m_p_1
+        
+        # >>> Update stage
+        
+        stage.mass(m_s_1, m_p_1, m_payload)
+        stage.motor(F_1, I_sp_1, stage.csi)
+        stage.calc()
+        
+        return stage
+    
+    @classmethod
+    def two_stage_vehicle_to_orbit(cls,
+                                   stage_1 : Stage,
+                                   stage_2 : Stage,
+                                   V_bo : float,
+                                   m_payload : float,
+                                   t_bo_1 : float,
+                                   F_W : list,
+                                   I_sp : list,
+                                   gamma_avg : list = [30, 30],
+                                   k_s : list = [0.062, 0.12]) -> list:
+        """Evaluate the stages parameters for a two-stage vehicle to orbit
+
+        Args:
+            stage_1 (Stage): Stage 1
+            stage_2 (Stage): Stage 2
+            V_bo (float): Final burnout velocity for orbit insertion [km/s]
+            m_payload (float): Payload mass [kg]
+            t_bo_1 (float): Burnout time for the first stage [s]
+            F_W (list): List of two thrust to weight ratios
+            I_sp (list): List of two specific impulses [s]
+            gamma_avg (list, optional): List of two average values of flight path angle. Defaults to [30, 30].
+            k_s (list, optional): List of two structural fractions. Defaults to [0.062, 0.12].
+
+        Returns:
+            list: List of updated stages parameters
+        """
+        
+        # ! Check
+        
+        if len(F_W) != 2 or len(I_sp) != 2 or len(gamma_avg) != 2 or len(k_s) != 2: return stage_1, stage_2
+        
+        F_W_1, F_W_2 = F_W
+        
+        I_sp_1, I_sp_2 = I_sp
+        
+        gamma_avg_1, gamma_avg_2 = gamma_avg
+        
+        k_s_1, k_s_2 = k_s
+        
+        # >>> Propellant fraction
+        
+        k_p_1 = F_W_1 / I_sp_1
+        
+        k_p_2 = F_W_2 / I_sp_2
+        
+        # >>> Burnout velocity
+        
+        V_bo_1 = - cls.g_E * I_sp_1 * np.log(1 - k_p_1 * t_bo_1) - cls.g_E * t_bo_1 * np.sin(np.deg2rad(gamma_avg_1))
+        
+        # >>> Burnout time
+        
+        f = lambda t: V_bo + cls.g_E * I_sp_2 * np.log(1 - k_p_2 * (t - t_bo_1)) + cls.g_E * (t - t_bo_1) * np.sin(np.deg2rad(gamma_avg_2)) - V_bo_1
+        
+        f_dot = lambda t: - cls.g_E * I_sp_2 * k_p_2 * 1 / (1 - k_p_2 * (t - t_bo_1)) + cls.g_E * np.sin(np.deg2rad(gamma_avg_2))
+        
+        t_bo_2 = newton(f, 1 / k_p_2 + t_bo_1 - 1, f_dot)
+        
+        # >>> Stack mass
+        
+        dt_1 = t_bo_1 - 0
+        
+        dt_2 = t_bo_2 - t_bo_1
+        
+        m_0_I = m_payload / ( (1 - (1 + k_s_1) * k_p_1 * dt_1) * (1 - (1 + k_s_2) * k_p_2 * dt_2) )
+        
+        m_0_II = m_payload / (1 - (1 + k_s_2) * k_p_2 * dt_2)
+        
+        # >>> Thrust
+        
+        F_1 = F_W_1 * m_0_I * cls.g_E * 1e3
+        
+        F_2 = F_W_2 * m_0_II * cls.g_E * 1e3
+        
+        # >>> Propellant mass
+        
+        m_p_1 = k_p_1 * dt_1 * m_0_I
+        
+        m_p_2 = k_p_2 * dt_2 * m_0_II
+        
+        # >>> Structural mass
+        
+        m_s_1 = k_s_1 * m_p_1
+        
+        m_s_2 = k_s_2 * m_p_2
+        
+        # >>> Update stage
+        
+        stage_1.mass(m_s_1, m_p_1, m_0_II)
+        stage_1.motor(F_1, I_sp_1, stage_1.csi)
+        stage_1.calc()
+        
+        stage_2.mass(m_s_2, m_p_2, m_payload)
+        stage_2.motor(F_2, I_sp_2, stage_2.csi)
+        stage_2.calc()
+        
+        return stage_1, stage_2
+    
+    @classmethod
+    def three_stage_vehicle_to_orbit(cls,
+                                     stage_1 : Stage,
+                                     stage_2 : Stage,
+                                     stage_3 : Stage,
+                                     V_bo : float,
+                                     m_payload : float,
+                                     t_bo_1 : float,
+                                     t_bo_2 : float,
+                                     F_W : list,
+                                     I_sp : list,
+                                     gamma_avg : list = [30, 30, 30],
+                                     k_s : list = [0.062, 0.12, 0.12]) -> list:
+        """Evaluate the stages parameters for a three-stage vehicle to orbit
+
+        Args:
+            stage_1 (Stage): Stage 1
+            stage_2 (Stage): Stage 2
+            stage_3 (Stage): Stage 3
+            V_bo (float): Final burnout velocity for orbit insertion [km/s]
+            m_payload (float): Payload mass [kg]
+            t_bo_1 (float): Burnout time for the first stage [s]
+            t_bo_2 (float): Burnout time for the second stage [s]
+            F_W (list): List of three thrust to weight ratios
+            I_sp (list): List of three specific impulses [s]
+            gamma_avg (list, optional): List of three average values of flight path angle. Defaults to [30, 30, 30].
+            k_s (list, optional): List of three structural fractions. Defaults to [0.062, 0.12, 0.12].
+
+        Returns:
+            list: List of updated stages parameters
+        """
+        
+        # ! Check
+        
+        if len(F_W) != 3 or len(I_sp) != 3 or len(gamma_avg) != 3 or len(k_s) != 3: return stage_1, stage_2, stage_3
+        
+        F_W_1, F_W_2, F_W_3 = F_W
+        
+        I_sp_1, I_sp_2, I_sp_3 = I_sp
+        
+        gamma_avg_1, gamma_avg_2, gamma_avg_3 = gamma_avg
+        
+        k_s_1, k_s_2, k_s_3 = k_s
+        
+        # >>> Propellant fraction
+        
+        k_p_1 = F_W_1 / I_sp_1
+        
+        k_p_2 = F_W_2 / I_sp_2
+        
+        k_p_3 = F_W_3 / I_sp_3
+        
+        # >>> Burnout velocity
+        
+        V_bo_1 = - cls.g_E * I_sp_1 * np.log(1 - k_p_1 * t_bo_1) - cls.g_E * t_bo_1 * np.sin(np.deg2rad(gamma_avg_1))
+        
+        V_bo_2 = - cls.g_E * I_sp_2 * np.log(1 - k_p_2 * (t_bo_2 - t_bo_1)) - cls.g_E * (t_bo_2 - t_bo_1) * np.sin(np.deg2rad(gamma_avg_2)) + V_bo_1
+        
+        # >>> Burnout time
+        
+        f = lambda t: V_bo + cls.g_E * I_sp_3 * np.log(1 - k_p_3 * (t - t_bo_2)) + cls.g_E * (t - t_bo_2) * np.sin(np.deg2rad(gamma_avg_3)) - V_bo_2
+        
+        f_dot = lambda t: - cls.g_E * I_sp_3 * k_p_3 * 1 / (1 - k_p_3 * (t - t_bo_2)) + cls.g_E * np.sin(np.deg2rad(gamma_avg_3))
+        
+        t_bo_3 = newton(f, 1 / k_p_3 + t_bo_2 - 1, f_dot)
+        
+        # >>> Stack mass
+        
+        dt_1 = t_bo_1 - 0
+        
+        dt_2 = t_bo_2 - t_bo_1
+        
+        dt_3 = t_bo_3 - t_bo_2
+        
+        m_0_I = m_payload / ( (1 - (1 + k_s_1) * k_p_1 * dt_1) * (1 - (1 + k_s_2) * k_p_2 * dt_2) * (1 - (1 + k_s_3) * k_p_3 * dt_3) )
+        
+        m_0_II = m_payload / ( (1 - (1 + k_s_2) * k_p_2 * dt_2) * (1 - (1 + k_s_3) * k_p_3 * dt_3) )
+        
+        m_0_III = m_payload / (1 - (1 + k_s_3) * k_p_3 * dt_3)
+        
+        # >>> Thrust
+        
+        F_1 = F_W_1 * m_0_I * cls.g_E * 1e3
+        
+        F_2 = F_W_2 * m_0_II * cls.g_E * 1e3
+        
+        F_3 = F_W_3 * m_0_III * cls.g_E * 1e3
+        
+        # >>> Propellant mass
+        
+        m_p_1 = k_p_1 * dt_1 * m_0_I
+        
+        m_p_2 = k_p_2 * dt_2 * m_0_II
+        
+        m_p_3 = k_p_3 * dt_3 * m_0_III
+        
+        # >>> Structural mass
+        
+        m_s_1 = k_s_1 * m_p_1
+        
+        m_s_2 = k_s_2 * m_p_2
+        
+        m_s_3 = k_s_3 * m_p_3
+        
+        # >>> Update stage
+        
+        stage_1.mass(m_s_1, m_p_1, m_0_II)
+        stage_1.motor(F_1, I_sp_1, stage_1.csi)
+        stage_1.calc()
+        
+        stage_2.mass(m_s_2, m_p_2, m_0_III)
+        stage_2.motor(F_2, I_sp_2, stage_2.csi)
+        stage_2.calc()
+        
+        stage_3.mass(m_s_3, m_p_3, m_payload)
+        stage_3.motor(F_3, I_sp_3, stage_3.csi)
+        stage_3.calc()
+        
+        return stage_1, stage_2, stage_3
 
 if __name__ == '__main__':
     
@@ -357,8 +649,41 @@ if __name__ == '__main__':
 
     res = Launcher.simulate_launch(np.array([0, np.deg2rad(89.85), 0, 0, 0, 0, 0]), h_t=130, t_f=stage_1.t_burn)
     
-    Launcher.plot_launch(res['y'], res['t'])
+    #Launcher.plot_launch(res['y'], res['t'])
     
     print('-' * 40, '\n')
     
-    plt.show()
+    print('EXAMPLE 7.2\n')
+    
+    stage_1 = Stage()
+    
+    stage_1 = Launcher.single_stage_vehicle_to_orbit(stage_1, 7.909, 10_680, 1.3, 450)
+    
+    print(stage_1.m_0, stage_1.m_p, stage_1.m_s, stage_1.m_payload, stage_1.t_burn, stage_1.F_vac)
+    
+    print('-' * 40, '\n')
+    
+    print('EXAMPLE 7.3\n')
+    
+    stage_2 = Stage()
+    
+    stage_1, stage_2 = Launcher.two_stage_vehicle_to_orbit(stage_1, stage_2, 7.909, 10_680, 200, [1.3, 1.3], [450, 450])
+    
+    print(stage_1.m_0, stage_1.m_p, stage_1.m_s, stage_1.m_payload, stage_1.t_burn, stage_1.F_vac)
+    print(stage_2.m_0, stage_2.m_p, stage_2.m_s, stage_2.m_payload, stage_2.t_burn, stage_2.F_vac)
+    
+    print('-' * 40, '\n')
+    
+    print('EXAMPLE 7.4\n')
+    
+    stage_3 = Stage()
+    
+    stage_1, stage_2, stage_3 = Launcher.three_stage_vehicle_to_orbit(stage_1, stage_2, stage_3, 7.909, 10_680, 200, 345, [1.3, 1.3, 1.3], [450, 450, 450])
+    
+    print(stage_1.m_0, stage_1.m_p, stage_1.m_s, stage_1.m_payload, stage_1.t_burn, stage_1.F_vac)
+    print(stage_2.m_0, stage_2.m_p, stage_2.m_s, stage_2.m_payload, stage_2.t_burn, stage_2.F_vac)
+    print(stage_3.m_0, stage_3.m_p, stage_3.m_s, stage_3.m_payload, stage_3.t_burn, stage_3.F_vac)
+    
+    print('-' * 40, '\n')
+    
+    #plt.show()

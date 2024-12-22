@@ -2,11 +2,12 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import "sections/qml"
+import "common"
+import "mission/qml"
+import "../components/dialog"
+import "../components/material"
 
-import "../components"
-
-// * The DialogSpacecraft class manages the spacecraft dialog.
+// * The DialogMissionSettings class manages the mission settings dialog.
 Dialog
 {
     // * Menu item source icon.
@@ -15,12 +16,6 @@ Dialog
     // * Loads all the sections.
     function load()
     {
-        _section_launcher_.load()
-
-        _section_spacecraft_.load()
-
-        _section_capsule_.load()
-
         _section_orbit_insertion_.load()
 
         _section_orbit_transfer_.load()
@@ -53,10 +48,7 @@ Dialog
     header: DialogHeader
     {
         p_Title: "Mission Settings"
-    }
-
-    footer: DialogFooter
-    {
+        p_ShowSaveButton: true
         p_ShowUpdateButton: true
 
         function f_Close()
@@ -73,12 +65,6 @@ Dialog
 
         function f_Update()
         {
-            _section_launcher_.save()
-
-            _section_spacecraft_.save()
-
-            _section_capsule_.save()
-
             _section_orbit_insertion_.save()
 
             _section_orbit_transfer_.save()
@@ -102,9 +88,19 @@ Dialog
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.bottom: parent.bottom
-            width: _menu_.width + 20
-            contentWidth: _menu_.width + 20
+            width: _menu_.width// + 20
+            contentWidth: _menu_.width// + 20
             contentHeight: _menu_.height
+
+            background: Rectangle
+            {
+                color: "#209e9e9e"
+                radius: 10
+                border.color: Material.color(Material.Grey)
+                border.width: 2
+            }
+
+            ScrollBar.vertical: MaterialScrollBar { orientation: Qt.Vertical }
 
             ColumnLayout
             {
@@ -114,8 +110,9 @@ Dialog
 
                 SettingsMenuItem
                 {
-                    p_Icon: "/png/launcher.png"
-                    p_Text: "Launcher"
+                    p_Icon: "/png/orbit_insertion.png"
+                    p_Text: "Orbit Insertion"
+                    p_Color: Material.color(Material.LightBlue)
                     p_Selected: p_CurrentIndex === 0
                     
                     function f_Click() { p_CurrentIndex = 0 }
@@ -123,8 +120,9 @@ Dialog
 
                 SettingsMenuItem
                 {
-                    p_Icon: "/png/spacecraft.png"
-                    p_Text: "Spacecraft"
+                    p_Icon: "/png/orbit_transfer.png"
+                    p_Text: "Orbit Transfer"
+                    p_Color: Material.color(Material.LightBlue)
                     p_Selected: p_CurrentIndex === 1
                     
                     function f_Click() { p_CurrentIndex = 1 }
@@ -132,8 +130,9 @@ Dialog
 
                 SettingsMenuItem
                 {
-                    p_Icon: "/png/capsule.png"
-                    p_Text: "Re-Entry Capsule"
+                    p_Icon: "/png/orbit_propagation.png"
+                    p_Text: "Orbit Propagation"
+                    p_Color: Material.color(Material.LightBlue)
                     p_Selected: p_CurrentIndex === 2
                     
                     function f_Click() { p_CurrentIndex = 2 }
@@ -141,9 +140,9 @@ Dialog
 
                 SettingsMenuItem
                 {
-                    p_Icon: "/png/orbit_insertion.png"
-                    p_Text: "Orbit Insertion"
-                    p_MissionType: true
+                    p_Icon: "/png/interplanetary_transfer.png"
+                    p_Text: "Interplanetary Transfer"
+                    p_Color: Material.color(Material.LightBlue)
                     p_Selected: p_CurrentIndex === 3
                     
                     function f_Click() { p_CurrentIndex = 3 }
@@ -151,42 +150,12 @@ Dialog
 
                 SettingsMenuItem
                 {
-                    p_Icon: "/png/orbit_transfer.png"
-                    p_Text: "Orbit Transfer"
-                    p_MissionType: true
+                    p_Icon: "/png/atmospheric_entry.png"
+                    p_Text: "Atmospheric Entry"
+                    p_Color: Material.color(Material.LightBlue)
                     p_Selected: p_CurrentIndex === 4
                     
                     function f_Click() { p_CurrentIndex = 4 }
-                }
-
-                SettingsMenuItem
-                {
-                    p_Icon: "/png/orbit_propagation.png"
-                    p_Text: "Orbit Propagation"
-                    p_MissionType: true
-                    p_Selected: p_CurrentIndex === 5
-                    
-                    function f_Click() { p_CurrentIndex = 5 }
-                }
-
-                SettingsMenuItem
-                {
-                    p_Icon: "/png/interplanetary_transfer.png"
-                    p_Text: "Interplanetary Transfer"
-                    p_MissionType: true
-                    p_Selected: p_CurrentIndex === 6
-                    
-                    function f_Click() { p_CurrentIndex = 6 }
-                }
-
-                SettingsMenuItem
-                {
-                    p_Icon: "/png/atmospheric_entry.png"
-                    p_Text: "Atmospheric Entry"
-                    p_MissionType: true
-                    p_Selected: p_CurrentIndex === 7
-                    
-                    function f_Click() { p_CurrentIndex = 7 }
                 }
             }
         }
@@ -197,23 +166,8 @@ Dialog
             anchors.top: parent.top
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            width: parent.width - _menu_scroll_view_.width
+            width: parent.width - _menu_scroll_view_.width - 20
             currentIndex: p_CurrentIndex
-
-            SectionLauncher
-            {
-                id: _section_launcher_
-            }
-
-            SectionSpacecraft
-            {
-                id: _section_spacecraft_
-            }
-
-            SectionCapsule
-            {
-                id: _section_capsule_
-            }
 
             SectionOrbitInsertion
             {

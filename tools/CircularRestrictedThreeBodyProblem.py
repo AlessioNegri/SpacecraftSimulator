@@ -97,7 +97,7 @@ class CircularRestrictedThreeBodyProblem():
         
         # ? Lagrange points
         
-        f  = lambda csi, pi_2: (1 - pi_2) / np.abs(csi + pi_2)**3 * (csi + pi_2) + pi_2 / np.abs(csi + pi_2 - 1)**3 * (csi + pi_2 - 1) - csi
+        f = lambda csi, pi_2: (1 - pi_2) / np.abs(csi + pi_2)**3 * (csi + pi_2) + pi_2 / np.abs(csi + pi_2 - 1)**3 * (csi + pi_2 - 1) - csi
         
         csi_1 = newton(f, 0.8369, args=(parameters.pi_2, ))
         csi_2 = newton(f, 1.156, args=(parameters.pi_2, ))
