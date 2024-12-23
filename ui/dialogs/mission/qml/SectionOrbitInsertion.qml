@@ -208,6 +208,14 @@ ScrollView
                     placeholderText: "Burnout Time - Stage 2 [s]"
                 }
             }
+
+            Button
+            {
+                text: "Calculate Staging"
+                font.bold: true
+                Material.background: "#FF5722"
+                onClicked: __MissionOrbitInsertion.calculate_staging()
+            }
         }
     }
 }

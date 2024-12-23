@@ -120,11 +120,13 @@ By clicking on a section, the right part of the dialog populates with the corres
 
 ## 3 Orbit Insertion
 
-The first phase of a mission is to bring the spacecraft to space from Earth. This can be done thanks to a launcher. It is possible to simulate up to 3 **stages** in series activating them through the switch buttons. The **pitchover conditions** establish the altitude at which the rocket starts turning with a flight path angle slightly different from the 90 degress at launch.
+The first phase of a mission is to bring the spacecraft to space from Earth. This can be done thanks to a launcher. It is possible to simulate up to 3 **stages** in series activating them through the switch buttons. The **pitchover conditions** establish the altitude at which the rocket starts turning with a flight path angle slightly different from the 90 degress at launch. The **circular parking orbit conditions** allow the user to select the altitude of the target circular orbit, giving the value of the velocity for it.
+
+Each stage is characterized by some parameters used by the *Calculate Staging* button to make an initial estimate for the parameters the user find on the *System Settings*.
 
 <p align="center"><img src="./images/orbit_insertion_1.png" width="100%"></p>
 
-Under the menu item `Missions / Orbit Insertion / Simulation`, the launcher trajectory and data can be visualized and analyzed from the main window.
+Under the menu item `Missions / Orbit Insertion / Simulation`, the launcher trajectory and data can be visualized and analyzed from the main window. It can be seen, from the example below, that the launcher reached the target altitude with the desired velocity, with a small flight path angle. In addition, the usage of three stages allow keeping the acceleration at small values.
 
 <p align="center"><img src="./images/orbit_insertion.png" width="100%"></p>
 

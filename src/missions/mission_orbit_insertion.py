@@ -29,10 +29,10 @@ class MissionOrbitInsertion(qtCore.QObject):
     # ? Pitchover Flight Path Angle [deg]
     
     @qtCore.Property(float)
-    def pitchover_flight_path_angle(self): return format(self._pitchover_flight_path_angle)
+    def pitchover_flight_path_angle(self): return format(self._pitchover_flight_path_angle, deg=True)
     
     @pitchover_flight_path_angle.setter
-    def pitchover_flight_path_angle(self, val : float): self._pitchover_flight_path_angle = val
+    def pitchover_flight_path_angle(self, val : float): self._pitchover_flight_path_angle = np.deg2rad(val)
     
     # ? Circular parking orbit height [km]
     
@@ -70,6 +70,30 @@ class MissionOrbitInsertion(qtCore.QObject):
     @use_stage_1.setter
     def use_stage_1(self, val : bool): self._use_stage_1 = val
     
+    # ? Thrust To Weight Ratio - Stage 1 []
+    
+    @qtCore.Property(float)
+    def thrust_to_weight_ratio_1(self): return format(self._thrust_to_weight_ratio_1)
+    
+    @thrust_to_weight_ratio_1.setter
+    def thrust_to_weight_ratio_1(self, val : float): self._thrust_to_weight_ratio_1 = val
+    
+    # ? Average Flight Path Angle - Stage 1 [deg]
+    
+    @qtCore.Property(float)
+    def average_flight_path_angle_1(self): return format(self._average_flight_path_angle_1, deg=True)
+    
+    @average_flight_path_angle_1.setter
+    def average_flight_path_angle_1(self, val : float): self._average_flight_path_angle_1 = np.deg2rad(val)
+    
+    # ? Structure Ratio - Stage 1 []
+    
+    @qtCore.Property(float)
+    def structure_ratio_1(self): return format(self._structure_ratio_1)
+    
+    @structure_ratio_1.setter
+    def structure_ratio_1(self, val : float): self._structure_ratio_1 = val
+    
     # ? Use Stage 2
     
     @qtCore.Property(bool)
@@ -78,6 +102,38 @@ class MissionOrbitInsertion(qtCore.QObject):
     @use_stage_2.setter
     def use_stage_2(self, val : bool): self._use_stage_2 = val
     
+    # ? Thrust To Weight Ratio - Stage 2 []
+    
+    @qtCore.Property(float)
+    def thrust_to_weight_ratio_2(self): return format(self._thrust_to_weight_ratio_2)
+    
+    @thrust_to_weight_ratio_2.setter
+    def thrust_to_weight_ratio_2(self, val : float): self._thrust_to_weight_ratio_2 = val
+    
+    # ? Average Flight Path Angle - Stage 2 [deg]
+    
+    @qtCore.Property(float)
+    def average_flight_path_angle_2(self): return format(self._average_flight_path_angle_2, deg=True)
+    
+    @average_flight_path_angle_2.setter
+    def average_flight_path_angle_2(self, val : float): self._average_flight_path_angle_2 = np.deg2rad(val)
+    
+    # ? Structure Ratio - Stage 2 []
+    
+    @qtCore.Property(float)
+    def structure_ratio_2(self): return format(self._structure_ratio_2)
+    
+    @structure_ratio_2.setter
+    def structure_ratio_2(self, val : float): self._structure_ratio_2 = val
+    
+    # ? Burnout Time - Stage 1 [s]
+    
+    @qtCore.Property(float)
+    def burnout_time_1(self): return format(self._burnout_time_1)
+    
+    @burnout_time_1.setter
+    def burnout_time_1(self, val : float): self._burnout_time_1 = val
+    
     # ? Use Stage 3
     
     @qtCore.Property(bool)
@@ -85,6 +141,38 @@ class MissionOrbitInsertion(qtCore.QObject):
     
     @use_stage_3.setter
     def use_stage_3(self, val : bool): self._use_stage_3 = val
+    
+    # ? Thrust To Weight Ratio - Stage 3 []
+    
+    @qtCore.Property(float)
+    def thrust_to_weight_ratio_3(self): return format(self._thrust_to_weight_ratio_3)
+    
+    @thrust_to_weight_ratio_3.setter
+    def thrust_to_weight_ratio_3(self, val : float): self._thrust_to_weight_ratio_3 = val
+    
+    # ? Average Flight Path Angle - Stage 3 [deg]
+    
+    @qtCore.Property(float)
+    def average_flight_path_angle_3(self): return format(self._average_flight_path_angle_3, deg=True)
+    
+    @average_flight_path_angle_3.setter
+    def average_flight_path_angle_3(self, val : float): self._average_flight_path_angle_3 = np.deg2rad(val)
+    
+    # ? Structure Ratio - Stage 3 []
+    
+    @qtCore.Property(float)
+    def structure_ratio_3(self): return format(self._structure_ratio_3)
+    
+    @structure_ratio_3.setter
+    def structure_ratio_3(self, val : float): self._structure_ratio_3 = val
+    
+    # ? Burnout Time - Stage 2 [s]
+    
+    @qtCore.Property(float)
+    def burnout_time_2(self): return format(self._burnout_time_2)
+    
+    @burnout_time_2.setter
+    def burnout_time_2(self, val : float): self._burnout_time_2 = val
     
     # ? Stage 1
     
@@ -134,15 +222,18 @@ class MissionOrbitInsertion(qtCore.QObject):
         # ? Entry Condition
         
         self._pitchover_height                  : float = 130                                           # * Pitchover Height                [ m ]
-        self._pitchover_flight_path_angle       : float = 89.85                                         # * Pitchover Flight Path Angle     [ deg ]
-        self._circular_parking_orbit_height     : float = 300                                           # * Circular Parking Orbit Height   [ km ]
-        self._circular_parking_orbit_velocity   : float = np.sqrt(Launcher.k / (Launcher.R_E + 300))    # * Circular Parking Orbit Velocity [ km / s ]
-        self._final_integration_time            : float = 300                                           # * Final Integration Time          [ s ]
+        self._pitchover_flight_path_angle       : float = np.deg2rad(89.85)                             # * Pitchover Flight Path Angle     [ deg ]
+        self._circular_parking_orbit_height     : float = 0                                             # * Circular Parking Orbit Height   [ km ]
+        self._circular_parking_orbit_velocity   : float = np.sqrt(Launcher.k / (Launcher.R_E + 0))      # * Circular Parking Orbit Velocity [ km / s ]
+        self._final_integration_time            : float = 800                                           # * Final Integration Time          [ s ]
         
         # ? Stage 1
         
-        self._use_stage_1   = True
-        self._stage_1       = Stage()
+        self._use_stage_1                   = True
+        self._thrust_to_weight_ratio_1      = 1.3
+        self._average_flight_path_angle_1   = np.deg2rad(30)
+        self._structure_ratio_1             = 0.062
+        self._stage_1                       = Stage()
         
         #self._stage_1.mass(68_000 / 15, 68_000 - 68_000 / 15, 0)
         #self._stage_1.motor(933.913 * 1e3, 390, 0.0)
@@ -150,33 +241,41 @@ class MissionOrbitInsertion(qtCore.QObject):
         #self._stage_1.calc()
         
         self._stage_1.mass(13_393, 141_634, 54_035)
-        self._stage_1.motor(4_323 * 1e3, 279, 0.0)
-        self._stage_1.aerodynamics(3.4, 0.5, 0.0)
+        self._stage_1.motor(4_323 * 1e3, 450, 0.0)#279
+        self._stage_1.aerodynamics(3.4, 0.0, 0.0) #0.5
         self._stage_1.calc()
         
         # ? Stage 2
         
-        self._use_stage_2   = True
-        self._stage_2       = Stage()
+        self._use_stage_2                   = True
+        self._thrust_to_weight_ratio_2      = 1.3
+        self._average_flight_path_angle_2   = np.deg2rad(30)
+        self._structure_ratio_2             = 0.12
+        self._burnout_time_1                = 200
+        self._stage_2                       = Stage()
         
         self._stage_2.mass(4_238, 36_239, 13_558)
-        self._stage_2.motor(1_304 * 1e3, 293.5, 0.0)
-        self._stage_2.aerodynamics(2.4, 0.5, 0.0)
+        self._stage_2.motor(1_304 * 1e3, 450, 0.0)#293.5
+        self._stage_2.aerodynamics(2.4, 0.0, 0.0)#0.5
         self._stage_2.calc()
         
         # ? Stage 3
         
-        self._use_stage_3   = True
-        self._stage_3       = Stage()
+        self._use_stage_3                   = True
+        self._thrust_to_weight_ratio_3      = 1.3
+        self._average_flight_path_angle_3   = np.deg2rad(30)
+        self._structure_ratio_3             = 0.12
+        self._burnout_time_2                = 345
+        self._stage_3                       = Stage()
         
         self._stage_3.mass(1_433, 10_567, 1_558)
-        self._stage_3.motor(317 * 1e3, 295.9, 0.0)
-        self._stage_3.aerodynamics(1.9, 0.5, 0.0)
+        self._stage_3.motor(317 * 1e3, 450, 0.0)#295.9
+        self._stage_3.aerodynamics(1.9, 0.0, 0.0)#0.5
         self._stage_3.calc()
         
         # ? Payload
         
-        self._payload_mass = 1_558  # * Payload Mass [kg]
+        self._payload_mass = 10_680 # 1_558  # * Payload Mass [kg]
         
         # ? Figure Canvas
         
@@ -257,7 +356,7 @@ class MissionOrbitInsertion(qtCore.QObject):
         
         # * Integration Parameters
         
-        y_0 = np.array([0, np.deg2rad(self.pitchover_flight_path_angle), 0, 0, 0, 0, 0])
+        y_0 = np.array([0, self._pitchover_flight_path_angle, 0, 0, 0, 0, 0])
         h_t = self.pitchover_height
         t_0 = 0
         t_f = self.final_integration_time
@@ -407,15 +506,51 @@ class MissionOrbitInsertion(qtCore.QObject):
         
         if self._use_stage_1 and self._use_stage_2 and self._use_stage_3:
             
-            Launcher.three_stage_vehicle_to_orbit()
+            self._stage_1, self._stage_2, self._stage_3 = Launcher.three_stage_vehicle_to_orbit(self._stage_1,
+                                                                                                self._stage_2,
+                                                                                                self._stage_3,
+                                                                                                self._circular_parking_orbit_velocity,
+                                                                                                self._payload_mass,
+                                                                                                self._burnout_time_1,
+                                                                                                self._burnout_time_2,
+                                                                                                [self._thrust_to_weight_ratio_1,
+                                                                                                 self._thrust_to_weight_ratio_2,
+                                                                                                 self._thrust_to_weight_ratio_3],
+                                                                                                [self._stage_1.I_sp_vac,
+                                                                                                 self._stage_2.I_sp_vac,
+                                                                                                 self._stage_3.I_sp_vac],
+                                                                                                [np.rad2deg(self._average_flight_path_angle_1),
+                                                                                                 np.rad2deg(self._average_flight_path_angle_2),
+                                                                                                 np.rad2deg(self._average_flight_path_angle_3)],
+                                                                                                [self._structure_ratio_1,
+                                                                                                 self._structure_ratio_2,
+                                                                                                 self._structure_ratio_3])
         
         elif self._use_stage_1 and self._use_stage_2 and not self._use_stage_3:
             
-            Launcher.two_stage_vehicle_to_orbit()
+            self._stage_1, self._stage_2 = Launcher.two_stage_vehicle_to_orbit(self._stage_1,
+                                                                               self._stage_2,
+                                                                               self._circular_parking_orbit_velocity,
+                                                                               self._payload_mass,
+                                                                               self._burnout_time_1,
+                                                                               [self._thrust_to_weight_ratio_1,
+                                                                                self._thrust_to_weight_ratio_2],
+                                                                               [self._stage_1.I_sp_vac,
+                                                                                self._stage_2.I_sp_vac],
+                                                                               [np.rad2deg(self._average_flight_path_angle_1),
+                                                                                np.rad2deg(self._average_flight_path_angle_2)],
+                                                                               [self._structure_ratio_1,
+                                                                                self._structure_ratio_2])
         
         elif self._use_stage_1 and not self._use_stage_2 and not self._use_stage_3:
             
-            Launcher.single_stage_vehicle_to_orbit()
+            self._stage_1 = Launcher.single_stage_vehicle_to_orbit(self._stage_1,
+                                                                   self._circular_parking_orbit_velocity,
+                                                                   self._payload_mass,
+                                                                   self._thrust_to_weight_ratio_1,
+                                                                   self._stage_1.I_sp_vac,
+                                                                   np.rad2deg(self._average_flight_path_angle_1),
+                                                                   self._structure_ratio_1)
     
     # --- PRIVATE METHODS 
     
