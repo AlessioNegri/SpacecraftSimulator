@@ -1,4 +1,4 @@
-""" QmlLog.py: Javascript console for QML """
+""" qml_log.py: Javascript console for QML """
 
 __author__      = "Alessio Negri"
 __license__     = "LGPL v3"

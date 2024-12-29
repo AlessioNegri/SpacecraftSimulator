@@ -16,7 +16,7 @@ Rectangle
     property bool p_Hide: false
 
     // * Color.
-    property color p_Color: Material.color(Material.Amber)
+    property color p_Color: "#93F9D8"
 
     // ! ----------------------------------------- ! //
 
@@ -63,7 +63,7 @@ Rectangle
         {
             width: 54
             height: 54
-            color: "#FFFFFF"
+            color: "#B0BEC5"//"#4093F9D8"
             radius: width / 2
             border.width: 3
             border.color: p_Color
@@ -98,7 +98,7 @@ Rectangle
             {
                 anchors.fill: parent
                 source: parent
-                color: Material.color(Material.Amber)
+                color: p_Color
             }
         }
     }

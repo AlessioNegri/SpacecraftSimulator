@@ -5,14 +5,13 @@ __license__     = "LGPL v3"
 __maintainer__  = "Alessio Negri"
 
 import PySide6.QtCore as qtCore
-import PySide6.QtQml as qtQml
 
 import tools.launch_mechanics as lm
 
 from common import format
 
 class Stage(qtCore.QObject, lm.Stage):
-    """This class describes the properties and parameters of a Launcher Stage"""
+    """This class describes the properties and parameters of a Launcher's Stage"""
     
     # --- PROPERTIES 
     
@@ -148,9 +147,6 @@ class Stage(qtCore.QObject, lm.Stage):
     
     def __init__(self) -> None:
         """Constructor
-
-        Args:
-            engine (qtQml.QQmlApplicationEngine): QML engine
         """
         
         qtCore.QObject.__init__(self)

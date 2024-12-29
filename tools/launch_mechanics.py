@@ -110,7 +110,6 @@ class Stage:
         """
         
         self.D      = D
-        self.S      = np.pi * D**2 / 4
         self.C_D    = C_D
         self.C_L    = C_L
     
@@ -120,12 +119,14 @@ class Stage:
         
         self.m_g        = self.m_s + self.m_p
         self.m_0        = self.m_g + self.m_payload
-        self.m_p_dot    = self.F_vac / (self.I_sp_vac * AstronomicalData.gravity(CelestialBody.EARTH))
-        self.t_burn     = self.m_p / self.m_p_dot
+        self.m_p_dot    = self.F_vac / (self.I_sp_vac * AstronomicalData.gravity(CelestialBody.EARTH)) if self.I_sp_vac > 0 else 0.0
+        self.t_burn     = self.m_p / self.m_p_dot if self.m_p_dot > 0 else 0.0
         
         self.F_to_W     = self.F_vac / (self.m_0 * AstronomicalData.gravity(CelestialBody.EARTH))
-        self.k_p        = self.F_to_W / self.I_sp_vac
-        self.k_s        = self.m_s / self.m_p
+        self.k_p        = self.F_to_W / self.I_sp_vac if self.I_sp_vac > 0 else 0.0
+        self.k_s        = self.m_s / self.m_p if self.m_p > 0 else 0.0
+        
+        self.S          = np.pi * self.D**2 / 4
         
         #print(f'm_p_dot = {self.m_p_dot}')
         #print(f't_burn = {self.t_burn}')
@@ -160,6 +161,8 @@ class Launcher:
     g_E     = AstronomicalData.gravity(CelestialBody.EARTH, km=True)        # * Sea Level Gravity           [ km / s^2 ]
     R_E     = AstronomicalData.equatiorial_radius(CelestialBody.EARTH)      # * Planet Equatiorial Radius   [ km ]
     k       = AstronomicalData.gravitational_parameter(CelestialBody.EARTH) # * Gravitational Parameter     [ km^3 / s^2 ]
+    L_a     = np.deg2rad(5.2)                                               # * Spaceport Latitude (Kourou) [ rad ]
+    beta    = np.deg2rad(141.27)                                            # * Spaceport Azimuth (Kourou)  [ rad ]
     stage   = Stage()                                                       # * Stage
     H       = 7.5                                                           # * Constant Scale Height       [ km ] 7.16
     
@@ -193,6 +196,12 @@ class Launcher:
         V, gamma, r, x, m, V_D_loss, V_G_loss = X
         
         z = r - cls.R_E
+        
+        # >>> Earth's Rotation (no azimuth variation)
+        
+        #V_om = 465.1 * 1e-3 * np.cos(cls.L_a) # * [km/s]
+        
+        #V = np.sqrt(V**2 + V_om**2 + V * V_om * np.cos(gamma) * np.sin(cls.beta))
         
         # >>> Stage
         
@@ -649,7 +658,7 @@ if __name__ == '__main__':
 
     res = Launcher.simulate_launch(np.array([0, np.deg2rad(89.85), 0, 0, 0, 0, 0]), h_t=130, t_f=stage_1.t_burn)
     
-    #Launcher.plot_launch(res['y'], res['t'])
+    Launcher.plot_launch(res['y'], res['t'])
     
     print('-' * 40, '\n')
     
@@ -686,4 +695,4 @@ if __name__ == '__main__':
     
     print('-' * 40, '\n')
     
-    #plt.show()
+    plt.show()

@@ -1,4 +1,4 @@
-""" FigureCanvas.py: Generic figure canvas for QML """
+""" figure_canvas.py: Generic figure canvas for QML """
 
 __author__      = "Alessio Negri"
 __license__     = "LGPL v3"
@@ -10,6 +10,7 @@ import PySide6.QtQuick as qtQuick
 import numpy as np
 import mpl_toolkits.mplot3d.proj3d as proj3d
 import mpl_toolkits.mplot3d.axes3d as axes3d
+import mplcyberpunk
 
 from matplotlib import dates
 
@@ -18,6 +19,10 @@ from lib.matplotlib_backend_qtquick.backend_qtquickagg import FigureCanvasQtQuic
 
 class FigureCanvas(qtCore.QObject):
     """Base class for managing Matplotlib figures in QML"""
+    
+    # --- CLASS MEMBERS 
+    
+    default_color = '#93F9D8'   # * Default line plot color
     
     # --- PROPERTIES 
     
@@ -43,14 +48,7 @@ class FigureCanvas(qtCore.QObject):
 
     # --- METHODS 
 
-    def __init__(self,
-                 parent : qtCore.QObject = None,
-                 dof3 : bool = False,
-                 rows : int = 1,
-                 cols : int = 1,
-                 x_date : bool = False,
-                 y_date : bool = False,
-                 figure_in_dialog : bool = False) -> None:
+    def __init__(self, parent : qtCore.QObject = None, dof3 : bool = False, rows : int = 1, cols : int = 1, x_date : bool = False, y_date : bool = False) -> None:
         """Constructor
 
         Args:
@@ -66,22 +64,20 @@ class FigureCanvas(qtCore.QObject):
         
         if rows < 1 or cols < 1: Exception('Figure rows / cols must be greater than 0!')
         
-        self.canvas             = None
-        self.figure             = None
-        self.axes               = None
-        self.toolbar            = None
-        self.figsize            = (6.0, 4.0)
-        self.dof3               = dof3
-        self.rows               = rows
-        self.cols               = cols
-        self.multiplot          = rows != 1 or cols != 1
-        self.x_date             = x_date
-        self.y_date             = y_date
-        self.figure_in_dialog   = figure_in_dialog
-        self.vert_lines         = {}
+        self.canvas     = None
+        self.figure     = None
+        self.axes       = None
+        self.toolbar    = None
+        self.figsize    = (6.0, 4.0)
+        self.dof3       = dof3
+        self.rows       = rows
+        self.cols       = cols
+        self.multiplot  = rows != 1 or cols != 1
+        self.x_date     = x_date
+        self.y_date     = y_date
         
-        self.coord              = '(0.00, 0.00)' if not dof3 else '(0.00, 0.00, 0.00)'
-        self.showCoord          = True if not dof3 else False
+        self.coord      = '(0.00, 0.00)' if not dof3 else ''
+        self.showCoord  = True if not dof3 else False
 
     def update_with_canvas(self, canvas : FigureCanvasQtQuickAgg, qml_object_parent : qtQuick.QQuickItem) -> None:
         """Initializes the canvas for the figure
@@ -96,7 +92,7 @@ class FigureCanvas(qtCore.QObject):
         self.canvas     = canvas
         self.figure     = canvas.figure
         self.toolbar    = NavigationToolbar2QtQuick(canvas=canvas)
-        self.figsize    = (qml_object_parent.width() // 100, (qml_object_parent.height() - 50) // 100) # * width and height in inches
+        self.figsize    = (qml_object_parent.width() // 100, qml_object_parent.height() // 100) # * width and height in inches
         
         # ? Set Axes
         
@@ -109,35 +105,31 @@ class FigureCanvas(qtCore.QObject):
                 for c in range(0, self.cols):
                     
                     self.axes[r][c].grid(True)
-                    self.axes[r][c].set_facecolor('#424242')# if self.figure_in_dialog else '#1C1B1F')
-                    
-                    #self.vert_lines[str(r) + str(c)] = self.axes[r][c].axvline(x=0, linewidth=2, linestyle='dashdot', color='w')
+                    self.axes[r][c].set_facecolor('#162A35')
             
         else:
             
             self.axes = self.figure.add_subplot(111) if not self.dof3 else self.figure.add_subplot(111, projection='3d')
             
             self.axes.grid(True)
-            self.axes.set_facecolor('#424242')# if self.figure_in_dialog else '#1C1B1F')
-            #self.vert_lines['00'] = self.axes.axvline(x=0, linewidth=2, linestyle='dashdot', color='w')
+            self.axes.set_facecolor('#162A35')
         
         # ? Set Figure
         
         if self.dof3:
             
-            self.figure.subplots_adjust(left=-0.11, top=0.99)
+            #self.figure.subplots_adjust(left=-0.11, top=0.99)
             self.figure.set_layout_engine('compressed')
-            self.axes.set_aspect('equal', adjustable='box')
+            #self.axes.set_aspect('equal', adjustable='box')
             
         else:
             
-        
-            self.figure.subplots_adjust(wspace=0.4, hspace=0.4)
+            #self.figure.subplots_adjust(wspace=0.4, hspace=0.4)
             self.figure.set_layout_engine('tight')
             
         self.figure.set_figwidth(self.figsize[0])
         self.figure.set_figheight(self.figsize[1])
-        self.figure.patch.set_facecolor('#424242')# if self.figure_in_dialog else '#1C1B1F')
+        self.figure.patch.set_facecolor('#162A35')
         
         # ? Set Canvas
         
@@ -161,158 +153,42 @@ class FigureCanvas(qtCore.QObject):
             
             self.axes.cla()
     
-    def redraw_canvas(self) -> None:
+    def redraw_canvas(self, glow_effect : bool = True) -> None:
         """Redraws the figure canvas
+
+        Args:
+            glow_effect (bool, optional): Enables the glow effect. Defaults to True.
         """
-        
-        # if self.multiplot:
-            
-        #     for r in range(0, self.rows):
-                
-        #         for c in range(0, self.cols):
-            
-        #             self.vert_lines[str(r) + str(c)].set_xdata([0])
         
         self.canvas.draw_idle()
-    
-    def line2d_seg_dist(self, p1 : list, p2 : list, p0 : tuple) -> float:
-        """Distance(s) from line defined by p1 - p2 to point(s) p0
         
-            p0[0] = x(s)
-            p0[1] = y(s)
-
-        intersection point p = p1 + u * (p2 - p1)
-        
-        and intersection point lies within segment if u is between 0 and 1
-        
-        Args:
-            p1 (list): Point 1
-            p2 (list): Point 2
-            p0 (tuple): Current 2D point
-
-        Returns:
-            float: Distance
-        """
-
-        x21 = p2[0] - p1[0]
-        y21 = p2[1] - p1[1]
-        
-        x01 = np.asarray(p0[0]) - p1[0]
-        y01 = np.asarray(p0[1]) - p1[1]
-
-        u = (x01*x21 + y01*y21) / (x21**2 + y21**2)
-        u = np.clip(u, 0, 1)
-        d = np.hypot(x01 - u*x21, y01 - u*y21)
-
-        return d
+        if glow_effect and not self.dof3:
+            
+            mplcyberpunk.add_gradient_fill(self.axes, alpha_gradientglow=0.5)
     
-    def get_w_lims(self, axis):
-        '''Get 3D world limits.'''
-        minx, maxx = axis.get_xlim3d()
-        miny, maxy = axis.get_ylim3d()
-        minz, maxz = axis.get_zlim3d()
-        return minx, maxx, miny, maxy, minz, maxz
-    
-    def unit_cube(self, axis, vals=None):
-        minx, maxx, miny, maxy, minz, maxz = vals or self.get_w_lims(axis)
-        return [(minx, miny, minz),
-                (maxx, miny, minz),
-                (maxx, maxy, minz),
-                (minx, maxy, minz),
-                (minx, miny, maxz),
-                (maxx, miny, maxz),
-                (maxx, maxy, maxz),
-                (minx, maxy, maxz)]
-    
-    def tunit_cube(self, axis, vals=None, M=None):
-        #if M is None:
-        #    M = self.M
-        xyzs = self.unit_cube(axis, vals)
-        tcube = proj3d.proj_points(xyzs, M)
-        return tcube
-    
-    def tunit_edges(self, axis, vals=None, M=None):
-        #tc = self.tunit_cube(axis, vals, M)
-        
-        tc = axis._transformed_cube(axis.get_w_lims())
-        #print(tc)
-        edges = [(tc[0], tc[1]),
-                 (tc[1], tc[2]),
-                 (tc[2], tc[3]),
-                 (tc[3], tc[0]),
-
-                 (tc[0], tc[4]),
-                 (tc[1], tc[5]),
-                 (tc[2], tc[6]),
-                 (tc[3], tc[7]),
-
-                 (tc[4], tc[5]),
-                 (tc[5], tc[6]),
-                 (tc[6], tc[7]),
-                 (tc[7], tc[4])]
-        return edges
-    
-    def xyz_data(self, event : qtGui.QMouseEvent, ax) -> list:
-        """Retrieves the x-y-z coordinates in a 3D plot
+    def format_canvas(self,
+                      x_label : str,
+                      y_label : str,
+                      y_label_pad : int,
+                      text : str = "") -> None:
+        """Formats the canvas
 
         Args:
-            event (qtGui.QMouseEvent): Event
-            ax (): Figure axis
-
-        Returns:
-            list: [x, y, z]
+            x_label (str): X label text
+            y_label (str): Y label text
+            y_label_pad (int): Y label padding
+            text (str, optional): Box text content. Defaults to "".
         """
         
-        #if ax.M is None: return 0.0, 0.0, 0.0
-
-        xd, yd = event.xdata, event.ydata
-        
-        p = (xd, yd)
-        
-        #edges = self.tunit_edges(ax)#ax.tunit_edges()
-        
-        #print(ax.get_w_lims())
-        tc = ax._transformed_cube(ax.get_w_lims())
-        
-        edges = [(tc[0], tc[1]),
-                 (tc[1], tc[2]),
-                 (tc[2], tc[3]),
-                 (tc[3], tc[0]),
-
-                 (tc[0], tc[4]),
-                 (tc[1], tc[5]),
-                 (tc[2], tc[6]),
-                 (tc[3], tc[7]),
-
-                 (tc[4], tc[5]),
-                 (tc[5], tc[6]),
-                 (tc[6], tc[7]),
-                 (tc[7], tc[4])]
-        
-        ldists = [(self.line2d_seg_dist(p0, p1, p), i) for i, (p0, p1) in enumerate(edges)]
-        
-        ldists.sort()
-
-        # ? Nearest edge
-        
-        edgei = ldists[0][1]
-
-        p0, p1 = edges[edgei]
-
-        # ? Scale the z value to match
-        
-        x0, y0, z0 = p0
-        x1, y1, z1 = p1
-        
-        d0 = np.hypot(x0 - xd, y0 - yd)
-        d1 = np.hypot(x1 - xd, y1 - yd)
-        dt = d0 + d1
-        
-        z = d1 / dt * z0 + d0 / dt * z1
-
-        x, y, z = proj3d.inv_transform(xd, yd, z, ax.M)
-        
-        return x, y, z
+        if not self.multiplot:
+            
+            self.axes.set_xlabel(x_label, fontdict={ 'size': 10 }, loc='right')
+            self.axes.set_ylabel(y_label, fontdict={ 'size': 10 }, labelpad=y_label_pad, loc='top', rotation=0)
+            
+            if text != "":
+            
+                self.axes.text(x=0.5, y=1.0, s=text, size=12, rotation=0, ha='center', va='center',
+                               transform = self.axes.transAxes, bbox=dict(boxstyle='round', ec='#93F9D8', fc='#162A35'))
     
     # --- SLOTS 
     
@@ -327,10 +203,10 @@ class FigureCanvas(qtCore.QObject):
         
         if self.figure == None: return
         
-        self.figsize = (width // 100, (height - 50) // 100)
+        self.figsize = (width // 100, height // 100)
         
-        self.figure.set_figwidth(self.figsize[0])
-        self.figure.set_figheight(self.figsize[1])
+        if self.figsize[0] > 0: self.figure.set_figwidth(self.figsize[0])
+        if self.figsize[1] > 0: self.figure.set_figheight(self.figsize[1])
         
         self.canvas.draw_idle()
  
@@ -351,22 +227,12 @@ class FigureCanvas(qtCore.QObject):
                     if event.inaxes == self.axes[r][c]:
             
                         self.coord = f'({event.xdata:.2f}, {event.ydata:.2f})'
-                        
-                        #self.vert_lines[str(r) + str(c)].set_xdata([event.xdata])
-                        #print(self.vert_lines[str(r) + str(c)].get_xdata())
-                        #self.redraw_canvas()
             
         else:
             
             if event.inaxes == self.axes:
                 
-                if self.dof3:
-                    #print('>>>', self.xyz_data(event, self.axes))
-                    x, y, z = self.xyz_data(event, self.axes)
-            
-                    self.coord = f'({x[0]:.2f}, {y[0]:.2f}, {z[0]:.2f})'
-                
-                else:
+                if not self.dof3:
                     
                     if self.x_date and self.y_date:
                         
@@ -390,10 +256,6 @@ class FigureCanvas(qtCore.QObject):
                     else:
                     
                         self.coord = f'({event.xdata:.2f}, {event.ydata:.2f})'
-                        
-                    #self.axes.axvline(x=event.xdata, linewidth=3, color='r')
-                    
-                    #self.redraw_canvas()
  
     @qtCore.Slot()
     def pan(self, *args):

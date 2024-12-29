@@ -1,11 +1,11 @@
 // ? Clears the maneuvers.
 function clearManeuvers()
 {
-    for (let i = r_Maneuvers.length - 1; i >= 0; --i)
+    for (let i = gr_ManeuverInfos.length - 1; i >= 0; --i)
     {
-        r_Maneuvers[i].destroy()
+        gr_ManeuverInfos[i].destroy()
 
-        r_Maneuvers.pop()
+        gr_ManeuverInfos.pop()
     }
 }
 
@@ -14,7 +14,7 @@ function loadManeuvers()
 {
     // * Clear
 
-    clearManeuvers()
+    //clearManeuvers()
 
     // * Cycle
 
@@ -25,8 +25,6 @@ function loadManeuvers()
         // * Retrieve maneuver from backend
 
         var maneuver = __MissionOrbitTransfer.maneuver(i)
-
-        console.log(maneuver)
 
         // * Create QML component
 
@@ -51,7 +49,7 @@ function loadManeuvers()
 
             // * Add and update
 
-            r_Maneuvers.push(obj)
+            gr_ManeuverInfos.push(obj)
         }
         else if (component.status == Component.Error)
         {

@@ -1,18 +1,10 @@
-import sys
+""" main.py: Main of the application """
 
-"""
-module_name,
-package_name,
-ClassName,
-method_name,
-ExceptionName,
-function_name,
-GLOBAL_CONSTANT_NAME,
-global_var_name,
-instance_var_name,
-function_parameter_name,
-local_var_name.
-"""
+__author__      = "Alessio Negri"
+__license__     = "LGPL v3"
+__maintainer__  = "Alessio Negri"
+
+import sys
 
 # ! PySide6
 
@@ -38,13 +30,6 @@ import mplcyberpunk
 
 import matplotlib.pyplot as plt
 
-#plt.style.use("cyberpunk")
-
-#import seaborn as sbn
-
-#sbn.set_style("darkgrid")
-#plt.style.use("dark_background")
-
 # ! Sources
 
 from src.mission_parameters import MissionParameters
@@ -57,7 +42,6 @@ qtQC2.QQuickStyle.setStyle('Material')
 # ! APP
 
 app = qtWidgets.QApplication(sys.argv)
-#app = qtGui.QGuiApplication(sys.argv)
 
 app.setWindowIcon(qtGui.QIcon(':/img/icon.ico'))
 app.setFont('Calibri')
@@ -73,17 +57,12 @@ qmlLog = QmlLog()
 missionParameters = MissionParameters(engine)
 
 engine.rootContext().setContextProperty("console", qmlLog)
-engine.rootContext().setContextProperty("__MissionParameters", missionParameters)
 
 engine.quit.connect(app.quit)
 
 engine.load(qtCore.QUrl('qrc:/main.qml'))
 
 if not engine.rootObjects(): sys.exit(-1)
-
-# ! QML-Matplotlib Setup
-
-missionParameters.set_update_with_canvas(engine)
 
 # ! EXEC
 

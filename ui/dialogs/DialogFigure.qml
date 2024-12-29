@@ -19,8 +19,8 @@ Dialog
     id: root
     anchors.centerIn: parent
     modal: true
-    width: parent.width
-    height: parent.height
+    width: parent.width * 0.95
+    height: parent.height * 0.95
     font.pointSize: 12
 
     Shortcut

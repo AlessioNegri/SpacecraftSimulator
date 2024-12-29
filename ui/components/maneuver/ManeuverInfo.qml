@@ -20,11 +20,16 @@ GridLayout
     // ! ----------------------------------------- ! //
 
     id: root
-    columns: 3
-    rowSpacing: 20
-    uniformCellWidths: true
+    columns: 4
+    columnSpacing: 20
+    //uniformCellWidths: true
     Layout.fillWidth: true
     Layout.alignment: Qt.AlignHCenter
+
+    Item
+    {
+        Layout.columnSpan: 4
+    }
 
     Text
     {
@@ -44,8 +49,7 @@ GridLayout
         color: "#FFFFFF"
         font.pointSize: 14
         font.bold: true
-        Layout.columnSpan: 3
-        Layout.alignment: Text.AlignHCenter
+        Layout.fillWidth: true
     }
 
     TextField
@@ -54,7 +58,6 @@ GridLayout
         implicitHeight: 40
         placeholderText: "Δv [km / s]"
         readOnly: true
-        Layout.fillWidth: true
     }
 
     TextField
@@ -63,7 +66,6 @@ GridLayout
         implicitHeight: 40
         placeholderText: "Δt [h]"
         readOnly: true
-        Layout.fillWidth: true
     }
 
     TextField
@@ -72,6 +74,5 @@ GridLayout
         implicitHeight: 40
         placeholderText: "Δm [kg]"
         readOnly: true
-        Layout.fillWidth: true
     }
 }

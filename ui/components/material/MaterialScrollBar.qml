@@ -12,16 +12,16 @@ ScrollBar
     orientation: Qt.Vertical
     parent: parent
     anchors.top: parent.top
-    anchors.left: parent.right
+    anchors.right: parent.right
     anchors.bottom: parent.bottom
-    anchors.rightMargin: 20
+    policy: ScrollBar.AsNeeded
 
     contentItem: Rectangle
     {
         implicitWidth: 6
         implicitHeight: 100
         radius: width / 2
-        color: root.pressed ? "#FF9800" : "#AAFF9800"
+        color: root.pressed ? "#93F9D8" : "#487D76"
         opacity: (root.policy === ScrollBar.AlwaysOn) || ((root.active && root.size < 1.0) ? 0.75 : 0)
 
         // ? Animate the changes in opacity (default duration is 250 ms).

@@ -2,11 +2,16 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import "../material"
+
 // * The PageHeader class manages the page header.
 Item
 {
     // * Title.
     property string p_Title: ""
+
+    // * Icon source file.
+    property string p_Source: ""
 
     // ! ----------------------------------------- ! //
 
@@ -14,27 +19,34 @@ Item
     width: parent.width
     height: 50
 
-    ColumnLayout
+    RowLayout
     {
         anchors.fill: parent
-        spacing: 1
+        spacing: 10
+
+        Item {}
+
+        Image
+        {
+            source: p_Source
+            sourceSize.width: 32
+            sourceSize.height: 32
+            fillMode: Image.PreserveAspectFit
+        }
 
         Text
         {
             text: p_Title
-            color: "#FFFFFF"
+            color: "#93F9D8"
             font.pointSize: 20
             font.bold: true
             Layout.fillWidth: true
-            horizontalAlignment: Text.AlignHCenter
+            horizontalAlignment: Text.AlignLeft
         }
 
-        Rectangle
+        Item
         {
-            height: 3
-            color: Material.color(Material.Grey)
             Layout.fillWidth: true
-            Layout.alignment: Qt.AlignBottom
         }
     }
 }

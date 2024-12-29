@@ -128,7 +128,7 @@ class MissionOrbitPropagation(qtCore.QObject):
     @end_date.setter
     def end_date(self, val : str): self._end_date = val
     
-    # --- METHODS 
+    # --- PUBLIC METHODS 
     
     def __init__(self, engine : qtQml.QQmlApplicationEngine) -> None:
         """Constructor
@@ -138,6 +138,8 @@ class MissionOrbitPropagation(qtCore.QObject):
         """
         
         qtCore.QObject.__init__(self)
+        
+        self.engine = engine
         
         engine.rootContext().setContextProperty("__MissionOrbitPropagation", self)
         
@@ -162,29 +164,65 @@ class MissionOrbitPropagation(qtCore.QObject):
         self._start_date                        : str = '2024-06-01 00:00:00'   # * Start date
         self._end_date                          : str = '2024-06-02 00:00:00'   # * End date
         
-        # ? Orbit propagation
+        # ? Simulation Results
         
-        self.figure = FigureCanvas(rows=2, cols=3)
+        self.result = dict() # * Simulation Result Dictionary
+        
+        # ? Figure Canvas
+        
+        self.figure_semi_major_axis     = FigureCanvas()
+        self.figure_eccentricity        = FigureCanvas()
+        self.figure_angular_momentum    = FigureCanvas()
+        self.figure_inclination         = FigureCanvas()
+        self.figure_raan                = FigureCanvas()
+        self.figure_periapsis_anomaly   = FigureCanvas()
         
         # ? Context properties
         
-        engine.rootContext().setContextProperty("__OrbitPropagationFigure", self.figure)
+        engine.rootContext().setContextProperty("__OrbitPropagationFigureSemiMajorAxis", self.figure_semi_major_axis)
+        engine.rootContext().setContextProperty("__OrbitPropagationFigureEccentricity", self.figure_eccentricity)
+        engine.rootContext().setContextProperty("__OrbitPropagationFigureAngularMomentum", self.figure_angular_momentum)
+        engine.rootContext().setContextProperty("__OrbitPropagationFigureInclination", self.figure_inclination)
+        engine.rootContext().setContextProperty("__OrbitPropagationFigureRAAN", self.figure_raan)
+        engine.rootContext().setContextProperty("__OrbitPropagationFigurePeriapsisAnomaly", self.figure_periapsis_anomaly)
     
-    def set_update_with_canvas(self, engine : qtQml.QQmlApplicationEngine) -> None:
+    # --- PUBLIC SLOTS 
+    
+    @qtCore.Slot()
+    def attach_canvas(self) -> None:
         """Connects all the QML figures with the backend model
-
-        Args:
-            engine (qtQml.QQmlApplicationEngine): QML engine
         """
         
-        win = engine.rootObjects()[0]
+        win = self.engine.rootObjects()[0]
         
-        self.figure.update_with_canvas(win.findChild(qtCore.QObject, "OrbitPropagationFigure"), win.findChild(qtCore.QObject, "OrbitPropagationFigureParent"))
+        self.figure_semi_major_axis.update_with_canvas(win.findChild(qtCore.QObject, "OrbitPropagationFigureSemiMajorAxis"), win.findChild(qtCore.QObject, "OrbitPropagationFigureSemiMajorAxisParent"))
+        self.figure_eccentricity.update_with_canvas(win.findChild(qtCore.QObject, "OrbitPropagationFigureEccentricity"), win.findChild(qtCore.QObject, "OrbitPropagationFigureEccentricityParent"))
+        self.figure_angular_momentum.update_with_canvas(win.findChild(qtCore.QObject, "OrbitPropagationFigureAngularMomentum"), win.findChild(qtCore.QObject, "OrbitPropagationFigureAngularMomentumParent"))
+        self.figure_inclination.update_with_canvas(win.findChild(qtCore.QObject, "OrbitPropagationFigureInclination"), win.findChild(qtCore.QObject, "OrbitPropagationFigureInclinationParent"))
+        self.figure_raan.update_with_canvas(win.findChild(qtCore.QObject, "OrbitPropagationFigureRAAN"), win.findChild(qtCore.QObject, "OrbitPropagationFigureRAANParent"))
+        self.figure_periapsis_anomaly.update_with_canvas(win.findChild(qtCore.QObject, "OrbitPropagationFigurePeriapsisAnomaly"), win.findChild(qtCore.QObject, "OrbitPropagationFigurePeriapsisAnomalyParent"))
         
         self.init_figure()
     
-    # --- PUBLIC SLOTS 
-     
+    @qtCore.Slot()
+    def detach_canvas(self) -> None:
+        """Disconnects all the QML figures from the backend model
+        """
+        
+        self.figure_semi_major_axis     = FigureCanvas()
+        self.figure_eccentricity        = FigureCanvas()
+        self.figure_angular_momentum    = FigureCanvas()
+        self.figure_inclination         = FigureCanvas()
+        self.figure_raan                = FigureCanvas()
+        self.figure_periapsis_anomaly   = FigureCanvas()
+        
+        self.engine.rootContext().setContextProperty("__OrbitPropagationFigureSemiMajorAxis", self.figure_semi_major_axis)
+        self.engine.rootContext().setContextProperty("__OrbitPropagationFigureEccentricity", self.figure_eccentricity)
+        self.engine.rootContext().setContextProperty("__OrbitPropagationFigureAngularMomentum", self.figure_angular_momentum)
+        self.engine.rootContext().setContextProperty("__OrbitPropagationFigureInclination", self.figure_inclination)
+        self.engine.rootContext().setContextProperty("__OrbitPropagationFigureRAAN", self.figure_raan)
+        self.engine.rootContext().setContextProperty("__OrbitPropagationFigurePeriapsisAnomaly", self.figure_periapsis_anomaly)
+    
     @qtCore.Slot()
     def simulate(self) -> None:
         """Simulates the orbital perturbations
@@ -218,47 +256,11 @@ class MissionOrbitPropagation(qtCore.QObject):
                                                                            JD_0=JD_0 * 86400,
                                                                            JD_f=JD_f * 86400)
         
-        a       = result['a']
-        e       = result['e']
-        h       = result['h']
-        i       = result['i']
-        Omega   = result['Omega']
-        omega   = result['omega']
-        t       = result['t']
+        self.result = result
         
         # ? Plot
         
-        self.figure.reset_canvas()
-        
-        self.figure.axes[0,0].plot(t, a - a[0], color='#FFCC80')
-        self.figure.axes[0,0].set_title('Semi-Major Axis Variation [ $km$ ]')
-        
-        self.figure.axes[0,1].plot(t, e - e[0], color='#90CAF9')
-        self.figure.axes[0,1].set_title('Eccentricity Variation')
-        
-        self.figure.axes[0,2].plot(t, h - h[0], color='#CE93D8')
-        self.figure.axes[0,2].set_title('Angular Momentum Variation [ $km^2\;/\;s$ ]')
-        
-        self.figure.axes[1,0].plot(t, i - i[0], color='#F48FB1')
-        self.figure.axes[1,0].set_xlabel('Time [days]')
-        self.figure.axes[1,0].set_title('Inclination Variation [ $°$ ]')
-        
-        self.figure.axes[1,1].plot(t, Omega - Omega[0], color='#E6EE9C')
-        self.figure.axes[1,1].set_xlabel('Time [days]')
-        self.figure.axes[1,1].set_title('RAAN Variation [ $°$ ]')
-        
-        self.figure.axes[1,2].plot(t, omega - omega[0], color='#80CBC4')
-        self.figure.axes[1,2].set_xlabel('Time [days]')
-        self.figure.axes[1,2].set_title('Periapsis Anomaly Variation [ $°$ ]')
-        
-        mplcyberpunk.make_lines_glow(self.figure.axes[0,0])
-        mplcyberpunk.make_lines_glow(self.figure.axes[0,1])
-        mplcyberpunk.make_lines_glow(self.figure.axes[0,2])
-        mplcyberpunk.make_lines_glow(self.figure.axes[1,0])
-        mplcyberpunk.make_lines_glow(self.figure.axes[1,1])
-        mplcyberpunk.make_lines_glow(self.figure.axes[1,2])
-        
-        self.figure.redraw_canvas()
+        self.plot_figures()
     
     # --- PRIVATE METHODS 
     
@@ -266,21 +268,98 @@ class MissionOrbitPropagation(qtCore.QObject):
         """Initializes the figure canvas
         """
         
-        self.figure.reset_canvas()
+        # ? Semi Major Axis
         
-        self.figure.axes[0,0].set_title('Semi-Major Axis Variation [ $km$ ]')
+        self.figure_semi_major_axis.reset_canvas()
+        self.figure_semi_major_axis.format_canvas('Time [ days ]', 'Semi-Major Axis Variation [ $km$ ]', -200)
+        self.figure_semi_major_axis.redraw_canvas()
         
-        self.figure.axes[0,1].set_title('Eccentricity Variation')
+        # ? Eccentricity
         
-        self.figure.axes[0,2].set_title('Angular Momentum Variation [ $km^2\;/\;s$ ]')
+        self.figure_eccentricity.reset_canvas()
+        self.figure_eccentricity.format_canvas('Time [ days ]', 'Eccentricity Variation', -150)
+        self.figure_eccentricity.redraw_canvas()
         
-        self.figure.axes[1,0].set_xlabel('Time [days]')
-        self.figure.axes[1,0].set_title('Inclination Variation [ $°$ ]')
+        # ? Angular Momentum
         
-        self.figure.axes[1,1].set_xlabel('Time [days]')
-        self.figure.axes[1,1].set_title('RAAN Variation [ $°$ ]')
+        self.figure_angular_momentum.reset_canvas()
+        self.figure_angular_momentum.format_canvas('Time [ days ]', 'Angular Momentum Variation [ $km^2\;/\;s$ ]', -250)
+        self.figure_angular_momentum.redraw_canvas()
         
-        self.figure.axes[1,2].set_xlabel('Time [days]')
-        self.figure.axes[1,2].set_title('Periapsis Anomaly Variation [ $°$ ]')
+        # ? Inclination
         
-        self.figure.redraw_canvas()
+        self.figure_inclination.reset_canvas()
+        self.figure_inclination.format_canvas('Time [ days ]', 'Inclination Variation [ $°$ ]', -175)
+        self.figure_inclination.redraw_canvas()
+        
+        # ? RAAN
+        
+        self.figure_raan.reset_canvas()
+        self.figure_raan.format_canvas('Time [ days ]', 'RAAN Variation [ $°$ ]', -150)
+        self.figure_raan.redraw_canvas()
+        
+        # ? Periapsis Anomaly
+        
+        self.figure_periapsis_anomaly.reset_canvas()
+        self.figure_periapsis_anomaly.format_canvas('Time [ days ]', 'Periapsis Anomaly Variation [ $°$ ]', -200)
+        self.figure_periapsis_anomaly.redraw_canvas()
+        
+        # ? Plot
+        
+        self.plot_figures()
+    
+    def plot_figures(self) -> None:
+        """Plots the figures with the results of the simulation
+        """
+        
+        if len(self.result) == 0: return
+        
+        a       = self.result['a']
+        e       = self.result['e']
+        h       = self.result['h']
+        i       = self.result['i']
+        Omega   = self.result['Omega']
+        omega   = self.result['omega']
+        t       = self.result['t']
+        
+        # ? Semi Major Axis
+        
+        self.figure_semi_major_axis.reset_canvas()
+        self.figure_semi_major_axis.format_canvas('Time [ days ]', 'Semi-Major Axis Variation [ $km$ ]', -200)
+        self.figure_semi_major_axis.axes.plot(t, a - a[0], color=FigureCanvas.default_color)
+        self.figure_semi_major_axis.redraw_canvas()
+        
+        # ? Eccentricity
+        
+        self.figure_eccentricity.reset_canvas()
+        self.figure_eccentricity.format_canvas('Time [ days ]', 'Eccentricity Variation', -150)
+        self.figure_eccentricity.axes.plot(t, e - e[0], color=FigureCanvas.default_color)
+        self.figure_eccentricity.redraw_canvas()
+        
+        # ? Angular Momentum
+        
+        self.figure_angular_momentum.reset_canvas()
+        self.figure_angular_momentum.format_canvas('Time [ days ]', 'Angular Momentum Variation [ $km^2\;/\;s$ ]', -250)
+        self.figure_angular_momentum.axes.plot(t, h - h[0], color=FigureCanvas.default_color)
+        self.figure_angular_momentum.redraw_canvas()
+        
+        # ? Inclination
+        
+        self.figure_inclination.reset_canvas()
+        self.figure_inclination.format_canvas('Time [ days ]', 'Inclination Variation [ $°$ ]', -175)
+        self.figure_inclination.axes.plot(t, i - i[0], color=FigureCanvas.default_color)
+        self.figure_inclination.redraw_canvas()
+        
+        # ? RAAN
+        
+        self.figure_raan.reset_canvas()
+        self.figure_raan.format_canvas('Time [ days ]', 'RAAN Variation [ $°$ ]', -150)
+        self.figure_raan.axes.plot(t, Omega - Omega[0], color=FigureCanvas.default_color)
+        self.figure_raan.redraw_canvas()
+        
+        # ? Periapsis Anomaly
+        
+        self.figure_periapsis_anomaly.reset_canvas()
+        self.figure_periapsis_anomaly.format_canvas('Time [ days ]', 'Periapsis Anomaly Variation [ $°$ ]', -200)
+        self.figure_periapsis_anomaly.axes.plot(t, omega - omega[0], color=FigureCanvas.default_color)
+        self.figure_periapsis_anomaly.redraw_canvas()

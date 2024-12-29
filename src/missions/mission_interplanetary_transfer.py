@@ -1,4 +1,4 @@
-""" MissionInterplanetaryTransfer.py: Implements the Interplanetary transfer mission """
+""" mission_interplanetary_transfer.py: Implements the Interplanetary transfer mission """
 
 __author__      = "Alessio Negri"
 __license__     = "LGPL v3"
@@ -147,11 +147,13 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         
         qtCore.QObject.__init__(self)
         
+        self.engine = engine
+        
         engine.rootContext().setContextProperty("__MissionInterplanetaryTransfer", self)
         
         self.spacecraft = Spacecraft(engine)
         
-        # * Pork Chop Plot
+        # ? Pork Chop Plot
         
         self._launch_window_beg             = '2020-01-01'                              # * Launch window begin
         self._launch_window_end             = '2021-01-01'                              # * Launch window end
@@ -164,7 +166,7 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         self.pork_chop_plot.status_changed.connect(self.update_progress_bar)
         self.pork_chop_plot.finished.connect(self.generation_completed)
         
-        # * Interplanetary Leg
+        # ? Interplanetary Leg
         
         self._dep_planet                    = index_from_planet(Planet.EARTH)   # * Departure planet
         self._arr_planet                    = index_from_planet(Planet.MARS)    # * Arrival planet
@@ -175,10 +177,15 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         self._arr_period                    = 48                                # * Arrival rendezvous orbit period            [ h ]
         self.figure_interplanetary_transfer = FigureCanvas(dof3=True)           # * Interplanetary transfer figure
         
-        # * Context properties
+        # ? Context properties
         
         engine.rootContext().setContextProperty("__PorkChopPlotFigure", self.figure_pork_chop_plot)
         engine.rootContext().setContextProperty("__InterplanetaryTransferFigure", self.figure_interplanetary_transfer)
+        
+        # ? Simulation Results
+        
+        self.result_simulation      = dict()    # * Simulation Result for Interplanetary Leg
+        self.result_pork_chop_plot  = dict()    # * Simulation Result for Pork Chop Plot
     
     def set_update_with_canvas(self, engine : qtQml.QQmlApplicationEngine) -> None:
         """Connects all the QML figures with the backend model
@@ -196,6 +203,30 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         self.init_transfer_figure()
     
     # --- PUBLIC SLOTS 
+    
+    @qtCore.Slot()
+    def attach_canvas(self) -> None:
+        """Connects all the QML figures with the backend model
+        """
+        
+        win = self.engine.rootObjects()[0]
+    
+        self.figure_pork_chop_plot.update_with_canvas(win.findChild(qtCore.QObject, "PorkChopPlotFigure"), win.findChild(qtCore.QObject, "PorkChopPlotFigureParent"))
+        self.figure_interplanetary_transfer.update_with_canvas(win.findChild(qtCore.QObject, "InterplanetaryTransferFigure"), win.findChild(qtCore.QObject, "InterplanetaryTransferFigureParent"))
+    
+        self.init_pork_chop_figure()
+        self.init_transfer_figure()
+    
+    @qtCore.Slot()
+    def detach_canvas(self) -> None:
+        """Disconnects all the QML figures from the backend model
+        """
+        
+        self.figure_pork_chop_plot          = FigureCanvas(x_date=True, y_date=True)
+        self.figure_interplanetary_transfer = FigureCanvas(dof3=True)
+
+        self.engine.rootContext().setContextProperty("__PorkChopPlotFigure", self.figure_pork_chop_plot)
+        self.engine.rootContext().setContextProperty("__InterplanetaryTransferFigure", self.figure_interplanetary_transfer)
     
     @qtCore.Slot()
     def generate_pork_chop_plot(self) -> None:
@@ -243,6 +274,16 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         """Slot called when the pork chop plot has been generated
         """
         
+        # ? Save Results
+        
+        self.result_pork_chop_plot['dv_1']  = self.pork_chop_plot.dv_1
+        self.result_pork_chop_plot['dv_2']  = self.pork_chop_plot.dv_2
+        self.result_pork_chop_plot['T_F']   = self.pork_chop_plot.T_F
+        self.result_pork_chop_plot['X']     = self.pork_chop_plot.X
+        self.result_pork_chop_plot['Y']     = self.pork_chop_plot.Y
+        
+        # ? Plot
+        
         self.plot_pork_chop()
     
     @qtCore.Slot()
@@ -284,9 +325,11 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         
         result = self.integrate_maneuver(lambert_oe, lambert_oe.theta, theta_2)
         
+        self.result_simulation = result
+        
         # ? Plot
 
-        self.plot_interplanetary_transfer(result)
+        self.plot_interplanetary_transfer()
     
     # --- PRIVATE METHODS 
     
@@ -306,10 +349,12 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         #self.cb_2 = self.figure_pork_chop_plot.figure.colorbar([0], cax=self.cax_2,  orientation='vertical', label='$\Delta V_1$ $[km / s]$', shrink=0.9)
         #self.cb_3 = self.figure_pork_chop_plot.figure.colorbar([0], cax=self.cax_3,  orientation='vertical', label='$TOF$ $[days]$', shrink=0.9)
         
-        self.figure_pork_chop_plot.axes.set_xlabel('Launch Window')
-        self.figure_pork_chop_plot.axes.set_ylabel('Arrival Window')
-        
+        self.figure_pork_chop_plot.format_canvas('Launch Window', 'Arrival Window', -125)
         self.figure_pork_chop_plot.redraw_canvas()
+        
+        # ? Plot
+
+        self.plot_pork_chop()
     
     def init_transfer_figure(self) -> None:
         """Initializes the transfer figure canvas
@@ -344,7 +389,7 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         # ? Settings
         
         self.figure_interplanetary_transfer.axes.grid(False)
-        self.figure_interplanetary_transfer.axes.legend()
+        self.figure_interplanetary_transfer.axes.legend(bbox_to_anchor=(1.5, 0.5), loc='center right')
         self.figure_interplanetary_transfer.axes.set_xticks([])
         self.figure_interplanetary_transfer.axes.set_yticks([])
         self.figure_interplanetary_transfer.axes.set_zticks([])
@@ -362,10 +407,16 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         self.figure_interplanetary_transfer.axes.zaxis._axinfo["grid"]['color'] = (1,1,1,0)
         
         self.figure_interplanetary_transfer.redraw_canvas()
+        
+        # ? Plot
+
+        self.plot_interplanetary_transfer()
     
     def plot_pork_chop(self) -> None:
         """Plots the Pork Chop Plot
         """
+        
+        if len(self.result_pork_chop_plot) == 0: return
         
         self.figure_pork_chop_plot.reset_canvas()
         
@@ -373,11 +424,11 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         #self.cb_2.remove()
         #self.cb_3.remove()
         
-        dv_1    = self.pork_chop_plot.dv_1
-        dv_2    = self.pork_chop_plot.dv_2
-        T_F     = self.pork_chop_plot.T_F
-        X       = self.pork_chop_plot.X
-        Y       = self.pork_chop_plot.Y
+        dv_1    = self.result_pork_chop_plot['dv_1']
+        dv_2    = self.result_pork_chop_plot['dv_2']
+        T_F     = self.result_pork_chop_plot['T_F']
+        X       = self.result_pork_chop_plot['X']
+        Y       = self.result_pork_chop_plot['Y']
         
         dv_cond = dv_1.copy()
             
@@ -396,19 +447,16 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         self.cb_2 = self.figure_pork_chop_plot.figure.colorbar(contourVelocityConstraint, cax=self.cax_2,  orientation='vertical', label='$\Delta V_1$ $[km / s]$', shrink=0.9)
         self.cb_3 = self.figure_pork_chop_plot.figure.colorbar(contourTimeOfFlight, cax=self.cax_3,  orientation='vertical', label='$TOF$ $[days]$', shrink=0.9)
         
-        self.figure_pork_chop_plot.axes.set_xlabel('Launch Window')
-        self.figure_pork_chop_plot.axes.set_ylabel('Arrival Window')
-        
-        self.figure_pork_chop_plot.redraw_canvas()
+        self.figure_pork_chop_plot.format_canvas('Launch Window', 'Arrival Window', -125)
+        self.figure_pork_chop_plot.redraw_canvas(glow_effect=False)
         
         self.signal_pork_chop_plot_finished.emit()
     
-    def plot_interplanetary_transfer(self, transfer_trajectory : np.ndarray) -> None:
+    def plot_interplanetary_transfer(self) -> None:
         """Plots the interplanetary leg
-
-        Args:
-            transfer_trajectory (np.ndarray): Transfer trajectory
         """
+        
+        if len(self.result_simulation) == 0: return
         
         self.figure_interplanetary_transfer.reset_canvas()
         
@@ -422,7 +470,7 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         depPlanet = celestial_body_from_planet(planet_from_index(self._dep_planet))
         arrPlanet = celestial_body_from_planet(planet_from_index(self._arr_planet))
         
-        for dt in np.linspace(0, np.abs(transfer_trajectory['dt']), 1000):
+        for dt in np.linspace(0, np.abs(self.result_simulation['dt']), 1000):
             
             r, _ = InterplanetaryTrajectories.ephemeris(depPlanet, start + timedelta(0, dt))
             
@@ -440,7 +488,7 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         
         self.figure_interplanetary_transfer.axes.plot(r_1_x, r_1_y, r_1_z, color='#90CAF9', linestyle='dashed', linewidth='2', label='Departure Planet')
         self.figure_interplanetary_transfer.axes.plot(r_2_x, r_2_y, r_2_z, color='#FFAB91', linestyle='dashed', linewidth='2', label='Arrival Planet')
-        self.figure_interplanetary_transfer.axes.plot(transfer_trajectory['y'][0,:], transfer_trajectory['y'][1,:], transfer_trajectory['y'][2,:], color='#A5D6A7', label='Orbit')
+        self.figure_interplanetary_transfer.axes.plot(self.result_simulation['y'][0,:], self.result_simulation['y'][1,:], self.result_simulation['y'][2,:], color='#A5D6A7', label='Orbit')
         self.figure_interplanetary_transfer.axes.scatter(0, 0, 0, c='#FFC107', s=500)
         self.figure_interplanetary_transfer.axes.scatter(r_1_x[0], r_1_y[0], r_1_z[0], marker='s', c='#90CAF9', s=50, label='Departure Planet Start')
         self.figure_interplanetary_transfer.axes.scatter(r_1_x[-1], r_1_y[-1], r_1_z[-1], c='#90CAF9', s=50, label='Departure Planet End')
@@ -449,16 +497,15 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
         
         # ? Settings
         
-        x_min = np.min([np.min(r_1_x), np.min(r_2_x), np.min(transfer_trajectory['y'][0,:])])
-        x_max = np.max([np.max(r_1_x), np.max(r_2_x), np.max(transfer_trajectory['y'][0,:])])
-        y_min = np.min([np.min(r_1_y), np.min(r_2_y), np.min(transfer_trajectory['y'][1,:])])
-        y_max = np.max([np.max(r_1_y), np.max(r_2_y), np.max(transfer_trajectory['y'][1,:])])
-        z_min = np.min([np.min(r_1_z), np.min(r_2_z), np.min(transfer_trajectory['y'][2,:])])
-        z_max = np.max([np.max(r_1_z), np.max(r_2_z), np.max(transfer_trajectory['y'][2,:])])
+        x_min = np.min([np.min(r_1_x), np.min(r_2_x), np.min(self.result_simulation['y'][0,:])])
+        x_max = np.max([np.max(r_1_x), np.max(r_2_x), np.max(self.result_simulation['y'][0,:])])
+        y_min = np.min([np.min(r_1_y), np.min(r_2_y), np.min(self.result_simulation['y'][1,:])])
+        y_max = np.max([np.max(r_1_y), np.max(r_2_y), np.max(self.result_simulation['y'][1,:])])
+        z_min = np.min([np.min(r_1_z), np.min(r_2_z), np.min(self.result_simulation['y'][2,:])])
+        z_max = np.max([np.max(r_1_z), np.max(r_2_z), np.max(self.result_simulation['y'][2,:])])
         
         self.figure_interplanetary_transfer.axes.grid(False)
-        self.figure_interplanetary_transfer.axes.legend()
-        #self.figure_interplanetary_transfer.axes.legend(bbox_to_anchor=(-0.5, 0.5), loc='center left')
+        self.figure_interplanetary_transfer.axes.legend(bbox_to_anchor=(1.5, 0.5), loc='center right')
         self.figure_interplanetary_transfer.axes.set_xticks([])
         self.figure_interplanetary_transfer.axes.set_yticks([])
         self.figure_interplanetary_transfer.axes.set_zticks([])

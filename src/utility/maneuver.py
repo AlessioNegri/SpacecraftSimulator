@@ -1,4 +1,4 @@
-""" Maneuver.py: Generic maneuver for QML """
+""" maneuver.py: Generic maneuver for QML """
 
 __author__      = "Alessio Negri"
 __license__     = "LGPL v3"
@@ -26,6 +26,14 @@ class Maneuver(qtCore.QObject):
     """Class that manages the generic maneuver and interfaces with QML"""
     
     # --- PROPERTIES 
+    
+    # ? ID
+    
+    @qtCore.Property(int)
+    def id(self): return self._id
+
+    @id.setter
+    def id(self, value : int): self._id = value
     
     # ? Type
     
@@ -75,6 +83,10 @@ class Maneuver(qtCore.QObject):
     @delta_mass.setter
     def delta_mass(self, value : float): self._delta_mass = value
     
+    # --- CLASS MEMBERS 
+    
+    unique_id = 0
+    
     # --- METHODS 
     
     def __init__(self,
@@ -99,9 +111,22 @@ class Maneuver(qtCore.QObject):
         
         super().__init__(parent)
         
+        self._id                = self.generate_id()
         self._type              = type              # * Type of maneuver
         self._option            = option            # * Option selection for a given maneuver
         self._option_value      = option_value      # * Optional value for the option parameter
         self._delta_velocity    = delta_velocity    # * Delta velocity cost of the maneuver     [ km / s]
         self._delta_time        = delta_time        # * Delta time of the maneuver              [ s ]
         self._delta_mass        = delta_mass        # * Delta mass cost of the maneuver         [ kg ]
+    
+    # --- CLASS METHODS 
+    
+    @classmethod
+    def generate_id(cls) -> int:
+        """Generates an unique id
+
+        Returns:
+            int: _description_
+        """
+        
+        return cls.unique_id + 1

@@ -1,10 +1,10 @@
-# SpacecraftSimulator
+# SpacecraftSimulator 🛰️
 
 **Spacecraft Dynamics And Missions Simulator**
 
 <p align="center"><img src="./images/about.png" width="50%"></p>
 
-## 1. Introduction
+## 1. Introduction 📖
 
 The `Spacecraft Simulator` application has the objective to implement the algorithms used in **Orbital Mechanics** and **Entry Mechanics**, integrating them inside a GUI application to simplify the analysis.
 
@@ -88,7 +88,7 @@ The project is structured in the following folders.
 > **mplcyberpunk**
 > - `URL` https://github.com/dhaitz/mplcyberpunk
 
-## 2. Settings
+## 2. Settings ⚙️
 
 Under the menu item `Edit` it is possible to configure all the properties of the systems and the missions. The two dialogs contain in the left the list of all sections:
 
@@ -118,7 +118,7 @@ Under the menu item `Edit` it is possible to configure all the properties of the
 
 By clicking on a section, the right part of the dialog populates with the corresponding parameters that can be configured. All these missions will be discussed in detail in the following sections.
 
-## 3 Orbit Insertion
+## 3 Orbit Insertion 🏷️
 
 The first phase of a mission is to bring the spacecraft to space from Earth. This can be done thanks to a launcher. It is possible to simulate up to 3 **stages** in series activating them through the switch buttons. The **pitchover conditions** establish the altitude at which the rocket starts turning with a flight path angle slightly different from the 90 degress at launch. The **circular parking orbit conditions** allow the user to select the altitude of the target circular orbit, giving the value of the velocity for it.
 
@@ -130,7 +130,7 @@ Under the menu item `Missions / Orbit Insertion / Simulation`, the launcher traj
 
 <p align="center"><img src="./images/orbit_insertion.png" width="100%"></p>
 
-## 4 Orbit Transfer
+## 4 Orbit Transfer 🏷️
 
 An orbit transfer consists of a set of maneuvers to move a spacecraft from a departure orbit towards an arrival orbit. The user can decide the two orbits and the list of maneuver to simulate an orbit transfer.
 
@@ -181,7 +181,7 @@ Under the menu item `Missions / Orbit Transfer / Simulation`, the transfer is si
 
 <p align="center"><img src="./images/orbit_transfer.png" width="100%"></p>
 
-## 5 Orbit Propagation
+## 5 Orbit Propagation 🏷️
 
 In the Orbit Propagation mission it is possible to analyze the effects of the following perturbations on an orbit around Earth in a range of dates:
 - **Drag**
@@ -197,7 +197,7 @@ Under the menu item `Missions / Orbit Propagation / Simulation` you can simulate
 
 <p align="center"><img src="./images/orbit_propagation.png" width="100%"></p>
 
-## 6 Interplanetary Transfer
+## 6 Interplanetary Transfer 🏷️
 
 One of the most interesting aspect of space is space exploration. In this section I explain how the user can simulate an interplanetary transfer.
 
@@ -217,7 +217,7 @@ After the analysis of the Pork Chop Plot, the actual transfer can be simulated, 
 
 <p align="center"><img src="./images/interplanetary_transfer.png" width="100%"></p>
 
-## 7 Atmospheric Entry
+## 7 Atmospheric Entry 🏷️
 
 The **Atmospheric Entry** problem studies what happens when an object (e.g. capsule carrying extraterrestrial meterial) re-enters on Earth.
 

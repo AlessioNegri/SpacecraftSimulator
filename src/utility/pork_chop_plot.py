@@ -1,4 +1,4 @@
-""" PorkChopPlot.py: Thread dedicated to the Pork Chop Plot evaluation """
+""" pork_chop_plot.py: Thread dedicated to the Pork Chop Plot evaluation """
 
 __author__      = "Alessio Negri"
 __license__     = "LGPL v3"
@@ -19,8 +19,11 @@ class PorkChopPlot(core.QThread):
     
     # --- SIGNALS 
     
-    status_changed  = core.Signal(float, str)
-    finished        = core.Signal()
+    # ? Signal emitted when the status has changed.
+    status_changed = core.Signal(float, str)
+    
+    # ? Signal emitted when the operation has finished.
+    finished = core.Signal()
     
     # --- METHODS 
     
@@ -43,11 +46,11 @@ class PorkChopPlot(core.QThread):
         self.arrival_planet     = CelestialBody.NEPTUNE                                             # * Arrival planet
         self.launch_window      = [datetime(2020, 1, 1, 0, 0, 0), datetime(2021, 1, 1, 0, 0, 0)]    # * Launch window
         self.arrival_window     = [datetime(2031, 1, 1, 0, 0, 0), datetime(2032, 6, 1, 0, 0, 0)]    # * Arrival window
-        self.step               = 10                                                                # * Simulation step
+        self.step               = 10                                                                # * Simulation step     [ s ]
         self.stop               = False                                                             # * Stop simuation
     
     def run(self) -> None:
-        """QThreas run method
+        """QThread run method
         """
         
         self.calculate()
@@ -87,8 +90,6 @@ class PorkChopPlot(core.QThread):
                 previous_percentage = int(current_percentage)
             
                 self.status_changed.emit(current_percentage, 'Processing...')
-                
-            #printProgressBar(lwIndex, daterangeLength(lwBeg, lwEnd, self.step), prefix = 'Progress:', suffix = 'Processing...', length = 50)
             
             for awIndex, awDate in enumerate(daterange(awBeg, awEnd, self.step)):
         

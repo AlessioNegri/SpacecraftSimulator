@@ -42,7 +42,7 @@ Rectangle
     {
         anchors.fill: parent
         radius: 5
-        color: Material.color(Material.Amber)
+        color: "#93F9D8"
         opacity: 0.25
         visible: p_Selected
     }

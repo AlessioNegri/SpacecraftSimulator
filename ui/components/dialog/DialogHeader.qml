@@ -53,7 +53,7 @@ Item
                 text: p_Title
                 font.pointSize: 24
                 font.bold: true
-                color: Material.color(Material.Orange)
+                color: "#93F9D8"
             }
 
             Item

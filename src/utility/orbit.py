@@ -1,17 +1,17 @@
-""" Orbit.py: Generic orbit for QML """
+""" orbit.py: Generic orbit for QML """
 
 __author__      = "Alessio Negri"
 __license__     = "LGPL v3"
 __maintainer__  = "Alessio Negri"
 
 import PySide6.QtCore as qtCore
-import PySide6.QtQml as qtQml
 import numpy as np
 
 from enum import IntEnum
 
-from common import format, singleton
+from common import format
 
+from tools.AstronomicalData import CelestialBody, celestial_body_from_index
 from tools.TwoBodyProblem import OrbitalParameters
 from tools.ThreeDimensionalOrbit import OrbitalElements
 
@@ -26,7 +26,6 @@ class StateType(IntEnum):
 
 # --- CLASS 
 
-@singleton
 class Orbit(qtCore.QObject):
     """This class describes the properties and parameters of an Orbit"""
     
@@ -112,6 +111,16 @@ class Orbit(qtCore.QObject):
     @v_z.setter
     def v_z(self, val : float): self._v_z = val; self.v_z_changed.emit()
     
+    # ? Specific Angular Momentum [km^2 / s]
+    
+    specific_angular_momentum_changed = qtCore.Signal()
+    
+    @qtCore.Property(float, notify=specific_angular_momentum_changed)
+    def specific_angular_momentum(self): return format(self._specific_angular_momentum)
+
+    @specific_angular_momentum.setter
+    def specific_angular_momentum(self, val : float): self._specific_angular_momentum = val; self.specific_angular_momentum_changed.emit()
+    
     # ? Semi Major Axis [km]
     
     semi_major_axis_changed = qtCore.Signal()
@@ -194,16 +203,11 @@ class Orbit(qtCore.QObject):
     
     # --- METHODS 
     
-    def __init__(self, engine : qtQml.QQmlApplicationEngine) -> None:
+    def __init__(self) -> None:
         """Constructor
-
-        Args:
-            engine (qtQml.QQmlApplicationEngine): QML engine
         """
         
         qtCore.QObject.__init__(self)
-        
-        engine.rootContext().setContextProperty("__Orbit", self)
         
         self._body                              : int = 0                   # * Celestial body                                                  [ ]
         self._state                             : int = StateType.CARTESIAN # * Selected state among CARTESIAN - KEPLERIAN - MODIFIED_KEPLERIAN [ ]
@@ -213,6 +217,7 @@ class Orbit(qtCore.QObject):
         self._v_x                               : float = 0.0               # * Velocity vector component x                                     [ km / s ]
         self._v_y                               : float = 0.0               # * Velocity vector component y                                     [ km / s ]
         self._v_z                               : float = 0.0               # * Velocity vector component z                                     [ km / s ]
+        self._specific_angular_momentum         : float = 0.0               # * Specific angular momentum                                       [ km^2 / s ]
         self._semi_major_axis                   : float = 0.0               # * Semi-major axis                                                 [ km ]
         self._eccentricity                      : float = 0.0               # * Eccentricity                                                    [ ]
         self._inclination                       : float = 0.0               # * Inclination                                                     [ rad ]
@@ -221,15 +226,33 @@ class Orbit(qtCore.QObject):
         self._true_anomaly                      : float = 0.0               # * True anomaly                                                    [ rad ]
         self._periapsis_radius                  : float = 0.0               # * Periapsis radius                                                [ km ]
         self._apoapsis_radius                   : float = 0.0               # * Apoapsis radius                                                 [ km ]
+
+    def get_celestial_body(self) -> CelestialBody:
+        """Retrieves the celestial body
+
+        Returns:
+            CelestialBody: Celestial body
+        """
+        
+        return celestial_body_from_index(self._body)
+
+    def get_cartesian_parameters(self) -> list:
+        """Retrieves the Cartesian parameters
+
+        Returns:
+            list: [ Position Vector, Velocity Vector ]
+        """
+        
+        return [np.array([self._r_x, self._r_y, self._r_z]), np.array([self._v_x, self._v_y, self._v_z])]
     
     def get_keplerian_parameters(self) -> OrbitalElements:
         """Retrieves the Keplerian parameters
 
         Returns:
-            ORBITAL_ELEMENTS: Orbital elements
+            OrbitalElements: Orbital elements
         """
         
-        return OrbitalElements(0, self._eccentricity, self._inclination, self._right_ascension_ascending_node, self._periapsis_anomaly, self._true_anomaly, self._semi_major_axis)
+        return OrbitalElements(self._specific_angular_momentum, self._eccentricity, self._inclination, self._right_ascension_ascending_node, self._periapsis_anomaly, self._true_anomaly, self._semi_major_axis)
     
     def update_central_body(self, body : int) -> None:
         """Updates the central body
@@ -268,9 +291,10 @@ class Orbit(qtCore.QObject):
         """Updates the Keplerian parameters
 
         Args:
-            orbital_elements (ORBITAL_ELEMENTS): Orbital elements
+            orbital_elements (OrbitalElements): Orbital elements
         """
         
+        self._specific_angular_momentum     = orbital_elements.h
         self.semi_major_axis                = orbital_elements.a
         self.eccentricity                   = orbital_elements.e
         self.inclination                    = np.rad2deg(orbital_elements.i)
@@ -289,10 +313,11 @@ class Orbit(qtCore.QObject):
         """Updates the Keplerian parameters
 
         Args:
-            orbital_elements (ORBITAL_ELEMENTS): Orbital elements
-            orbital_parameters (ORBITAL_PARAMETERS): Orbital parameters
+            orbital_elements (OrbitalElements): Orbital elements
+            orbital_parameters (OrbitalParameters): Orbital parameters
         """
         
+        self.specific_angular_momentum      = orbital_elements.h
         self.semi_major_axis                = orbital_elements.a
         self.eccentricity                   = orbital_elements.e
         self.inclination                    = np.rad2deg(orbital_elements.i)

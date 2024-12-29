@@ -1,4 +1,4 @@
-""" MissionOrbitInsertion.py: Implements the orbit insertion mission """
+""" mission_orbit_insertion.py: Implements the orbit insertion mission """
 
 __author__      = "Alessio Negri"
 __license__     = "LGPL v3"
@@ -16,7 +16,9 @@ from systems.stage import Stage
 from tools.launch_mechanics import Launcher
 
 class MissionOrbitInsertion(qtCore.QObject):
-    """Managers the orbit insertion mission"""
+    """Manages the orbit insertion mission"""
+    
+    # --- PROPERTIES 
     
     # ? Pitchover Height [m]
     
@@ -198,6 +200,14 @@ class MissionOrbitInsertion(qtCore.QObject):
     @stage_3.setter
     def stage_3(self, val : Stage): self._stage_3 = val
     
+    # ? Payload
+    
+    @qtCore.Property(Stage)
+    def payload(self): return self._payload
+    
+    @payload.setter
+    def payload(self, val : Stage): self._payload = val
+    
     # ? Payload Mass [kg]
     
     @qtCore.Property(float)
@@ -217,12 +227,14 @@ class MissionOrbitInsertion(qtCore.QObject):
         
         qtCore.QObject.__init__(self)
         
+        self.engine = engine
+        
         engine.rootContext().setContextProperty("__MissionOrbitInsertion", self)
         
         # ? Entry Condition
         
         self._pitchover_height                  : float = 130                                           # * Pitchover Height                [ m ]
-        self._pitchover_flight_path_angle       : float = np.deg2rad(89.85)                             # * Pitchover Flight Path Angle     [ deg ]
+        self._pitchover_flight_path_angle       : float = np.deg2rad(89.97)                             # * Pitchover Flight Path Angle     [ deg ]
         self._circular_parking_orbit_height     : float = 0                                             # * Circular Parking Orbit Height   [ km ]
         self._circular_parking_orbit_velocity   : float = np.sqrt(Launcher.k / (Launcher.R_E + 0))      # * Circular Parking Orbit Velocity [ km / s ]
         self._final_integration_time            : float = 800                                           # * Final Integration Time          [ s ]
@@ -235,14 +247,9 @@ class MissionOrbitInsertion(qtCore.QObject):
         self._structure_ratio_1             = 0.062
         self._stage_1                       = Stage()
         
-        #self._stage_1.mass(68_000 / 15, 68_000 - 68_000 / 15, 0)
-        #self._stage_1.motor(933.913 * 1e3, 390, 0.0)
-        #self._stage_1.aerodynamics(5, 0.5, 0.0)
-        #self._stage_1.calc()
-        
-        self._stage_1.mass(13_393, 141_634, 54_035)
-        self._stage_1.motor(4_323 * 1e3, 450, 0.0)#279
-        self._stage_1.aerodynamics(3.4, 0.0, 0.0) #0.5
+        self._stage_1.mass(6_523, 105_211, 0.0)
+        self._stage_1.motor(2_321 * 1e3, 450, 0.0)
+        self._stage_1.aerodynamics(3.4, 0.0, 0.0)
         self._stage_1.calc()
         
         # ? Stage 2
@@ -254,9 +261,9 @@ class MissionOrbitInsertion(qtCore.QObject):
         self._burnout_time_1                = 200
         self._stage_2                       = Stage()
         
-        self._stage_2.mass(4_238, 36_239, 13_558)
-        self._stage_2.motor(1_304 * 1e3, 450, 0.0)#293.5
-        self._stage_2.aerodynamics(2.4, 0.0, 0.0)#0.5
+        self._stage_2.mass(3_536, 29_473, 0.0)
+        self._stage_2.motor(897 * 1e3, 450, 0.0)
+        self._stage_2.aerodynamics(2.4, 0.0, 0.0)
         self._stage_2.calc()
         
         # ? Stage 3
@@ -268,44 +275,82 @@ class MissionOrbitInsertion(qtCore.QObject):
         self._burnout_time_2                = 345
         self._stage_3                       = Stage()
         
-        self._stage_3.mass(1_433, 10_567, 1_558)
-        self._stage_3.motor(317 * 1e3, 450, 0.0)#295.9
-        self._stage_3.aerodynamics(1.9, 0.0, 0.0)#0.5
+        self._stage_3.mass(2_857, 23_813, 0.0)
+        self._stage_3.motor(317 * 1e3, 450, 0.0)
+        self._stage_3.aerodynamics(1.9, 0.0, 0.0)
         self._stage_3.calc()
         
         # ? Payload
         
-        self._payload_mass = 10_680 # 1_558  # * Payload Mass [kg]
+        self._payload = Stage()
+        
+        self._payload.mass(10_680, 0.0, 0.0)
+        self._payload.aerodynamics(1.9, 0.0, 0.0)
+        self._payload.calc()
+        
+        self._payload_mass = 10_680 # * Payload Mass [kg]
+        
+        # ? Simulation Results
+        
+        self.result = dict() # * Simulation Result Dictionary
         
         # ? Figure Canvas
         
-        self.figure = FigureCanvas(rows=2, cols=2)
+        self.figure_velocity            = FigureCanvas()
+        self.figure_acceleration        = FigureCanvas()
+        self.figure_flight_path_angle   = FigureCanvas()
+        self.figure_trajectory          = FigureCanvas()
         
         # ? Context properties
         
-        engine.rootContext().setContextProperty("__OrbitInsertionFigure", self.figure)
+        engine.rootContext().setContextProperty("__OrbitInsertionFigureVelocity", self.figure_velocity)
+        engine.rootContext().setContextProperty("__OrbitInsertionFigureAcceleration", self.figure_acceleration)
+        engine.rootContext().setContextProperty("__OrbitInsertionFigureFlightPathAngle", self.figure_flight_path_angle)
+        engine.rootContext().setContextProperty("__OrbitInsertionFigureTrajectory", self.figure_trajectory)
         
         self.connect_stages()
-        
-    def set_update_with_canvas(self, engine : qtQml.QQmlApplicationEngine) -> None:
-        """Connects all the QML figures with the backend model
-
-        Args:
-            engine (qtQml.QQmlApplicationEngine): QML engine
-        """
-        
-        win = engine.rootObjects()[0]
-        
-        self.figure.update_with_canvas(win.findChild(qtCore.QObject, "OrbitInsertionFigure"), win.findChild(qtCore.QObject, "OrbitInsertionFigureParent"))
-        
-        self.init_figure()
     
     # --- PUBLIC SLOTS 
+    
+    @qtCore.Slot()
+    def attach_canvas(self) -> None:
+        """Connects all the QML figures with the backend model
+        """
+        
+        win = self.engine.rootObjects()[0]
+    
+        self.figure_velocity.update_with_canvas(win.findChild(qtCore.QObject, "OrbitInsertionFigureVelocity"), win.findChild(qtCore.QObject, "OrbitInsertionFigureVelocityParent"))
+        self.figure_acceleration.update_with_canvas(win.findChild(qtCore.QObject, "OrbitInsertionFigureAcceleration"), win.findChild(qtCore.QObject, "OrbitInsertionFigureAccelerationParent"))
+        self.figure_flight_path_angle.update_with_canvas(win.findChild(qtCore.QObject, "OrbitInsertionFigureFlightPathAngle"), win.findChild(qtCore.QObject, "OrbitInsertionFigureFlightPathAngleParent"))
+        self.figure_trajectory.update_with_canvas(win.findChild(qtCore.QObject, "OrbitInsertionFigureTrajectory"), win.findChild(qtCore.QObject, "OrbitInsertionFigureTrajectoryParent"))
+    
+        self.init_figures()
+            
+    @qtCore.Slot()
+    def detach_canvas(self) -> None:
+        """Disconnects all the QML figures from the backend model
+        """
+        
+        self.figure_velocity            = FigureCanvas()
+        self.figure_acceleration        = FigureCanvas()
+        self.figure_flight_path_angle   = FigureCanvas()
+        self.figure_trajectory          = FigureCanvas()
+        
+        self.engine.rootContext().setContextProperty("__OrbitInsertionFigureVelocity", self.figure_velocity)
+        self.engine.rootContext().setContextProperty("__OrbitInsertionFigureAcceleration", self.figure_acceleration)
+        self.engine.rootContext().setContextProperty("__OrbitInsertionFigureFlightPathAngle", self.figure_flight_path_angle)
+        self.engine.rootContext().setContextProperty("__OrbitInsertionFigureTrajectory", self.figure_trajectory)
     
     @qtCore.Slot()
     def connect_stages(self) -> None:
         """Connects the stages from their parameters
         """
+        
+        # ? Payload
+        
+        self._payload.m_payload = self.payload_mass
+        
+        self._payload.calc()
         
         # ? Stage 3
         
@@ -423,6 +468,27 @@ class MissionOrbitInsertion(qtCore.QObject):
                 result['t'] = np.append(result['t'], result_3['t'])
                 a           = np.append(a, np.array([(result_3['y'][0, i] - result_3['y'][0, i - 1]) / (result_3['t'][i] - result_3['t'][i - 1]) for i in range(1, len(result_3['t']))]))
                 t_a         = np.append(t_a, result_3['t'][1:])
+                
+                y_0 = result_3['y'][:, -1]
+                h_t = 0
+                t_0 = t_f
+                
+                y_0[2] -= Launcher.R_E
+                
+        # * Payload
+            
+        t_f = max(self.final_integration_time, self._stage_1.t_burn * self._use_stage_1 + self._stage_2.t_burn * self._use_stage_2 + self._stage_3.t_burn * self._use_stage_3)
+        
+        if t_f > t_0:
+            
+            Launcher.stage = self._payload
+            
+            result_bo = Launcher.simulate_launch(y_0, h_t=h_t, t_0=t_0, t_f=t_f)
+            
+            result['y'] = np.append(result['y'], result_bo['y'], axis=1)
+            result['t'] = np.append(result['t'], result_bo['t'])
+            a           = np.append(a, np.array([(result_bo['y'][0, i] - result_bo['y'][0, i - 1]) / (result_bo['t'][i] - result_bo['t'][i - 1]) for i in range(1, len(result_bo['t']))]))
+            t_a         = np.append(t_a, result_bo['t'][1:])
         
         # * Removes the first element
         
@@ -431,73 +497,14 @@ class MissionOrbitInsertion(qtCore.QObject):
         a           = np.delete(a, 0)
         t_a         = np.delete(t_a, 0)
         
-        V           = result['y'][0, :]
-        gamma       = result['y'][1, :]
-        r           = result['y'][2, :]
-        x           = result['y'][3, :]
-        m           = result['y'][4, :]
-        V_D_loss    = result['y'][5, :]
-        V_G_loss    = result['y'][6, :]
-        t           = result['t']
+        self.result = result
+        
+        self.result['a']    = a
+        self.result['t_a']  = t_a
         
         # ? Plot
         
-        self.figure.reset_canvas()
-        
-        self.figure.axes[0,0].plot(t, V, color='#FFCC80', label='Velocity [$km\;/\;s$] - Time [$s$]')
-        self.figure.axes[0,0].legend()
-        self.figure.axes[0,0].text(x=0.5,
-                                   y=0.95,
-                                   s=f'$V_f = {V[-1]:.3f}\;\;km/s$',
-                                   size=12,
-                                   rotation=0,
-                                   ha='center',
-                                   va='center',
-                                   transform = self.figure.axes[0,0].transAxes,
-                                   bbox=dict(boxstyle='round', ec='#FFCC80', fc='#FFCC8080'))
-        
-        self.figure.axes[0,1].plot(t_a, a / Launcher.g_E, color='#90CAF9', label='Acceleration [$g$] - Time [$s$]')
-        self.figure.axes[0,1].legend()
-        self.figure.axes[0,1].text(x=0.5,
-                                   y=0.95,
-                                   s='$a_{max} = ' + f'{(max(a) / Launcher.g_E):.3f}\;\;g$',
-                                   size=12,
-                                   rotation=0,
-                                   ha='center',
-                                   va='center',
-                                   transform = self.figure.axes[0,1].transAxes,
-                                   bbox=dict(boxstyle='round', ec='#90CAF9', fc='#90CAF980'))
-        
-        self.figure.axes[1,0].plot(t, np.rad2deg(gamma), color='#F48FB1', label='Flight Path Angle [$deg$] - Time [$s$]')
-        self.figure.axes[1,0].legend()
-        self.figure.axes[1,0].text(x=0.5,
-                                   y=0.95,
-                                   s=f'$\gamma_f = {np.rad2deg(gamma)[-1]:.3f}\;\;\deg$',
-                                   size=12,
-                                   rotation=0,
-                                   ha='center',
-                                   va='center',
-                                   transform = self.figure.axes[1,0].transAxes,
-                                   bbox=dict(boxstyle='round', ec='#F48FB1', fc='#F48FB180'))
-        
-        self.figure.axes[1,1].plot(x, r - Launcher.R_E, color='#CE93D8', label='Altitude [$km$] - Downrange Distance [$km$]')
-        self.figure.axes[1,1].legend()
-        self.figure.axes[1,1].text(x=0.5,
-                                   y=0.95,
-                                   s=f'$h_f = {(r[-1] - Launcher.R_E):.3f}\;\;km$',
-                                   size=12,
-                                   rotation=0,
-                                   ha='center',
-                                   va='center',
-                                   transform = self.figure.axes[1,1].transAxes,
-                                   bbox=dict(boxstyle='round', ec='#CE93D8', fc='#CE93D880'))
-        
-        mplcyberpunk.make_lines_glow(self.figure.axes[0,0])
-        mplcyberpunk.make_lines_glow(self.figure.axes[0,1])
-        mplcyberpunk.make_lines_glow(self.figure.axes[1,0])
-        mplcyberpunk.make_lines_glow(self.figure.axes[1,1])
-        
-        self.figure.redraw_canvas()
+        self.plot_figures()
     
     @qtCore.Slot()
     def calculate_staging(self) -> None:
@@ -554,22 +561,79 @@ class MissionOrbitInsertion(qtCore.QObject):
     
     # --- PRIVATE METHODS 
     
-    def init_figure(self) -> None:
-        """Initializes the figure canvas
+    def init_figures(self) -> None:
+        """Initializes the figures canvas
         """
         
-        self.figure.reset_canvas()
-            
-        self.figure.axes[0,0].plot(0, 0, color='#FFCC80', label='Velocity [$km\;/\;s$] - Time [$s$]')
-        self.figure.axes[0,0].legend()
+        # ? Velocity
         
-        self.figure.axes[0,1].plot(0, 0, color='#90CAF9', label='Acceleration [$g$] - Time [$s$]')
-        self.figure.axes[0,1].legend()
+        self.figure_velocity.reset_canvas()
+        self.figure_velocity.format_canvas('Time [ $s$ ]', 'Velocity [ $km\;/\;s$ ]', -110)
+        self.figure_velocity.redraw_canvas()
         
-        self.figure.axes[1,0].plot(0, 0, color='#F48FB1', label='Flight Path Angle [$deg$] - Time [$s$]')
-        self.figure.axes[1,0].legend()
+        # ? Acceleration
         
-        self.figure.axes[1,1].plot(0, 0, color='#CE93D8', label='Altitude [$km$] - Downrange Distance [$km$]')
-        self.figure.axes[1,1].legend()
+        self.figure_acceleration.reset_canvas()
+        self.figure_acceleration.format_canvas('Time [ $s$ ]', 'Acceleration [ $g$ ]', -120)
+        self.figure_acceleration.redraw_canvas()
         
-        self.figure.redraw_canvas()
+        # ? Flight Path Angle
+        
+        self.figure_flight_path_angle.reset_canvas()
+        self.figure_flight_path_angle.format_canvas('Time [ $s$ ]', 'Flight Path Angle [$deg$]', -150)
+        self.figure_flight_path_angle.redraw_canvas()
+        
+        # ? Trajectory
+        
+        self.figure_trajectory.reset_canvas()
+        self.figure_trajectory.format_canvas('Downrange Distance [ $km$ ]', 'Altitude [ $km$ ]', -105)
+        self.figure_trajectory.redraw_canvas()
+        
+        # ? Plot
+        
+        self.plot_figures()
+    
+    def plot_figures(self) -> None:
+        """Plots the figures with the results of the simulation
+        """
+        
+        if len(self.result) == 0: return
+        
+        V           = self.result['y'][0, :]
+        gamma       = self.result['y'][1, :]
+        r           = self.result['y'][2, :]
+        x           = self.result['y'][3, :]
+        m           = self.result['y'][4, :]
+        V_D_loss    = self.result['y'][5, :]
+        V_G_loss    = self.result['y'][6, :]
+        t           = self.result['t']
+        a           = self.result['a']
+        t_a         = self.result['t_a']
+        
+        # ? Velocity
+        
+        self.figure_velocity.reset_canvas()
+        self.figure_velocity.format_canvas('Time [ $s$ ]', 'Velocity [ $km\;/\;s$ ]', -110, f'$V_f = {V[-1]:.3f}\;\;km/s$')
+        self.figure_velocity.axes.plot(t, V, color=FigureCanvas.default_color)
+        self.figure_velocity.redraw_canvas()
+        
+        # ? Acceleration
+        
+        self.figure_acceleration.reset_canvas()
+        self.figure_acceleration.format_canvas('Time [ $s$ ]', 'Acceleration [ $g$ ]', -120, '$a_{max} = ' + f'{(max(abs(a)) / Launcher.g_E):.3f}\;\;g$')
+        self.figure_acceleration.axes.plot(t_a, a / Launcher.g_E, color=FigureCanvas.default_color)
+        self.figure_acceleration.redraw_canvas()
+        
+        # ? Flight Path Angle
+        
+        self.figure_flight_path_angle.reset_canvas()
+        self.figure_flight_path_angle.format_canvas('Time [ $s$ ]', 'Flight Path Angle [ $deg$ ]', -150, f'$\gamma_f = {np.rad2deg(gamma)[-1]:.3f}\;\;\deg$')
+        self.figure_flight_path_angle.axes.plot(t, np.rad2deg(gamma), color=FigureCanvas.default_color)
+        self.figure_flight_path_angle.redraw_canvas()
+        
+        # ? Trajectory
+        
+        self.figure_trajectory.reset_canvas()
+        self.figure_trajectory.format_canvas('Downrange Distance [ $km$ ]', 'Altitude [ $km$ ]', -105, f'$h_f = {(r[-1] - Launcher.R_E):.3f}\;\;km$')
+        self.figure_trajectory.axes.plot(x, r - Launcher.R_E, color=FigureCanvas.default_color, label='Altitude [$km$] - Downrange Distance [$km$]')
+        self.figure_trajectory.redraw_canvas()

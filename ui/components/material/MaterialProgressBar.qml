@@ -17,7 +17,7 @@ ProgressBar
         implicitWidth: 200
         implicitHeight: 35
         radius: 3
-        color: Material.color(Material.Grey)
+        color: "#487D76"
     }
 
     contentItem: Item
@@ -30,7 +30,7 @@ ProgressBar
             width: root.visualPosition * parent.width
             height: parent.height
             radius: 2
-            color: Material.color(Material.Orange)
+            color: "#8093F9D8"
         }
 
         Text

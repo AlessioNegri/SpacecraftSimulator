@@ -2,7 +2,9 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import "../../dialogs/mission/js/SectionOrbitTransfer.js" as Script
+import "../../pages/js/PageOrbitTransferLeft.js" as Script
+
+import "../material"
 
 // * The Maneuver class manages the generic maneuver.
 RowLayout
@@ -27,7 +29,6 @@ RowLayout
     ComboBox
     {
         id: _maneuver_
-        Material.background: Material.Orange
         implicitWidth: 300
         implicitHeight: 40
         currentIndex: p_Type
@@ -61,7 +62,6 @@ RowLayout
     ComboBox
     {
         id: _option_
-        Material.background: Material.Orange
         implicitWidth: 250
         implicitHeight: 40
         currentIndex: p_Option
@@ -88,14 +88,12 @@ RowLayout
 
     Item { Layout.fillWidth: true }
 
-    Button
+    MaterialIcon
     {
-        icon.source: "/svg/delete.svg"
-        font.pointSize: 12
-        font.bold: true
-        Material.background: "#F44336"
-        Material.foreground: "#FFFFFF"
-        Layout.alignment: Qt.AlignRight
-        onClicked: Script.removeManeuver(p_Id)
+        source: "/svg/delete.svg"
+        baseColor: "#F44336"
+        tooltip: "Remove"
+        
+        function f_Click() { Script.removeManeuver(p_Id) }
     }
 }
