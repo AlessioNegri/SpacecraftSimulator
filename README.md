@@ -2,9 +2,9 @@
 
 **Spacecraft Dynamics And Missions Simulator**
 
-<p align="center"><img src="./images/about.png" width="50%"></p>
+<p align="center"><img src="./images/about.png?" width="50%"></p>
 
-<p align="center"><img src="./images/home.png" width="100%"></p>
+<p align="center"><img src="./images/home.png?" width="100%"></p>
 
 ## 1. Introduction 📖
 
@@ -109,11 +109,11 @@ From the left menu, it is possible to configure all the properties of the system
 - `Spacecraft`
 - `Re-Entry Capsule` <br/><br/>
 
-<p align="center"><img src="./images/launcher.png" width="100%"></p>
+<p align="center"><img src="./images/launcher.png?" width="100%"></p>
 
-<p align="center"><img src="./images/spacecraft.png" width="100%"></p>
+<p align="center"><img src="./images/spacecraft.png?" width="100%"></p>
 
-<p align="center"><img src="./images/re_entry_capsule.png" width="100%"></p>
+<p align="center"><img src="./images/re_entry_capsule.png?" width="100%"></p>
 
 ## 3 Orbit Insertion 🏷️
 
@@ -123,17 +123,17 @@ Each stage is characterized by some parameters used by the *Calculate Staging* b
 
 By clicking on the `Simulate` button, the launcher trajectory and data can be visualized and analyzed from the main window. It can be seen, from the example below, that the launcher reached the target altitude with the desired velocity, with a small flight path angle. In addition, the usage of three stages allows keeping the acceleration at small values.
 
-<p align="center"><img src="./images/orbit_insertion_1.png" width="100%"></p>
+<p align="center"><img src="./images/orbit_insertion_1.png?" width="100%"></p>
 
-<p align="center"><img src="./images/orbit_insertion_2.png" width="100%"></p>
+<p align="center"><img src="./images/orbit_insertion_2.png?" width="100%"></p>
 
 ## 4 Orbit Transfer 🏷️
 
 An orbit transfer consists of a set of maneuvers to move a spacecraft from a departure orbit towards an arrival orbit. The user can decide the two orbits and the list of maneuver to simulate an orbit transfer.
 
-<p align="center"><img src="./images/orbit_transfer_1.png" width="100%"></p>
+<p align="center"><img src="./images/orbit_transfer_1.png?" width="100%"></p>
 
-<p align="center"><img src="./images/orbit_transfer_2.png" width="100%"></p>
+<p align="center"><img src="./images/orbit_transfer_2.png?" width="100%"></p>
 
 ### 4.1 Celestial Body
 
@@ -160,9 +160,9 @@ The second step consists of configuring the **Departure Orbit** and **Arrival Or
 
 A preview of the **Orbit** and the **Ground Track** can be visioned by clicking on the available buttons.
 
-<p align="center"><img src="./images/orbit_preview.png" width="100%"></p>
+<p align="center"><img src="./images/orbit_preview.png?" width="100%"></p>
 
-<p align="center"><img src="./images/ground_track_preview.png" width="100%"></p>
+<p align="center"><img src="./images/ground_track_preview.png?" width="100%"></p>
 
 ### 4.3 Maneuvers
 
@@ -176,7 +176,7 @@ After the transfer has been evaluated, the values of $\Delta v$, $\Delta t$, and
 
 By clicking on the `Simulate` button, the transfer is simulated and becomes visible in the chart.
 
-<p align="center"><img src="./images/orbit_transfer.png" width="100%"></p>
+<p align="center"><img src="./images/orbit_transfer.png?" width="100%"></p>
 
 ## 5 Orbit Propagation 🏷️
 
@@ -190,11 +190,11 @@ for a given set of initial orbital elements.
 
 By clicking on the `Simulate` button, you can simulate the orbit propagation. The evolution of the orbital elements with respect to the initial values can be analyzed in the main window.
 
-<p align="center"><img src="./images/orbit_propagation_1.png" width="100%"></p>
+<p align="center"><img src="./images/orbit_propagation_1.png?" width="100%"></p>
 
-<p align="center"><img src="./images/orbit_propagation_2.png" width="100%"></p>
+<p align="center"><img src="./images/orbit_propagation_2.png?" width="100%"></p>
 
-<p align="center"><img src="./images/orbit_propagation_3.png" width="100%"></p>
+<p align="center"><img src="./images/orbit_propagation_3.png?" width="100%"></p>
 
 ## 6 Interplanetary Transfer 🏷️
 
@@ -204,17 +204,17 @@ One of the most interesting aspect of space is space exploration. In this sectio
 
 Under the section `Interplanetary Transfer` it is possible to analyze/design the interplanetary transfer bewteen two planets of the Solar System, given a *Launch Window* and an *Arrival Window*. Once selected the parameters, by clicking on the `Generate` button the Pork Chop Plot is generated, and can be seen int the bottom right figure. Use the `Stop` button to finish the generation before it ends.
 
-<p align="center"><img src="./images/interplanetary_transfer_1.png" width="100%"></p>
+<p align="center"><img src="./images/interplanetary_transfer_1.png?" width="100%"></p>
 
 This is a Pork Chop Plot between *Earth* and *Mars*.
 
-<p align="center"><img src="./images/pork_chop_plot.png" width="100%"></p>
+<p align="center"><img src="./images/pork_chop_plot.png?" width="100%"></p>
 
 ### 6.2 Transfer
 
 After the analysis of the Pork Chop Plot, the actual transfer can be simulated, by choosing the effective departure and arrival dates, and the departure and arrival orbits around the planets. The following is a simulation for a tansfer between *Earth* and *Mars*.
 
-<p align="center"><img src="./images/interplanetary_transfer_2.png" width="100%"></p>
+<p align="center"><img src="./images/interplanetary_transfer_2.png?" width="100%"></p>
 
 ## 7 Atmospheric Entry 🏷️
 
@@ -235,8 +235,8 @@ After you have decided the *Entry Conditions*, by clicking on the `Simulate` but
 - **Stagnation Point Convective Heat Flux vs Time**
 - **Altitude vs Velocity**
 
-<p align="center"><img src="./images/atmospheric_entry_1.png" width="100%"></p>
+<p align="center"><img src="./images/atmospheric_entry_1.png?" width="100%"></p>
 
-<p align="center"><img src="./images/atmospheric_entry_2.png" width="100%"></p>
+<p align="center"><img src="./images/atmospheric_entry_2.png?" width="100%"></p>
 
-<p align="center"><img src="./images/atmospheric_entry_3.png" width="100%"></p>
+<p align="center"><img src="./images/atmospheric_entry_3.png?" width="100%"></p>
