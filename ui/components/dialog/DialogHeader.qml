@@ -90,11 +90,28 @@ Item
             }
         }
 
-        Rectangle
+        RowLayout
         {
-            height: 3
-            color: Material.color(Material.Grey)
+            spacing: 10
             Layout.fillWidth: true
+
+            Item
+            {
+                width: 1
+            }
+
+            Rectangle
+            {
+                height: 3
+                radius: 10
+                color: Material.color(Material.Grey)
+                Layout.fillWidth: true
+            }
+
+            Item
+            {
+                width: 1
+            }
         }
     }
 }

@@ -110,8 +110,8 @@ class PorkChopPlot(core.QThread):
                 
                 # >>> c. Hyperbolic excess velocities
                 
-                self.dv_1[awIndex, lwIndex] = np.linalg.norm(V_D_v - V_1)
-                self.dv_2[awIndex, lwIndex] = np.linalg.norm(V_A_v - V_2)
+                self.dv_1[awIndex, lwIndex] = np.linalg.norm(V_D_v - V_1) if np.linalg.norm(V_D_v - V_1) < 50 else 50
+                self.dv_2[awIndex, lwIndex] = np.linalg.norm(V_A_v - V_2) if np.linalg.norm(V_A_v - V_2) < 50 else 50
                 
                 # >>> d. Times
                 

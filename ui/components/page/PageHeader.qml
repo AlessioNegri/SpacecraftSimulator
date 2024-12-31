@@ -24,8 +24,6 @@ Item
         anchors.fill: parent
         spacing: 10
 
-        Item {}
-
         Image
         {
             source: p_Source
@@ -40,13 +38,48 @@ Item
             color: "#93F9D8"
             font.pointSize: 20
             font.bold: true
-            Layout.fillWidth: true
             horizontalAlignment: Text.AlignLeft
         }
 
         Item
         {
             Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            DragHandler
+            {
+                onActiveChanged: if (active) window.startSystemMove()
+            }
+
+            MouseArea
+            {
+                anchors.fill: parent
+                onDoubleClicked: window.visibility === Window.Maximized ? window.showNormal() : window.showMaximized()
+            }
+        }
+
+        MaterialIcon
+        {
+            source: "/svg/remove.svg"
+            baseColor: "#FFFF00"
+
+            function f_Click() { window.showMinimized() }
+        }
+
+        MaterialIcon
+        {
+            source: window.visibility === Window.Maximized ? "/svg/fullscreen_exit.svg" : "/svg/fullscreen.svg"
+            baseColor: "#00FF00"
+
+            function f_Click() { window.visibility === Window.Maximized ? window.showNormal() : window.showMaximized() }
+        }
+
+        MaterialIcon
+        {
+            source: "/svg/clear.svg"
+            baseColor: "#FF0000"
+
+            function f_Click() { _dialog_exit_.open() }
         }
     }
 }

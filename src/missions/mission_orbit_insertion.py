@@ -477,7 +477,7 @@ class MissionOrbitInsertion(qtCore.QObject):
                 
         # * Payload
             
-        t_f = max(self.final_integration_time, self._stage_1.t_burn * self._use_stage_1 + self._stage_2.t_burn * self._use_stage_2 + self._stage_3.t_burn * self._use_stage_3)
+        t_f = self.final_integration_time
         
         if t_f > t_0:
             

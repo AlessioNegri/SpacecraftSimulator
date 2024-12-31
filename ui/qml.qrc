@@ -24,6 +24,7 @@
         <file>components/maneuver/Maneuver.qml</file>
         <file>components/maneuver/ManeuverInfo.qml</file>
 
+        <file>components/page/InfoBox.qml</file>
         <file>components/page/PageBox.qml</file>
         <file>components/page/PageHeader.qml</file>
         <file>components/page/PageFooter.qml</file>
@@ -84,6 +85,20 @@
 
         <file alias="icon.ico">../img/icon.ico</file>
         <file alias="icon.png">../img/icon.png</file>
+
+    </qresource>
+
+    <qresource prefix="/jpg">
+
+        <file alias="atmospheric_entry.jpg">../img/jpg/atmospheric_entry.jpg</file>
+        <file alias="background.jpg">../img/jpg/background.jpg</file>
+        <file alias="capsule.jpg">../img/jpg/capsule.jpg</file>
+        <file alias="interplanetary_transfer.jpg">../img/jpg/interplanetary_transfer.jpg</file>
+        <file alias="launcher.jpg">../img/jpg/launcher.jpg</file>
+        <file alias="orbit_insertion.jpg">../img/jpg/orbit_insertion.jpg</file>
+        <file alias="orbit_propagation.jpg">../img/jpg/orbit_propagation.jpg</file>
+        <file alias="orbit_transfer.jpg">../img/jpg/orbit_transfer.jpg</file>
+        <file alias="spacecraft.jpg">../img/jpg/spacecraft.jpg</file>
 
     </qresource>
 
@@ -149,6 +164,7 @@
         <file alias="home.svg">../img/svg/home.svg</file>
         <file alias="pan_tool.svg">../img/svg/pan_tool.svg</file>
         <file alias="play_arrow.svg">../img/svg/play_arrow.svg</file>
+        <file alias="remove.svg">../img/svg/remove.svg</file>
         <file alias="save.svg">../img/svg/save.svg</file>
         <file alias="settings.svg">../img/svg/settings.svg</file>
         <file alias="update.svg">../img/svg/update.svg</file>

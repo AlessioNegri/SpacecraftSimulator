@@ -14,8 +14,9 @@ Page
     Component.onCompleted: __MissionOrbitInsertion.attach_canvas()
     Component.onDestruction: __MissionOrbitInsertion.detach_canvas()
 
-    background: Rectangle { color: "#162A35" }
+    //background: Rectangle { color: "#162A35" }
     header: PageHeader { p_Title: "Orbit Insertion"; p_Source: "/png/orbit_insertion.png" }
+    footer: PageFooter {}
 
     contentItem: Item
     {
@@ -83,6 +84,7 @@ Page
                     Rectangle
                     {
                         height: 3
+                        radius: 10
                         color: Material.color(Material.Grey)
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignBottom

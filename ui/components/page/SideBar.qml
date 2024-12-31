@@ -8,9 +8,6 @@ import "../../dialogs"
 // * The SideBar class manages the side bar component.
 Rectangle
 {
-     // * Current page.
-    property int p_CurrentPage: 0
-
     // ! ----------------------------------------- ! //
 
     id: root
@@ -20,7 +17,7 @@ Rectangle
     width: 60
     color: "#162A35"
     radius: 10
-    border.color: Material.color(Material.Grey)
+    border.color: "#93F9D8"
     border.width: 2
 
     ColumnLayout
@@ -36,7 +33,7 @@ Rectangle
             hoverColor: "transparent"
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
 
-            function f_Click() { p_CurrentPage = 0; loader.source = "pages/PageHome.qml" }
+            function f_Click() { gp_CurrentPage = 0; loader.source = "pages/PageHome.qml" }
         }
 
         Rectangle
@@ -54,10 +51,10 @@ Rectangle
             hoverColor: "transparent"
             tooltip: "Launcher"
             selectable: true
-            checked: p_CurrentPage === 1
+            checked: gp_CurrentPage === 1
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
 
-            function f_Click() { p_CurrentPage = 1; loader.source = "pages/PageLauncher.qml" }
+            function f_Click() { gp_CurrentPage = 1; loader.source = "pages/PageLauncher.qml" }
         }
 
         MaterialIcon
@@ -67,10 +64,10 @@ Rectangle
             hoverColor: "transparent"
             tooltip: "Spacecraft"
             selectable: true
-            checked: p_CurrentPage === 2
+            checked: gp_CurrentPage === 2
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
 
-            function f_Click() { p_CurrentPage = 2; loader.source = "pages/PageSpacecraft.qml" }
+            function f_Click() { gp_CurrentPage = 2; loader.source = "pages/PageSpacecraft.qml" }
         }
 
         MaterialIcon
@@ -80,10 +77,10 @@ Rectangle
             hoverColor: "transparent"
             tooltip: "Capsule"
             selectable: true
-            checked: p_CurrentPage === 3
+            checked: gp_CurrentPage === 3
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
 
-            function f_Click() { p_CurrentPage = 3; loader.source = "pages/PageCapsule.qml" }
+            function f_Click() { gp_CurrentPage = 3; loader.source = "pages/PageCapsule.qml" }
         }
 
         Rectangle
@@ -101,10 +98,10 @@ Rectangle
             hoverColor: "transparent"
             tooltip: "Orbit Insertion"
             selectable: true
-            checked: p_CurrentPage === 4
+            checked: gp_CurrentPage === 4
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
 
-            function f_Click() { p_CurrentPage = 4; loader.source = "pages/PageOrbitInsertion.qml" }
+            function f_Click() { gp_CurrentPage = 4; loader.source = "pages/PageOrbitInsertion.qml" }
         }
 
         MaterialIcon
@@ -114,10 +111,10 @@ Rectangle
             hoverColor: "transparent"
             tooltip: "Orbit Transfer"
             selectable: true
-            checked: p_CurrentPage === 5
+            checked: gp_CurrentPage === 5
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
 
-            function f_Click() { p_CurrentPage = 5; loader.source = "pages/PageOrbitTransfer.qml" }
+            function f_Click() { gp_CurrentPage = 5; loader.source = "pages/PageOrbitTransfer.qml" }
         }
 
         MaterialIcon
@@ -127,10 +124,10 @@ Rectangle
             hoverColor: "transparent"
             tooltip: "Orbit Propagation"
             selectable: true
-            checked: p_CurrentPage === 6
+            checked: gp_CurrentPage === 6
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
 
-            function f_Click() { p_CurrentPage = 6; loader.source = "pages/PageOrbitPropagation.qml" }
+            function f_Click() { gp_CurrentPage = 6; loader.source = "pages/PageOrbitPropagation.qml" }
         }
 
         MaterialIcon
@@ -140,10 +137,10 @@ Rectangle
             hoverColor: "transparent"
             tooltip: "Interplanetary Transfer"
             selectable: true
-            checked: p_CurrentPage === 7
+            checked: gp_CurrentPage === 7
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
 
-            function f_Click() { p_CurrentPage = 7; loader.source = "pages/PageInterplanetaryTransfer.qml" }
+            function f_Click() { gp_CurrentPage = 7; loader.source = "pages/PageInterplanetaryTransfer.qml" }
         }
 
         MaterialIcon
@@ -153,10 +150,10 @@ Rectangle
             hoverColor: "transparent"
             tooltip: "Atmospheric Entry"
             selectable: true
-            checked: p_CurrentPage === 8
+            checked: gp_CurrentPage === 8
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
 
-            function f_Click() { p_CurrentPage = 8; loader.source = "pages/PageAtmosphericEntry.qml" }
+            function f_Click() { gp_CurrentPage = 8; loader.source = "pages/PageAtmosphericEntry.qml" }
         }
 
         Item

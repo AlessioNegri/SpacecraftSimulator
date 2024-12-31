@@ -8,6 +8,9 @@ import "dialogs"
 // * Main window application
 ApplicationWindow
 {
+    // * Current page.
+    property int gp_CurrentPage: 0
+
     // * Reference to the Maneuvers array.
     property var gr_Maneuvers: []
 
@@ -19,10 +22,45 @@ ApplicationWindow
     id: window
     title: "Spacecraft Simulator"
     visible: true
-    visibility: Window.Maximized
+    //visibility: Window.Maximized
     width: 1200
     height: 700
-    background: Rectangle { color: "#162A35" }
+    flags: Qt.Window | Qt.FramelessWindowHint
+    
+    background: Rectangle
+    {
+        color: "#162A35"
+        radius: 5
+        border.width: 2
+        border.color: "#93F9D8"
+
+        Image
+        {
+            id: _background_
+            source: "/jpg/background.jpg"
+            opacity: 0.5
+            anchors.fill: parent
+            anchors.margins: 2
+        }
+
+        Rectangle
+        {
+            color: "transparent"
+            radius: 10
+            border.width: 2
+            border.color: "#93F9D8"
+            anchors.fill: parent
+        }
+
+        Rectangle
+        {
+            color: "transparent"
+            radius: 7
+            border.width: 2
+            border.color: "#93F9D8"
+            anchors.fill: parent
+        }
+    }
 
     Component.onCompleted:
     {
@@ -38,6 +76,13 @@ ApplicationWindow
     DialogExit { id: _dialog_exit_ }
 
     DialogSettings { id: _dialog_settings_ }
+
+    onClosing: {
+
+        close.accepted = false
+
+        _dialog_exit_.open()
+    }
 
     // * Side Bar
 
@@ -56,6 +101,9 @@ ApplicationWindow
         id: loader
         anchors.fill: parent
         anchors.leftMargin: _side_bar_.width + 10
+        anchors.rightMargin: 5
+        anchors.topMargin: 5
+        anchors.bottomMargin: 5
         source: "pages/PageHome.qml"
     }
 

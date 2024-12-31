@@ -28,6 +28,14 @@ Dialog
     font.pointSize: 12
     onVisibleChanged: if (visible) load()
 
+    background: Rectangle
+    {
+        color: "#162A35"
+        radius: 10
+        border.width: 2
+        border.color: "#93F9D8"
+    }
+
     Shortcut
     {
         sequence: StandardKey.Cancel

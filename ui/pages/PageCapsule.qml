@@ -10,8 +10,9 @@ Page
 {
     // ! ----------------------------------------- ! //
 
-    background: Rectangle { color: "#162A35" }
+    //background: Rectangle { color: "#162A35" }
     header: PageHeader { p_Title: "Capsule"; p_Source: "/png/capsule.png" }
+    footer: PageFooter {}
 
     contentItem: Item
     {
@@ -67,6 +68,7 @@ Page
                     Rectangle
                     {
                         height: 3
+                        radius: 10
                         color: Material.color(Material.Grey)
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignBottom

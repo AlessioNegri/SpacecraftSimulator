@@ -14,7 +14,7 @@ Page
     Component.onCompleted: __MissionAtmosphericEntry.attach_canvas()
     Component.onDestruction: __MissionAtmosphericEntry.detach_canvas()
     
-    background: Rectangle { color: "#162A35" }
+    //background: Rectangle { color: "#162A35" }
     header: PageHeader { p_Title: "Atmospheric Entry"; p_Source: "/png/atmospheric_entry.png" }
     footer: PageFooter {}
 
@@ -84,6 +84,7 @@ Page
                     Rectangle
                     {
                         height: 3
+                        radius: 10
                         color: Material.color(Material.Grey)
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignBottom

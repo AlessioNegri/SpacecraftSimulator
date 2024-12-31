@@ -277,7 +277,7 @@ class MissionOrbitPropagation(qtCore.QObject):
         # ? Eccentricity
         
         self.figure_eccentricity.reset_canvas()
-        self.figure_eccentricity.format_canvas('Time [ days ]', 'Eccentricity Variation', -150)
+        self.figure_eccentricity.format_canvas('Time [ days ]', 'Eccentricity Variation', -175)
         self.figure_eccentricity.redraw_canvas()
         
         # ? Angular Momentum
@@ -332,7 +332,7 @@ class MissionOrbitPropagation(qtCore.QObject):
         # ? Eccentricity
         
         self.figure_eccentricity.reset_canvas()
-        self.figure_eccentricity.format_canvas('Time [ days ]', 'Eccentricity Variation', -150)
+        self.figure_eccentricity.format_canvas('Time [ days ]', 'Eccentricity Variation', -175)
         self.figure_eccentricity.axes.plot(t, e - e[0], color=FigureCanvas.default_color)
         self.figure_eccentricity.redraw_canvas()
         

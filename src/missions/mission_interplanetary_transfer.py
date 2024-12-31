@@ -434,11 +434,11 @@ class MissionInterplanetaryTransfer(qtCore.QObject):
             
         dv_cond[dv_cond > 12.5] = 0.0
         
-        contourVelocity = self.figure_pork_chop_plot.axes.contourf(X, Y, dv_1 + dv_2, cmap='hot')
+        contourVelocity = self.figure_pork_chop_plot.axes.contourf(X, Y, dv_1 + dv_2, cmap='ocean')
         
-        contourVelocityConstraint = self.figure_pork_chop_plot.axes.contour(X, Y, dv_cond, cmap='flag')
+        contourVelocityConstraint = self.figure_pork_chop_plot.axes.contour(X, Y, dv_cond, cmap='autumn')
         
-        contourTimeOfFlight = self.figure_pork_chop_plot.axes.contour(X, Y, T_F, cmap='summer')
+        contourTimeOfFlight = self.figure_pork_chop_plot.axes.contour(X, Y, T_F, cmap='seismic', levels=15)
         
         self.figure_pork_chop_plot.axes.clabel(contourVelocityConstraint, inline=1, fontsize=10)
         self.figure_pork_chop_plot.axes.clabel(contourTimeOfFlight, inline=1, fontsize=10)

@@ -14,8 +14,9 @@ Page
     Component.onCompleted: __MissionInterplanetaryTransfer.attach_canvas()
     Component.onDestruction: __MissionInterplanetaryTransfer.detach_canvas()
 
-    background: Rectangle { color: "#162A35" }
+    //background: Rectangle { color: "#162A35" }
     header: PageHeader { p_Title: "Interplanetary Transfer"; p_Source: "/png/interplanetary_transfer.png" }
+    footer: PageFooter {}
 
     contentItem: Item
     {
@@ -89,6 +90,7 @@ Page
                     Rectangle
                     {
                         height: 3
+                        radius: 10
                         color: Material.color(Material.Grey)
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignBottom

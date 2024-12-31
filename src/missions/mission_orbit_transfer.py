@@ -509,7 +509,7 @@ class MissionOrbitTransfer(qtCore.QObject):
         
         img = np.asarray(Image.open(texture).transpose(Image.FLIP_TOP_BOTTOM))
         
-        orbitFigure.axes.imshow(img, origin='lower', extent=(-180, 180, -90, 90), alpha=0.25)
+        orbitFigure.axes.imshow(img, origin='lower', extent=(-180, 180, -90, 90), alpha=0.5)
         
         temp_ra = []
         temp_dec = []

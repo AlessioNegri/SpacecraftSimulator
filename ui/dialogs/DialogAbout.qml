@@ -16,6 +16,15 @@ Dialog
     font.pointSize: 12
     width: 625
     height: 275
+    closePolicy: Popup.NoAutoClose
+
+    background: Rectangle
+    {
+        color: "#162A35"
+        radius: 10
+        border.width: 2
+        border.color: "#93F9D8"
+    }
 
     Shortcut
     {

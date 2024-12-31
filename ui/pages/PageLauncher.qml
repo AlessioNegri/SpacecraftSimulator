@@ -20,8 +20,9 @@ Page
         _stage_3_.p_InUse = __MissionOrbitInsertion.use_stage_3
     }
 
-    background: Rectangle { color: "#162A35" }
+    //background: Rectangle { color: "#162A35" }
     header: PageHeader { p_Title: "Launcher"; p_Source: "/png/launcher.png" }
+    footer: PageFooter {}
 
     contentItem: Item
     {
@@ -87,6 +88,7 @@ Page
                     Rectangle
                     {
                         height: 3
+                        radius: 10
                         color: Material.color(Material.Grey)
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignBottom

@@ -4,13 +4,27 @@
 
 <p align="center"><img src="./images/about.png" width="50%"></p>
 
+<p align="center"><img src="./images/home.png" width="100%"></p>
+
 ## 1. Introduction 📖
 
-The `Spacecraft Simulator` application has the objective to implement the algorithms used in **Orbital Mechanics** and **Entry Mechanics**, integrating them inside a GUI application to simplify the analysis.
+The `Spacecraft Simulator` application has the objective to implement the algorithms used in **Orbital Mechanics**, **Launch Mechanics** ,and **Entry Mechanics**, integrating them inside a GUI application to simplify the analysis.
 
 I decided to adopt the *Python* language to develop all the algorithms due to the high variety of libraries for scientific applications.
 
 For the Graphical User Interface (GUI) I decided to rely on the *QML* language (part of the *Qt* environment) due to its flexibility and the nice and modern fill it can reach.
+
+The **Missions** that can be simulated are the following:
+- `Orbit Insertion` <br/>
+Simulate the launch phase when the spacecraft reaches the orbit from ground thanks to a launcher <br/><br/>
+- `Orbit Transfer` <br/>
+Simulate the cost in terms of $\Delta v$, $\Delta t$, and $\Delta m$ of the transfer between a departure and an arrival orbit <br/><br/>
+- `Orbit Propagation` <br/>
+Simulate the propagation of an orbit around Earth due to perturbations <br/><br/>
+- `Interplanetary Transfer` <br/>
+Simulate the transfer between two planets of the Solar System <br/><br/>
+- `Atmospheric Entry` <br/>
+Simulate the re-entry of a capsule
 
 ### 1.1 Languages & Libraries
 
@@ -88,14 +102,12 @@ The project is structured in the following folders.
 > **mplcyberpunk**
 > - `URL` https://github.com/dhaitz/mplcyberpunk
 
-## 2. Settings ⚙️
+## 2. Systems ⚙️
 
-Under the menu item `Edit` it is possible to configure all the properties of the systems and the missions. The two dialogs contain in the left the list of all sections:
-
-- **Systems Settings** comprising all the properties of the different systems: <br/><br/>
-    - `Launcher`
-    - `Spacecraft`
-    - `Re-Entry Capsule` <br/><br/>
+From the left menu, it is possible to configure all the properties of the systems and the missions. The **systems** managed are the following:
+- `Launcher`
+- `Spacecraft`
+- `Re-Entry Capsule` <br/><br/>
 
 <p align="center"><img src="./images/launcher.png" width="100%"></p>
 
@@ -103,32 +115,17 @@ Under the menu item `Edit` it is possible to configure all the properties of the
 
 <p align="center"><img src="./images/re_entry_capsule.png" width="100%"></p>
 
-- **Mission Settings** comprising the parameters to configure the different types of mission: <br/><br/>
-    - `Orbit Insertion` <br/>
-    Simulate the launch phase when the spacecraft reaches the orbit from ground thanks to a launcher
-    <br/><br/>
-    - `Orbit Transfer` <br/>
-    Simulate the cost in terms of $\Delta v$, $\Delta t$, and $\Delta m$ of the transfer between a departure and an arrival orbit <br/><br/>
-    - `Orbit Propagation` <br/>
-    Simulate the propagation of an orbit around Earth due to perturbations <br/><br/>
-    - `Interplanetary Transfer` <br/>
-    Simulate the transfer between two planets of the Solar System <br/><br/>
-    - `Atmospheric Entry` <br/>
-    Simulate the re-entry of a capsule
-
-By clicking on a section, the right part of the dialog populates with the corresponding parameters that can be configured. All these missions will be discussed in detail in the following sections.
-
 ## 3 Orbit Insertion 🏷️
 
 The first phase of a mission is to bring the spacecraft to space from Earth. This can be done thanks to a launcher. It is possible to simulate up to 3 **stages** in series activating them through the switch buttons. The **pitchover conditions** establish the altitude at which the rocket starts turning with a flight path angle slightly different from the 90 degress at launch. The **circular parking orbit conditions** allow the user to select the altitude of the target circular orbit, giving the value of the velocity for it.
 
-Each stage is characterized by some parameters used by the *Calculate Staging* button to make an initial estimate for the parameters the user find on the *System Settings*.
+Each stage is characterized by some parameters used by the *Calculate Staging* button to make an initial estimate for the parameters the user find on the *Launcher* page.
+
+By clicking on the `Simulate` button, the launcher trajectory and data can be visualized and analyzed from the main window. It can be seen, from the example below, that the launcher reached the target altitude with the desired velocity, with a small flight path angle. In addition, the usage of three stages allows keeping the acceleration at small values.
 
 <p align="center"><img src="./images/orbit_insertion_1.png" width="100%"></p>
 
-Under the menu item `Missions / Orbit Insertion / Simulation`, the launcher trajectory and data can be visualized and analyzed from the main window. It can be seen, from the example below, that the launcher reached the target altitude with the desired velocity, with a small flight path angle. In addition, the usage of three stages allow keeping the acceleration at small values.
-
-<p align="center"><img src="./images/orbit_insertion.png" width="100%"></p>
+<p align="center"><img src="./images/orbit_insertion_2.png" width="100%"></p>
 
 ## 4 Orbit Transfer 🏷️
 
@@ -177,7 +174,7 @@ At this point it is possible to configure the maneuvers for the transfer between
 
 After the transfer has been evaluated, the values of $\Delta v$, $\Delta t$, and $\Delta m$ for each transfer are calculated for a detailed analysis of the cost of the transfer.
 
-Under the menu item `Missions / Orbit Transfer / Simulation`, the transfer is simulated and becomes visible in the chart.
+By clicking on the `Simulate` button, the transfer is simulated and becomes visible in the chart.
 
 <p align="center"><img src="./images/orbit_transfer.png" width="100%"></p>
 
@@ -191,11 +188,13 @@ In the Orbit Propagation mission it is possible to analyze the effects of the fo
 
 for a given set of initial orbital elements.
 
+By clicking on the `Simulate` button, you can simulate the orbit propagation. The evolution of the orbital elements with respect to the initial values can be analyzed in the main window.
+
 <p align="center"><img src="./images/orbit_propagation_1.png" width="100%"></p>
 
-Under the menu item `Missions / Orbit Propagation / Simulation` you can simulate the orbit propagation. The evolution of the orbital elements with respect to the initial values can be analyzed in the main window.
+<p align="center"><img src="./images/orbit_propagation_2.png" width="100%"></p>
 
-<p align="center"><img src="./images/orbit_propagation.png" width="100%"></p>
+<p align="center"><img src="./images/orbit_propagation_3.png" width="100%"></p>
 
 ## 6 Interplanetary Transfer 🏷️
 
@@ -203,11 +202,11 @@ One of the most interesting aspect of space is space exploration. In this sectio
 
 ### 6.1 Analysis
 
-Under the section `Interplanetary Transfer` it is possible to analyze/design the interplanetary transfer bewteen two planets of the Solar System, given a *Launch Window* and an *Arrival Window*. Once selected the parameters, by clicking on the `Generate` button the Pork Chop Plot is generated, and can be seen by clicking on the `Show` button. Use the `Stop` button to finish the generation before it ends.
+Under the section `Interplanetary Transfer` it is possible to analyze/design the interplanetary transfer bewteen two planets of the Solar System, given a *Launch Window* and an *Arrival Window*. Once selected the parameters, by clicking on the `Generate` button the Pork Chop Plot is generated, and can be seen int the bottom right figure. Use the `Stop` button to finish the generation before it ends.
 
 <p align="center"><img src="./images/interplanetary_transfer_1.png" width="100%"></p>
 
-This is a Pork Chop Plot between *Earth* and *Neptune*.
+This is a Pork Chop Plot between *Earth* and *Mars*.
 
 <p align="center"><img src="./images/pork_chop_plot.png" width="100%"></p>
 
@@ -215,7 +214,7 @@ This is a Pork Chop Plot between *Earth* and *Neptune*.
 
 After the analysis of the Pork Chop Plot, the actual transfer can be simulated, by choosing the effective departure and arrival dates, and the departure and arrival orbits around the planets. The following is a simulation for a tansfer between *Earth* and *Mars*.
 
-<p align="center"><img src="./images/interplanetary_transfer.png" width="100%"></p>
+<p align="center"><img src="./images/interplanetary_transfer_2.png" width="100%"></p>
 
 ## 7 Atmospheric Entry 🏷️
 
@@ -225,11 +224,9 @@ The **Atmospheric Entry** problem studies what happens when an object (e.g. caps
 
 Under the section `Atmospheric Entry` it is possible to set up the parameters needed to simulate a capsule re-entry: some of the data are also present in the *Capsule* section. The user can activate / deactivate the usage of the parachute. Under the results sub-section the user can analyze the **Impact Velocity** at ground.
 
-<p align="center"><img src="./images/atmospheric_entry_1.png" width="100%"></p>
-
 ### 7.2 Simulation
 
-After you have decided the *Entry Conditions*, by clicking on the menu item `Missions / Atmospheric Entry / Simulation`, the simulation is executed and the results shown on the charts below. Each chart represents a peculiar parameter of the analysis:
+After you have decided the *Entry Conditions*, by clicking on the `Simulate` button, the simulation is executed and the results shown on the charts below. Each chart represents a peculiar parameter of the analysis:
 
 - **Velocity vs Time**
 - **Acceleration g's vs Time**
@@ -238,4 +235,8 @@ After you have decided the *Entry Conditions*, by clicking on the menu item `Mis
 - **Stagnation Point Convective Heat Flux vs Time**
 - **Altitude vs Velocity**
 
-<p align="center"><img src="./images/atmospheric_entry.png" width="100%"></p>
+<p align="center"><img src="./images/atmospheric_entry_1.png" width="100%"></p>
+
+<p align="center"><img src="./images/atmospheric_entry_2.png" width="100%"></p>
+
+<p align="center"><img src="./images/atmospheric_entry_3.png" width="100%"></p>

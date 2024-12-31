@@ -40,6 +40,12 @@ ScrollView
         load()
     }
 
+    Component.onDestruction: {
+
+        __MissionInterplanetaryTransfer.signal_update_progress_bar.disconnect(Script.updateProgressBar)
+        __MissionInterplanetaryTransfer.signal_pork_chop_plot_finished.disconnect(Script.notifyFinished)
+    }
+
     width: parent.width
     contentWidth: parent.width
     contentHeight: _layout_.height

@@ -222,7 +222,15 @@ class OrbitDetermination():
         
         while cls.lambert_equation(z0, r_1_m, r_2_m, A, dt) < 0: z0 = z0 + 0.1
         
-        z = newton(cls.lambert_equation, 1.5, cls.lambert_equation_first_derivative, args=(r_1_m, r_2_m, A, dt))
+        z = 0
+        
+        try:
+            
+            z = newton(cls.lambert_equation, 1.5, cls.lambert_equation_first_derivative, args=(r_1_m, r_2_m, A, dt))
+            
+        except Exception as e:
+            
+            return [np.zeros(r_1.shape), np.zeros(r_2.shape), OrbitalElements(), 0.0]
         
         # >>> 5. Parameter y
         
