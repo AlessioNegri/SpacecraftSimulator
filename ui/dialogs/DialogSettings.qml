@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import "common"
+import "../components/common"
 import "../components/dialog"
 import "../components/material"
 

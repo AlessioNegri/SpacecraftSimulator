@@ -8,9 +8,9 @@ import PySide6.QtCore as qtCore
 import PySide6.QtQml as qtQml
 import numpy as np
 
-from common import format
+from src.common import format
 from src.utility.figure_canvas import FigureCanvas
-from systems.capsule import Capsule
+from src.systems.capsule import Capsule
 
 from tools.AtmosphericEntry import AtmosphericEntry
 

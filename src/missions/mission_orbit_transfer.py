@@ -12,7 +12,7 @@ import copy
 from PIL import Image
 
 from src.utility.figure_canvas import FigureCanvas
-from systems.spacecraft import Spacecraft
+from src.systems.spacecraft import Spacecraft
 from src.utility.orbit import Orbit, StateType
 from src.utility.maneuver import Maneuver, ManeuverType
 

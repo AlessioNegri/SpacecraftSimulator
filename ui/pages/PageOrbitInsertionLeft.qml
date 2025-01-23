@@ -4,7 +4,7 @@ import QtQuick.Layouts
 
 import "js/PageOrbitInsertionLeft.js" as Script
 
-import "../dialogs/common"
+import "../components/common"
 import "../components/material"
 
 // * The PageOrbitInsertionLeft class manages the orbit insertion left page.

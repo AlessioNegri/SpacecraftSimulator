@@ -4,7 +4,7 @@ import QtQuick.Layouts
 
 import "js/PageLauncherLeft.js" as Script
 
-import "../dialogs/common"
+import "../components/common"
 import "../components/dialog"
 import "../components/material"
 

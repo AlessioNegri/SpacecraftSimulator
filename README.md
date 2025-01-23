@@ -4,6 +4,15 @@
 
 <p align="center"><img src="./images/about.png?" width="50%"></p>
 
+![Static Badge](https://img.shields.io/badge/python-white?logo=python&logoColor=white&label=3.11.9&labelColor=red&color=darkcyan)
+![Static Badge](https://img.shields.io/badge/matplotlib-white?logo=python&logoColor=white&label=3.9.2&labelColor=red&color=darkcyan)
+![Static Badge](https://img.shields.io/badge/mplcyberpunk-white?logo=python&logoColor=white&label=0.7.1&labelColor=red&color=darkcyan)
+![Static Badge](https://img.shields.io/badge/numpy-white?logo=python&logoColor=white&label=2.0.2&labelColor=red&color=darkcyan)
+![Static Badge](https://img.shields.io/badge/scipy-white?logo=python&logoColor=white&label=1.14.1&labelColor=red&color=darkcyan)
+![Static Badge](https://img.shields.io/badge/qbstyles-white?logo=python&logoColor=white&label=0.1.4&labelColor=red&color=darkcyan)
+![Static Badge](https://img.shields.io/badge/pyinstaller-white?logo=python&logoColor=white&label=6.11.1&labelColor=red&color=darkcyan)
+![Static Badge](https://img.shields.io/badge/PySide6-white?logo=qt&logoColor=white&label=6.8.0&labelColor=red&color=darkcyan)
+
 <p align="center"><img src="./images/home.png?" width="100%"></p>
 
 ## 1. Introduction 📖
@@ -36,6 +45,7 @@ The application is developed in `Python 3.11.9` and uses the following main libr
 - `scipy 1.14.1` for numerical intergration
 - `PySide6 6.8.0.2` for the Grafical User Interface
 - `qbstyles 0.1.4` for nice matplotlib plots
+- `pyinstaller 6.11.1` for executable generation
 
 The front-end is developed in `Qt 6.8.0` using the `QML` language.
 
@@ -43,6 +53,7 @@ The front-end is developed in `Qt 6.8.0` using the `QML` language.
 
 The project is structured in the following folders.
 
+- `dist`: contains the application executable
 - `images`: README images
 - `img`: icons and images used in the GUI
 - `lib`: list of external libraries
@@ -62,7 +73,9 @@ The project is structured in the following folders.
     - `qml.qrc`: resource file for the QtQuick / QML project
     - `qtquickcontrols2.conf`: configuration file for the QtQuick / QML project
 - `generate.bat`: batch file used to compile the file *qml.qrc* in Python
+- `installer.bat`: pyinstaller command for the executable creation
 - `main.py`: root file of the Python project
+- `SpacecraftSimulator.spec`: pyinstaller generated file
 
 ### 1.3 References
 

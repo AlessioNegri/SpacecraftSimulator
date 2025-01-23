@@ -9,7 +9,7 @@ import numpy as np
 
 from enum import IntEnum
 
-from common import format
+from src.common import format
 
 from tools.AstronomicalData import CelestialBody, celestial_body_from_index
 from tools.TwoBodyProblem import OrbitalParameters

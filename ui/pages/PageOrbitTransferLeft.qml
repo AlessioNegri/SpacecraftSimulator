@@ -4,8 +4,10 @@ import QtQuick.Layouts
 
 import "js/PageOrbitTransferLeft.js" as Script
 
-import "../dialogs/common"
+import "../components/common"
 import "../components/material"
+
+import "../enums"
 
 // * The PageOrbitTransferLeft class manages the orbit transfer left page.
 ScrollView

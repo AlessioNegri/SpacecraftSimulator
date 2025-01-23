@@ -22,13 +22,13 @@ import ui.qml_rc
 
 from lib.matplotlib_backend_qtquick.backend_qtquickagg import FigureCanvasQtQuickAgg
 
-from qbstyles import mpl_style
+#from qbstyles import mpl_style
 
-mpl_style(dark=True)
-
-import mplcyberpunk
+#mpl_style(dark=True)
 
 import matplotlib.pyplot as plt
+
+plt.style.use('dark_background')
 
 # ! Sources
 

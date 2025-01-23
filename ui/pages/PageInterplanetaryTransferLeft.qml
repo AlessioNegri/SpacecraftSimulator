@@ -4,8 +4,10 @@ import QtQuick.Layouts
 
 import "js/PageInterplanetaryTransferLeft.js" as Script
 
-import "../dialogs/common"
+import "../components/common"
 import "../components/material"
+
+import "../enums"
 
 // * The PageInterplanetaryTransferLeft class manages the interplanetary transfer left page.
 ScrollView

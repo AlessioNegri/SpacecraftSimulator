@@ -4,7 +4,7 @@ import QtQuick.Layouts
 
 import "js/PageOrbitPropagationLeft.js" as Script
 
-import "../dialogs/common"
+import "../components/common"
 import "../components/material"
 
 // * The PageOrbitPropagationLeft class manages the orbit propagation left page.

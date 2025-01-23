@@ -4,7 +4,7 @@ import QtQuick.Layouts
 
 import "js/PageCapsuleLeft.js" as Script
 
-import "../dialogs/common"
+import "../components/common"
 import "../components/material"
 
 // * The PageCapsuleLeft class manages the capsule left page.

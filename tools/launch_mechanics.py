@@ -199,9 +199,18 @@ class Launcher:
         
         # >>> Earth's Rotation (no azimuth variation)
         
-        #V_om = 465.1 * 1e-3 * np.cos(cls.L_a) # * [km/s]
-        
-        #V = np.sqrt(V**2 + V_om**2 + V * V_om * np.cos(gamma) * np.sin(cls.beta))
+        if z >= h_t * 1e-3 and gamma != np.pi:
+            
+            V_0 = 465.1 * 1e-3 * np.cos(cls.L_a)                # * Earth Velocity [km/s]
+            V_S = - V * np.cos(gamma) * np.cos(cls.beta)        # * South Velocity [km/s]
+            V_E = + V * np.cos(gamma) * np.sin(cls.beta) + V_0  # * East Velocity [km/s]
+            V_Z = + V * np.sin(gamma)                           # * Up Velocity [km/s]
+            
+            V_i = np.sqrt(V_S**2 + V_E**2 + V_Z**2)
+            
+            gamma_i = np.arcsin(V_Z / V_i)
+            
+            beta_i = np.arctan(-V_E / V_S)
         
         # >>> Stage
         
@@ -633,6 +642,166 @@ class Launcher:
         
         return stage_1, stage_2, stage_3
 
+    #! SECTION 7.6
+    
+    @classmethod
+    def moi_and_cg(cls, R_1 : float, R_2 : float, h : float, m : float) -> list:
+        """Calculates the Moment Of Inertia (MOI) and Center of Gravity (CG) for uniform solid cylinders - right circular cones - cone frustums
+
+        Args:
+            R_1 (float): Base radius [m]
+            R_2 (float): Top radius [m]
+            h (float): Height [m]
+            m (float): Mass [kg]
+
+        Returns:
+            list: [ MOI, CG ]
+        """
+        
+        # ? Parameters
+        
+        A = 1 + (R_2 / R_1) + (R_2 / R_1)**2
+        B = 1 + 2 * (R_2 / R_1) + 3 * (R_2 / R_1)**2
+        D = 1 + (R_2 / R_1) + (R_2 / R_1)**2 + (R_2 / R_1)**3 + (R_2 / R_1)**4
+        F = 1 + 3 * (R_2 / R_1) + 6 * (R_2 / R_1)**2
+        
+        # ? Moment of inertia [kg m^2]
+        
+        I = m * h**2 / 10 * ( F/A - 5/8 * (B/A)**2 ) + 3/20 * R_1**2 * D/A
+        
+        # ? Center of gravity [m]
+        
+        h_CG = h / 4 * B/A
+        
+        # ? Return
+        
+        return [I, h_CG]
+    
+    @classmethod
+    def moi_and_cg_paraboloid(cls, R : float, h : float, m : float) -> list:
+        """Calculates the Moment Of Inertia (MOI) and Center of Gravity (CG) for a paraboloid of revolution
+
+        Args:
+            R (float): Base radius [m]
+            h (float): Height [m]
+            m (float): Mass [kg]
+
+        Returns:
+            list: [ MOI, CG ]
+        """
+        
+        # ? Moment of inertia [kg m^2]
+        
+        I = m / 18 * ( 3 * R**2 + h**2 )
+        
+        # ? Center of gravity [m]
+        
+        h_CG = h / 3
+        
+        # ? Return
+        
+        return [I, h_CG]
+    
+    @classmethod
+    def inertia(cls,
+                stage_1 : Stage,
+                stage_2 : Stage,
+                stage_3 : Stage,
+                l_c_1 : float,
+                l_c_2 : float,
+                l_f : float,
+                l_c_3 : float,
+                l_co : float,
+                R : float,
+                r_f : float,
+                m_f : float) -> dict:
+        """Calculates the Moment Of Inertia (MOI) and Center of Gravity (CG) for a 3-stage launcher
+
+        Args:
+            stage_1 (Stage): Stage 1
+            stage_2 (Stage): Stage 2
+            stage_3 (Stage): Stage 3
+            l_c_1 (float): Stage 1 length [m]
+            l_c_2 (float): Stage 2 length [m]
+            l_f (float): Stage 3 frustum length [m]
+            l_c_3 (float): Stage 3 lebgth [m]
+            l_co (float): Payload length [m]
+            R (float): Main launchedr radius [m]
+            r_f (float): Frustum top radius [m]
+            m_f (float): Frustum mass [kg]
+
+        Returns:
+            dict: Dictionary containing MOI and CG for Stages and Stacks
+        """
+    
+        # >>> 1. Total launcher length [m]
+        
+        l = l_c_1 + l_c_2 + l_f + l_c_3 + l_co
+        
+        # >>> 2. Stages mass [kg]
+        
+        m_c_1   = stage_1.m_g
+        m_c_2   = stage_2.m_g
+        m_c_3   = stage_3.m_g - m_f
+        m_co    = stage_3.m_payload
+        
+        # >>> 3. Heights of center of gravity [m]
+        
+        h_c_1   = l_c_1 / 2
+        h_c_2   = l_c_1 + l_c_2 / 2
+        h_f     = l_c_1 + l_c_2 + l_f / 4 * ( (R**2 + 2 * R * r_f + 3 * r_f**2) / (R**2 + R * r_f + r_f**2) )
+        h_c_3   = l_c_1 + l_c_2 + l_f + l_c_3 / 2
+        h_co    = l_c_1 + l_c_2 + l_f + l_c_3 + l_co / 4
+        
+        # >>> 4. Stages moment of intertia [kg m^2]
+        
+        I_c_1   = m_c_1 * l_c_1**2 / 12 * ( 1 + 3 * (R / l_c_1)**2 )
+        I_c_2   = m_c_2 * l_c_2**2 / 12 * ( 1 + 3 * (R / l_c_2)**2 )
+        I_f     = ( 3 * m_f * (R**5 - r_f**5) ) / ( 10 * (R**3 - r_f**3) ) - m_f * l_f**2 / 16 * ( (R**2 + 2 * R * r_f + 3 * r_f**2) / (R**2 + R * r_f + r_f**2) )**2
+        I_c_3   = m_c_3 * l_c_3**2 / 12 * ( 1 + 3 * (r_f / l_c_3)**2 )
+        I_co    = 3 * m_co * l_co**2 / 80 * ( 1 + 4 * (r_f / l_co)**2 )
+        
+        # >>> 5. Stacks mass [kg]
+        
+        m_I = m_c_1 + m_c_2 + m_f + m_c_3 + m_co
+        
+        m_II = m_c_2 + m_f + m_c_3 + m_co
+        
+        m_III = m_f + m_c_3 + m_co
+        
+        # >>> 6. Stacks center of gravity [m]
+        
+        x_CG_I = m_I * l - (m_co * h_co + m_c_3 * h_c_3 + m_f * h_f + m_c_2 * h_c_2 + m_c_1 * h_c_1)
+        
+        x_CG_II = m_II * (l - l_c_1) - (m_co * (h_co - l_c_1) + m_c_3 * (h_c_3 - l_c_1) + m_f * (h_f - l_c_1) + m_c_2 * (h_c_2 - l_c_1))
+        
+        x_CG_III = m_III * (l - l_c_1 - l_c_2) - (m_co * (h_co - l_c_1 - l_c_2) + m_c_3 * (h_c_3 - l_c_1 - l_c_2) + m_f * (h_f - l_c_1 - l_c_2))
+        
+        # >>> 7. Stacks moment of inertia [kg m^2]
+        
+        I_CG_I  = I_c_1 + I_c_2 + I_f + I_c_3 + I_co
+        I_CG_I += m_c_1 * (l - h_c_1 - x_CG_I)**2
+        I_CG_I += m_c_2 * (l - h_c_2 - x_CG_I)**2
+        I_CG_I += m_f * (l - h_f - x_CG_I)**2
+        I_CG_I += m_c_3 * (l - h_c_3 - x_CG_I)**2
+        I_CG_I += m_co * (l - h_co - x_CG_I)**2
+        
+        I_CG_II  = I_c_2 + I_f + I_c_3 + I_co
+        I_CG_II += m_c_2 * (l - h_c_2 - x_CG_II)**2
+        I_CG_II += m_f * (l - h_f - x_CG_II)**2
+        I_CG_II += m_c_3 * (l - h_c_3 - x_CG_II)**2
+        I_CG_II += m_co * (l - h_co - x_CG_II)**2
+        
+        I_CG_III  = I_f + I_c_3 + I_co
+        I_CG_III += m_f * (l - h_f - x_CG_III)**2
+        I_CG_III += m_c_3 * (l - h_c_3 - x_CG_III)**2
+        I_CG_III += m_co * (l - h_co - x_CG_III)**2
+        
+        return dict(stage_cg=[h_c_1, h_c_2, h_f, h_c_3, h_co],
+                    stage_moi=[I_c_1, I_c_2, I_f, I_c_3, I_co],
+                    stack_cg=[x_CG_I, x_CG_II, x_CG_III],
+                    stack_moi=[I_CG_I, I_CG_II, I_CG_III])
+    
 if __name__ == '__main__':
     
     print('EXAMPLE 7.1\n')

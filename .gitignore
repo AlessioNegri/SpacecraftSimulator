@@ -3,3 +3,6 @@
 
 # * Ignore all pdf files
 *.pdf
+
+# * Ignore pyinstaller directories
+build/

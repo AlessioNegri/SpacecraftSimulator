@@ -11,8 +11,8 @@ import PySide6.QtQml as qtQml
 
 sys.path.append(os.path.dirname(__file__))
 
-from systems.spacecraft import Spacecraft
-from systems.capsule import Capsule
+from src.systems.spacecraft import Spacecraft
+from src.systems.capsule import Capsule
 from src.missions.mission_orbit_insertion import MissionOrbitInsertion
 from src.missions.mission_orbit_transfer import MissionOrbitTransfer
 from src.missions.mission_orbit_propagation import MissionOrbitPropagation

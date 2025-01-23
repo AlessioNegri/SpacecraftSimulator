@@ -4,7 +4,7 @@ import QtQuick.Layouts
 
 import "js/PageSpacecraftLeft.js" as Script
 
-import "../dialogs/common"
+import "../components/common"
 import "../components/material"
 
 // * The PageSpacecraftLeft class manages the spacecraft left page.

@@ -20,7 +20,7 @@ sys.path.append(os.path.dirname(__file__))
 from Common import wrap_to360deg
 from AstronomicalData import AstronomicalData, CelestialBody
 from ThreeDimensionalOrbit import ThreeDimensionalOrbit, OrbitalElements
-from LagrangeCoefficients import LagrangeCoefficients
+from tools.LagrangeCoefficients import LagrangeCoefficients
 
 # --- ENUM 
 

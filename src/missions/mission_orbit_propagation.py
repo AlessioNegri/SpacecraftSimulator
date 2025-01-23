@@ -11,9 +11,9 @@ import mplcyberpunk
 
 from datetime import datetime
 
-from common import format
+from src.common import format
 from src.utility.figure_canvas import FigureCanvas
-from systems.spacecraft import Spacecraft
+from src.systems.spacecraft import Spacecraft
 
 from tools.AstronomicalData import CelestialBody
 from tools.OrbitalPerturbations import OrbitalPerturbations

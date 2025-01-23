@@ -60,8 +60,9 @@ Item
 
         MaterialIcon
         {
-            source: "/svg/remove.svg"
+            source: "/svg/remove_circle.svg"
             baseColor: "#FFFF00"
+            hoverColor: "#AAFFFF00"
 
             function f_Click() { window.showMinimized() }
         }
@@ -70,16 +71,20 @@ Item
         {
             source: window.visibility === Window.Maximized ? "/svg/fullscreen_exit.svg" : "/svg/fullscreen.svg"
             baseColor: "#00FF00"
+            hoverColor: "#AA00FF00"
 
             function f_Click() { window.visibility === Window.Maximized ? window.showNormal() : window.showMaximized() }
         }
 
         MaterialIcon
         {
-            source: "/svg/clear.svg"
+            source: "/svg/cancel.svg"
             baseColor: "#FF0000"
+            hoverColor: "#AAFF0000"
 
             function f_Click() { _dialog_exit_.open() }
         }
+
+        Item {}
     }
 }

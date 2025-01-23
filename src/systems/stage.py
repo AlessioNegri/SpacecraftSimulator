@@ -8,7 +8,7 @@ import PySide6.QtCore as qtCore
 
 import tools.launch_mechanics as lm
 
-from common import format
+from src.common import format
 
 class Stage(qtCore.QObject, lm.Stage):
     """This class describes the properties and parameters of a Launcher's Stage"""

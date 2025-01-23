@@ -10,19 +10,24 @@
 
         <!-- >>> COMPONENTS -->
 
+        <file>components/common/CelestialBodyIcon.qml</file>
+        <file>components/common/SectionHeader.qml</file>
+        <file>components/common/SectionItemName.qml</file>
+        <file>components/common/SectionItemValue.qml</file>
+
         <file>components/dialog/DialogHeader.qml</file>
         <file>components/dialog/SettingsMenuItem.qml</file>
 
         <file>components/figure/Figure.qml</file>
+
+        <file>components/maneuver/Maneuver.qml</file>
+        <file>components/maneuver/ManeuverInfo.qml</file>
 
         <file>components/material/MaterialButton.qml</file>
         <file>components/material/MaterialIcon.qml</file>
         <file>components/material/MaterialProgressBar.qml</file>
         <file>components/material/MaterialScrollBar.qml</file>
         <file>components/material/MaterialSwitch.qml</file>
-
-        <file>components/maneuver/Maneuver.qml</file>
-        <file>components/maneuver/ManeuverInfo.qml</file>
 
         <file>components/page/InfoBox.qml</file>
         <file>components/page/PageBox.qml</file>
@@ -38,15 +43,13 @@
         <file>dialogs/DialogFigure.qml</file>
         <file>dialogs/DialogSettings.qml</file>
 
-        <file>dialogs/common/qmldir</file>
-        <file>dialogs/common/CelestialBody.qml</file>
-        <file>dialogs/common/CelestialBodyIcon.qml</file>
-        <file>dialogs/common/Planet.qml</file>
-        <file>dialogs/common/SectionHeader.qml</file>
-        <file>dialogs/common/SectionItemName.qml</file>
-        <file>dialogs/common/SectionItemValue.qml</file>
-        <file>dialogs/common/StateRepresentation.qml</file>
+        <!-- >>> ENUMS -->
 
+        <file>enums/qmldir</file>
+        <file>enums/CelestialBody.qml</file>
+        <file>enums/Planet.qml</file>
+        <file>enums/StateRepresentation.qml</file>
+        
         <!-- >>> PAGES -->
         
         <file>pages/js/PageAtmosphericEntryLeft.js</file>
@@ -154,6 +157,7 @@
         <file alias="arrow_drop_down.svg">../img/svg/arrow_drop_down.svg</file>
         <file alias="arrow_drop_up.svg">../img/svg/arrow_drop_up.svg</file>
         <file alias="arrow_forward.svg">../img/svg/arrow_forward.svg</file>
+        <file alias="cancel.svg">../img/svg/cancel.svg</file>
         <file alias="clear.svg">../img/svg/clear.svg</file>
         <file alias="delete.svg">../img/svg/delete.svg</file>
         <file alias="error.svg">../img/svg/error.svg</file>
@@ -165,6 +169,7 @@
         <file alias="pan_tool.svg">../img/svg/pan_tool.svg</file>
         <file alias="play_arrow.svg">../img/svg/play_arrow.svg</file>
         <file alias="remove.svg">../img/svg/remove.svg</file>
+        <file alias="remove_circle.svg">../img/svg/remove_circle.svg</file>
         <file alias="save.svg">../img/svg/save.svg</file>
         <file alias="settings.svg">../img/svg/settings.svg</file>
         <file alias="update.svg">../img/svg/update.svg</file>

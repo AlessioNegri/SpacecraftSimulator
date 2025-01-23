@@ -4,7 +4,7 @@ import QtQuick.Layouts
 
 import "js/PageAtmosphericEntryLeft.js" as Script
 
-import "../dialogs/common"
+import "../components/common"
 import "../components/material"
 
 // * The PageAtmosphericEntryLeft class manages the atmospheric entry left page.

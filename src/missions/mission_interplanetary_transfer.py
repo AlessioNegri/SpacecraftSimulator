@@ -12,9 +12,9 @@ from datetime import datetime, timedelta
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.colorbar import Colorbar
 
-from common import format
+from src.common import format
 from src.utility.figure_canvas import FigureCanvas
-from systems.spacecraft import Spacecraft
+from src.systems.spacecraft import Spacecraft
 from src.utility.pork_chop_plot import PorkChopPlot
 
 from tools.AstronomicalData import AstronomicalData, CelestialBody, Planet, index_from_planet, planet_from_index, celestial_body_from_planet
