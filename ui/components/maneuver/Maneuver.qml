@@ -26,7 +26,7 @@ RowLayout
     id: root
     Layout.fillWidth: true
 
-    ComboBox
+    MaterialComboBox
     {
         id: _maneuver_
         implicitWidth: 300
@@ -59,7 +59,7 @@ RowLayout
         }
     }
 
-    ComboBox
+    MaterialComboBox
     {
         id: _option_
         implicitWidth: 250

@@ -28,6 +28,8 @@ Item
         {
             spacing: 10
             Layout.fillWidth: true
+
+            Item {}
             
             Text
             {

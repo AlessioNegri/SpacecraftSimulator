@@ -26,6 +26,26 @@ class FigureCanvas(qtCore.QObject):
     
     # --- PROPERTIES 
     
+    # ? Width
+    
+    width_changed = qtCore.Signal()
+    
+    @qtCore.Property(int, notify=width_changed)
+    def width(self): return self._width
+
+    @width.setter
+    def width(self, val : int): self._width = val; self.width_changed.emit()
+    
+    # ? Height
+    
+    height_changed = qtCore.Signal()
+    
+    @qtCore.Property(int, notify=height_changed)
+    def height(self): return self._height
+
+    @height.setter
+    def height(self, val : int): self._height = val; self.height_changed.emit()
+    
     # ? Coordinates
     
     coord_changed = qtCore.Signal()
@@ -76,6 +96,8 @@ class FigureCanvas(qtCore.QObject):
         self.x_date     = x_date
         self.y_date     = y_date
         
+        self.width      = 0
+        self.height     = 0
         self.coord      = '(0.00, 0.00)' if not dof3 else ''
         self.showCoord  = True if not dof3 else False
 
@@ -93,6 +115,8 @@ class FigureCanvas(qtCore.QObject):
         self.figure     = canvas.figure
         self.toolbar    = NavigationToolbar2QtQuick(canvas=canvas)
         self.figsize    = (qml_object_parent.width() // 100, qml_object_parent.height() // 100) # * width and height in inches
+        self.width      = self.figure.get_figwidth() * 100
+        self.height     = self.figure.get_figheight() * 100
         
         # ? Set Axes
         
@@ -129,6 +153,7 @@ class FigureCanvas(qtCore.QObject):
             
         self.figure.set_figwidth(self.figsize[0])
         self.figure.set_figheight(self.figsize[1])
+        self.figure.set_facecolor('#162A35')
         self.figure.patch.set_facecolor('#162A35')
         
         # ? Set Canvas
@@ -207,6 +232,9 @@ class FigureCanvas(qtCore.QObject):
         
         if self.figsize[0] > 0: self.figure.set_figwidth(self.figsize[0])
         if self.figsize[1] > 0: self.figure.set_figheight(self.figsize[1])
+        
+        self.width  = self.figure.get_figwidth() * 100
+        self.height = self.figure.get_figheight() * 100
         
         self.canvas.draw_idle()
  

@@ -31,14 +31,6 @@ class Stage(qtCore.QObject, lm.Stage):
     @propellant_mass.setter
     def propellant_mass(self, val : float): self.m_p = val
     
-    # ? Diameter [m]
-    
-    @qtCore.Property(float)
-    def diameter(self): return format(self.D)
-
-    @diameter.setter
-    def diameter(self, val : float): self.D = val
-    
     # ? Gross Mass [kg]
     
     @qtCore.Property(float)
@@ -78,6 +70,46 @@ class Stage(qtCore.QObject, lm.Stage):
 
     @structure_fraction.setter
     def structure_fraction(self, val : float): self.k_s = val
+    
+    # ? Diameter [m]
+    
+    @qtCore.Property(float)
+    def diameter(self): return format(self.D)
+
+    @diameter.setter
+    def diameter(self, val : float): self.D = val
+    
+    # ? Top Diameter [m]
+    
+    @qtCore.Property(float)
+    def top_diameter(self): return format(self.d)
+
+    @top_diameter.setter
+    def top_diameter(self, val : float): self.d = val
+    
+    # ? Height [m]
+    
+    @qtCore.Property(float)
+    def height(self): return format(self.h)
+
+    @height.setter
+    def height(self, val : float): self.h = val
+    
+    # ? Stage Center Of Gravity Height [m]
+    
+    @qtCore.Property(float)
+    def stage_center_of_gravity_height(self): return format(self.h_CG)
+
+    @stage_center_of_gravity_height.setter
+    def stage_center_of_gravity_height(self, val : float): self.h_CG = val
+    
+    # ? Stage Moment Of Inertia [kg * m^2]
+    
+    @qtCore.Property(float)
+    def stage_moment_of_inertia(self): return format(self.I)
+
+    @stage_moment_of_inertia.setter
+    def stage_moment_of_inertia(self, val : float): self.I = val
     
     # ? Vacuum Specific Impulse [s]
     

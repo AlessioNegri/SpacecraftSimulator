@@ -47,7 +47,12 @@ class Stage:
         self.epsilon    = 0.0   # * Nozzle Expansion Ratio      [ ]
         self.p_c        = 0.0   # * Combustion Chamber Pressure [ atm ]
         
-        self.D          = 0.0   # * Diameter                    [ m ]
+        self.D          = 0.0   # * Base Diameter               [ m ]
+        self.d          = 0.0   # * Top Diameter                [ m ]
+        self.h          = 0.0   # * Height                      [ m ]
+        self.h_CG       = 0.0   # * Center Of Gravity Height    [ m ]
+        self.I          = 0.0   # * Moment Of Inertia           [ kg * m^2 ]
+        
         self.S          = 0.0   # * Reference Surface           [ m^2 ]
         self.C_D        = 0.0   # * Drag Coefficient            [ ]
         self.C_L        = 0.0   # * Lift Coefficient            [ ]
@@ -64,6 +69,19 @@ class Stage:
         self.m_s        = m_s
         self.m_p        = m_p
         self.m_payload  = m_payload
+    
+    def geometry(self, D : float, h : float, d : float = 0.0) -> None:
+        """Sets the geometry parameters
+
+        Args:
+            D (float): Base Diameter [m]
+            h (float): Height [m]
+            Dd (float): Top Diameter [m]
+        """
+        
+        self.D = D
+        self.h = h
+        self.d = d
     
     def motor(self, F_vac : float, I_sp_vac : float, csi : float) -> None:
         """Sets the motor parameters
@@ -100,16 +118,14 @@ class Stage:
             self.Gamma = 1 / self.gamma * ((self.gamma - 1 ) * 0.5)**(self.gamma / (self.gamma - 1)) *\
                 ((self.gamma + 1) / (self.gamma - 1))**((self.gamma + 1) / (2 * (self.gamma - 1)))
     
-    def aerodynamics(self, D : float, C_D : float, C_L : float) -> None:
+    def aerodynamics(self, C_D : float, C_L : float) -> None:
         """Sets the aerodynamics parameters
 
         Args:
-            D (float): Diameter [m]
             C_D (float): Drag coefficient []
             C_L (float): Lift coefficient [atm]
         """
         
-        self.D      = D
         self.C_D    = C_D
         self.C_L    = C_L
     
@@ -359,7 +375,7 @@ class Launcher:
         axes[1,1].grid()
         axes[1,1].plot(t[1:], a / cls.g_E)
     
-    #! SECTION 7.5
+    # ! SECTION 7.5
     
     @classmethod
     def single_stage_vehicle_to_orbit(cls,
@@ -642,7 +658,9 @@ class Launcher:
         
         return stage_1, stage_2, stage_3
 
-    #! SECTION 7.6
+    # ! SECTION 7.6
+    
+    # --- SECTION 7.6.1 
     
     @classmethod
     def moi_and_cg(cls, R_1 : float, R_2 : float, h : float, m : float) -> list:
@@ -703,36 +721,35 @@ class Launcher:
         return [I, h_CG]
     
     @classmethod
-    def inertia(cls,
+    def three_stage_vehicle_inertia(cls,
                 stage_1 : Stage,
                 stage_2 : Stage,
                 stage_3 : Stage,
-                l_c_1 : float,
-                l_c_2 : float,
-                l_f : float,
-                l_c_3 : float,
-                l_co : float,
-                R : float,
-                r_f : float,
-                m_f : float) -> dict:
+                frustum : Stage,
+                payload : Stage) -> dict:
         """Calculates the Moment Of Inertia (MOI) and Center of Gravity (CG) for a 3-stage launcher
 
         Args:
             stage_1 (Stage): Stage 1
             stage_2 (Stage): Stage 2
             stage_3 (Stage): Stage 3
-            l_c_1 (float): Stage 1 length [m]
-            l_c_2 (float): Stage 2 length [m]
-            l_f (float): Stage 3 frustum length [m]
-            l_c_3 (float): Stage 3 lebgth [m]
-            l_co (float): Payload length [m]
-            R (float): Main launchedr radius [m]
-            r_f (float): Frustum top radius [m]
-            m_f (float): Frustum mass [kg]
+            frustum (Stage): Frustum
+            payload (Stage): Payload
 
         Returns:
             dict: Dictionary containing MOI and CG for Stages and Stacks
         """
+        
+        # >>> 0. Extract parameters
+        
+        l_c_1   : float = stage_1.h
+        l_c_2   : float = stage_2.h
+        l_f     : float = frustum.h
+        l_c_3   : float = stage_3.h
+        l_co    : float = payload.h
+        R       : float = stage_1.D / 2
+        r_f     : float = frustum.d / 2
+        m_f     : float = frustum.m_s
     
         # >>> 1. Total launcher length [m]
         
@@ -742,7 +759,7 @@ class Launcher:
         
         m_c_1   = stage_1.m_g
         m_c_2   = stage_2.m_g
-        m_c_3   = stage_3.m_g - m_f
+        m_c_3   = stage_3.m_g
         m_co    = stage_3.m_payload
         
         # >>> 3. Heights of center of gravity [m]
@@ -771,11 +788,11 @@ class Launcher:
         
         # >>> 6. Stacks center of gravity [m]
         
-        x_CG_I = m_I * l - (m_co * h_co + m_c_3 * h_c_3 + m_f * h_f + m_c_2 * h_c_2 + m_c_1 * h_c_1)
+        x_CG_I = 1 / m_I * (m_I * l - (m_co * h_co + m_c_3 * h_c_3 + m_f * h_f + m_c_2 * h_c_2 + m_c_1 * h_c_1))
         
-        x_CG_II = m_II * (l - l_c_1) - (m_co * (h_co - l_c_1) + m_c_3 * (h_c_3 - l_c_1) + m_f * (h_f - l_c_1) + m_c_2 * (h_c_2 - l_c_1))
+        x_CG_II = 1 / m_II * (m_II * (l - l_c_1) - (m_co * (h_co - l_c_1) + m_c_3 * (h_c_3 - l_c_1) + m_f * (h_f - l_c_1) + m_c_2 * (h_c_2 - l_c_1)))
         
-        x_CG_III = m_III * (l - l_c_1 - l_c_2) - (m_co * (h_co - l_c_1 - l_c_2) + m_c_3 * (h_c_3 - l_c_1 - l_c_2) + m_f * (h_f - l_c_1 - l_c_2))
+        x_CG_III = 1 / m_III * (m_III * (l - l_c_1 - l_c_2) - (m_co * (h_co - l_c_1 - l_c_2) + m_c_3 * (h_c_3 - l_c_1 - l_c_2) + m_f * (h_f - l_c_1 - l_c_2)))
         
         # >>> 7. Stacks moment of inertia [kg m^2]
         
@@ -797,10 +814,40 @@ class Launcher:
         I_CG_III += m_c_3 * (l - h_c_3 - x_CG_III)**2
         I_CG_III += m_co * (l - h_co - x_CG_III)**2
         
-        return dict(stage_cg=[h_c_1, h_c_2, h_f, h_c_3, h_co],
+        return dict(launcher_length=l,
+                    stage_cg=[h_c_1, h_c_2, h_f, h_c_3, h_co],
                     stage_moi=[I_c_1, I_c_2, I_f, I_c_3, I_co],
                     stack_cg=[x_CG_I, x_CG_II, x_CG_III],
                     stack_moi=[I_CG_I, I_CG_II, I_CG_III])
+    
+    @classmethod
+    def center_of_pressure_cone_cylinder(cls,
+                                         d : float,
+                                         h : float,
+                                         l : float,
+                                         h_f_r : float,
+                                         S_f_r : float,
+                                         d_m_r : float,
+                                         K_f : float) -> float:
+        """Calculates the Center of Pressure of a Cone-Cylinder launcher
+        under the slender body approximation      
+
+        Args:
+            d (float): Cylinder diameter [m]
+            h (float): Cone height [m]
+            l (float): Launcher length [m]
+            h_f_r (float): Flare height / d []
+            S_f_r (float): Flare surface / S []
+            d_m_r (float): Afterbody dimater / d []
+            K_f (float): Fin correction factor []
+
+        Returns:
+            float: Center of Pressure position from top [m]
+        """
+        
+        x_CP = d * ((2/3 * h/d) * S_f_r + (K_f + 1 - S_f_r) * l/d - h_f_r * (d_m_r**2 - 1) * S_f_r) / (1 + K_f)
+        
+        return x_CP
     
 if __name__ == '__main__':
     

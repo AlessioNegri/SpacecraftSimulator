@@ -22,7 +22,7 @@ ApplicationWindow
     id: window
     title: "Spacecraft Simulator"
     visible: true
-    //visibility: Window.Maximized
+    visibility: Window.Maximized
     width: 1200
     height: 700
     flags: Qt.Window | Qt.FramelessWindowHint
@@ -100,9 +100,9 @@ ApplicationWindow
     {
         id: loader
         anchors.fill: parent
-        anchors.leftMargin: _side_bar_.width + 10
-        anchors.rightMargin: 5
-        anchors.topMargin: 5
+        anchors.leftMargin: _side_bar_.width// + 10
+        anchors.rightMargin: 3
+        anchors.topMargin: 3
         anchors.bottomMargin: 5
         source: "pages/PageHome.qml"
     }

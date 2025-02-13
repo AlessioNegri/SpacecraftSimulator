@@ -72,6 +72,7 @@ excludes_list = [
     'networkx',
     'nltk',
     
+    'opencv-python',
     'opt_einsum',
     'optree',
     

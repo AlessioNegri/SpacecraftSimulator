@@ -4,6 +4,7 @@ import QtQuick.Layouts
 
 import "../components/material"
 import "../components/page"
+import "../dialogs"
 
 // * The PageHome class manages the home page.
 Page
@@ -12,6 +13,11 @@ Page
     property int p_CurrentStage: 1
 
     // ! ----------------------------------------- ! //
+
+    DialogLauncher
+    {
+        id: _dialog_launcher_
+    }
 
     Component.onCompleted: {
 
@@ -57,10 +63,11 @@ Page
                             {
                                 switch (p_CurrentStage)
                                 {
-                                    case 0: return "Payload"
-                                    case 1: return "Stage 1"
-                                    case 2: return "Stage 2"
-                                    case 3: return "Stage 3"
+                                    case -1: return "Frustum"
+                                    case  0: return "Payload"
+                                    case  1: return "Stage 1"
+                                    case  2: return "Stage 2"
+                                    case  3: return "Stage 3"
                                 }
                             }
                         }
@@ -68,6 +75,12 @@ Page
                         Item
                         {
                             Layout.fillWidth: true
+                        }
+
+                        MaterialButton
+                        {
+                            text: "Details"
+                            onClicked: _dialog_launcher_.open()
                         }
 
                         MaterialIcon
@@ -133,6 +146,17 @@ Page
                         p_Selected: p_CurrentStage === 3
 
                         function f_Click() { _section_.p_CurrentStage = p_CurrentStage = 3 }
+                    }
+                    
+                    Stage
+                    {
+                        id: _frustum_
+                        p_Source: "/png/launcher_frustum.png"
+                        p_Text: "FRUSTUM"
+                        p_Selected: p_CurrentStage === -1
+                        p_InUse: true
+
+                        function f_Click() { _section_.p_CurrentStage = p_CurrentStage = -1 }
                     }
 
                     Stage

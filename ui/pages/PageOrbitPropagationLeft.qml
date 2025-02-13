@@ -164,7 +164,7 @@ ScrollView
                     Layout.fillWidth: true
                 }
 
-                ComboBox
+                MaterialComboBox
                 {
                     id: _third_body_combo_box_
                     implicitHeight: 40

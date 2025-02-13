@@ -192,6 +192,14 @@ class MissionOrbitInsertion(qtCore.QObject):
     @stage_2.setter
     def stage_2(self, val : Stage): self._stage_2 = val
     
+    # ? Frustum
+    
+    @qtCore.Property(Stage)
+    def frustum(self): return self._frustum
+    
+    @frustum.setter
+    def frustum(self, val : Stage): self._frustum = val
+    
     # ? Stage 3
     
     @qtCore.Property(Stage)
@@ -208,13 +216,101 @@ class MissionOrbitInsertion(qtCore.QObject):
     @payload.setter
     def payload(self, val : Stage): self._payload = val
     
-    # ? Payload Mass [kg]
+    # ? Launcher length [m]
     
     @qtCore.Property(float)
-    def payload_mass(self): return format(self._payload_mass)
+    def launcher_length(self): return format(self._launcher_length)
+
+    @launcher_length.setter
+    def launcher_length(self, val : float): self._launcher_length = val
     
-    @payload_mass.setter
-    def payload_mass(self, val : float): self._payload_mass = val
+    # ? Stack I Center Of Gravity Height [m]
+    
+    @qtCore.Property(float)
+    def stack_I_center_of_gravity_height(self): return format(self._stack_I_h_CG)
+
+    @stack_I_center_of_gravity_height.setter
+    def stack_I_center_of_gravity_height(self, val : float): self._stack_I_h_CG = val
+    
+    # ? Stack I Moment Of Inertia [kg * m^2]
+    
+    @qtCore.Property(float)
+    def stack_I_moment_of_inertia(self): return format(self._stack_I_I)
+
+    @stack_I_moment_of_inertia.setter
+    def stack_I_moment_of_inertia(self, val : float): self._stack_I_I = val
+    
+    # ? Stack II Center Of Gravity Height [m]
+    
+    @qtCore.Property(float)
+    def stack_II_center_of_gravity_height(self): return format(self._stack_II_h_CG)
+
+    @stack_II_center_of_gravity_height.setter
+    def stack_II_center_of_gravity_height(self, val : float): self._stack_II_h_CG = val
+    
+    # ? Stack II Moment Of Inertia [kg * m^2]
+    
+    @qtCore.Property(float)
+    def stack_II_moment_of_inertia(self): return format(self._stack_II_I)
+
+    @stack_II_moment_of_inertia.setter
+    def stack_II_moment_of_inertia(self, val : float): self._stack_II_I = val
+    
+    # ? Stack III Center Of Gravity Height [m]
+    
+    @qtCore.Property(float)
+    def stack_III_center_of_gravity_height(self): return format(self._stack_III_h_CG)
+
+    @stack_III_center_of_gravity_height.setter
+    def stack_III_center_of_gravity_height(self, val : float): self._stack_III_h_CG = val
+    
+    # ? Stack III Moment Of Inertia [kg * m^2]
+    
+    @qtCore.Property(float)
+    def stack_III_moment_of_inertia(self): return format(self._stack_III_I)
+
+    @stack_III_moment_of_inertia.setter
+    def stack_III_moment_of_inertia(self, val : float): self._stack_III_I = val
+    
+    # ? Flare Height Ratio []
+    
+    @qtCore.Property(float)
+    def flare_height_ratio(self): return format(self._flare_height_ratio)
+
+    @flare_height_ratio.setter
+    def flare_height_ratio(self, val : float): self._flare_height_ratio = val
+    
+    # ? Flare Surface Ratio []
+    
+    @qtCore.Property(float)
+    def flare_surface_ratio(self): return format(self._flare_surface_ratio)
+
+    @flare_surface_ratio.setter
+    def flare_surface_ratio(self, val : float): self._flare_surface_ratio = val
+    
+    # ? Afterbody Height Ratio []
+    
+    @qtCore.Property(float)
+    def afterbody_height_ratio(self): return format(self._afterbody_height_ratio)
+
+    @afterbody_height_ratio.setter
+    def afterbody_height_ratio(self, val : float): self._afterbody_height_ratio = val
+    
+    # ? Fin Correction Factor []
+    
+    @qtCore.Property(float)
+    def fin_correction_factor(self): return format(self._fin_correction_factor)
+
+    @fin_correction_factor.setter
+    def fin_correction_factor(self, val : float): self._fin_correction_factor = val
+    
+    # ? Center of Pressure [m]
+    
+    @qtCore.Property(float)
+    def center_of_pressure(self): return format(self._center_of_pressure)
+
+    @center_of_pressure.setter
+    def center_of_pressure(self, val : float): self._center_of_pressure = val
     
     # --- PUBLIC METHODS 
     
@@ -248,8 +344,9 @@ class MissionOrbitInsertion(qtCore.QObject):
         self._stage_1                       = Stage()
         
         self._stage_1.mass(6_523, 105_211, 0.0)
+        self._stage_1.geometry(10, 42)
         self._stage_1.motor(2_321 * 1e3, 450, 0.0)
-        self._stage_1.aerodynamics(3.4, 0.0, 0.0)
+        self._stage_1.aerodynamics(0.0, 0.0)
         self._stage_1.calc()
         
         # ? Stage 2
@@ -262,9 +359,19 @@ class MissionOrbitInsertion(qtCore.QObject):
         self._stage_2                       = Stage()
         
         self._stage_2.mass(3_536, 29_473, 0.0)
+        self._stage_2.geometry(10, 24.8)
         self._stage_2.motor(897 * 1e3, 450, 0.0)
-        self._stage_2.aerodynamics(2.4, 0.0, 0.0)
+        self._stage_2.aerodynamics(0.0, 0.0)
         self._stage_2.calc()
+        
+        # ? Frustum
+        
+        self._frustum = Stage()
+        
+        self._frustum.mass(1_000, 0.0, 0.0)
+        self._frustum.geometry(10, 3, 6.6)
+        self._frustum.aerodynamics(0.0, 0.0)
+        self._frustum.calc()
         
         # ? Stage 3
         
@@ -276,19 +383,37 @@ class MissionOrbitInsertion(qtCore.QObject):
         self._stage_3                       = Stage()
         
         self._stage_3.mass(2_857, 23_813, 0.0)
+        self._stage_3.geometry(6.6, 17.8)
         self._stage_3.motor(317 * 1e3, 450, 0.0)
-        self._stage_3.aerodynamics(1.9, 0.0, 0.0)
+        self._stage_3.aerodynamics(0.0, 0.0)
         self._stage_3.calc()
         
         # ? Payload
         
         self._payload = Stage()
         
-        self._payload.mass(10_680, 0.0, 0.0)
-        self._payload.aerodynamics(1.9, 0.0, 0.0)
+        self._payload.mass(0.0, 0.0, 10_680)
+        self._payload.geometry(6.6, 10)
+        self._payload.aerodynamics(0.0, 0.0)
         self._payload.calc()
         
-        self._payload_mass = 10_680 # * Payload Mass [kg]
+        # ? Stacks
+        
+        self._launcher_length   = 0.0
+        self._stack_I_h_CG      = 0.0
+        self._stack_I_I         = 0.0
+        self._stack_II_h_CG     = 0.0
+        self._stack_II_I        = 0.0
+        self._stack_III_h_CG    = 0.0
+        self._stack_III_I       = 0.0
+        
+        # ? Details
+        
+        self._flare_height_ratio        = 0.81
+        self._flare_surface_ratio       = 0.78
+        self._afterbody_height_ratio    = 1.047
+        self._fin_correction_factor     = 0.5
+        self._center_of_pressure        = 0.0
         
         # ? Simulation Results
         
@@ -348,13 +473,11 @@ class MissionOrbitInsertion(qtCore.QObject):
         
         # ? Payload
         
-        self._payload.m_payload = self.payload_mass
-        
         self._payload.calc()
         
         # ? Stage 3
         
-        self._stage_3.m_payload = self.payload_mass
+        self._stage_3.m_payload = self._payload.m_payload
         
         self._stage_3.calc()
         
@@ -366,7 +489,7 @@ class MissionOrbitInsertion(qtCore.QObject):
             
         else:
         
-          self._stage_2.m_payload = self.payload_mass
+          self._stage_2.m_payload = self._payload.m_payload
         
         self._stage_2.calc()
         
@@ -382,9 +505,35 @@ class MissionOrbitInsertion(qtCore.QObject):
             
         else:
         
-          self._stage_1.m_payload = self.payload_mass
+          self._stage_1.m_payload = self._payload.m_payload
         
         self._stage_1.calc()
+        
+        # ? Stack calculations
+        
+        if self._use_stage_1 and self._use_stage_2 and self._use_stage_3:
+            
+            inertia = Launcher.three_stage_vehicle_inertia(self._stage_1, self._stage_2, self._stage_3, self._frustum, self._payload)
+            
+            self._launcher_length   = inertia['launcher_length']
+            self._stage_1.h_CG      = inertia['stage_cg'][0]
+            self._stage_1.I         = inertia['stage_moi'][0]
+            self._stage_2.h_CG      = inertia['stage_cg'][1]
+            self._stage_2.I         = inertia['stage_moi'][1]
+            self._frustum.h_CG      = inertia['stage_cg'][2]
+            self._frustum.I         = inertia['stage_moi'][2]
+            self._stage_3.h_CG      = inertia['stage_cg'][3]
+            self._stage_3.I         = inertia['stage_moi'][3]
+            self._payload.h_CG      = inertia['stage_cg'][4]
+            self._payload.I         = inertia['stage_moi'][4]
+            self._stack_I_h_CG      = inertia['stack_cg'][0]
+            self._stack_I_I         = inertia['stack_moi'][0]
+            self._stack_II_h_CG     = inertia['stack_cg'][1]
+            self._stack_II_I        = inertia['stack_moi'][1]
+            self._stack_III_h_CG    = inertia['stack_cg'][2]
+            self._stack_III_I       = inertia['stack_moi'][2]
+            
+            self.update_center_of_pressure()
     
     @qtCore.Slot()
     def simulate(self) -> None:
@@ -517,7 +666,7 @@ class MissionOrbitInsertion(qtCore.QObject):
                                                                                                 self._stage_2,
                                                                                                 self._stage_3,
                                                                                                 self._circular_parking_orbit_velocity,
-                                                                                                self._payload_mass,
+                                                                                                self._payload.payload_mass,
                                                                                                 self._burnout_time_1,
                                                                                                 self._burnout_time_2,
                                                                                                 [self._thrust_to_weight_ratio_1,
@@ -538,7 +687,7 @@ class MissionOrbitInsertion(qtCore.QObject):
             self._stage_1, self._stage_2 = Launcher.two_stage_vehicle_to_orbit(self._stage_1,
                                                                                self._stage_2,
                                                                                self._circular_parking_orbit_velocity,
-                                                                               self._payload_mass,
+                                                                               self._payload.payload_mass,
                                                                                self._burnout_time_1,
                                                                                [self._thrust_to_weight_ratio_1,
                                                                                 self._thrust_to_weight_ratio_2],
@@ -553,11 +702,24 @@ class MissionOrbitInsertion(qtCore.QObject):
             
             self._stage_1 = Launcher.single_stage_vehicle_to_orbit(self._stage_1,
                                                                    self._circular_parking_orbit_velocity,
-                                                                   self._payload_mass,
+                                                                   self._payload.payload_mass,
                                                                    self._thrust_to_weight_ratio_1,
                                                                    self._stage_1.I_sp_vac,
                                                                    np.rad2deg(self._average_flight_path_angle_1),
                                                                    self._structure_ratio_1)
+    
+    @qtCore.Slot()
+    def update_center_of_pressure(self) -> None:
+        """Slot called for updating center of pressure
+        """
+        
+        self._center_of_pressure = Launcher.center_of_pressure_cone_cylinder(d=self._stage_1.D,
+                                                                             h=self._frustum.h + self._stage_3.h + self._payload.h,
+                                                                             l=self._launcher_length,
+                                                                             h_f_r=self._flare_height_ratio,
+                                                                             S_f_r=self._flare_surface_ratio,
+                                                                             d_m_r=self._afterbody_height_ratio,
+                                                                             K_f=self._fin_correction_factor)
     
     # --- PRIVATE METHODS 
     

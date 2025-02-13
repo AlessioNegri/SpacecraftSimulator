@@ -145,8 +145,7 @@ class FigureCanvasQtQuick(QtQuick.QQuickPaintedItem, FigureCanvasBase):
         # to be called at the end of paintEvent.
         if rect is not None:
             def _draw_rect_callback(painter):
-                pen = QtGui.QPen(QtCore.Qt.black, 1 / self.dpi_ratio,
-                                 QtCore.Qt.DotLine)
+                pen = QtGui.QPen(QtGui.QColor(255,255,255), 2, QtCore.Qt.DotLine) # 1 / self.dpi_ratio
                 painter.setPen(pen)
                 painter.drawRect(*(pt / self.dpi_ratio for pt in rect))
         else:

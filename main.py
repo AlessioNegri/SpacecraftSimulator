@@ -46,6 +46,17 @@ app = qtWidgets.QApplication(sys.argv)
 app.setWindowIcon(qtGui.QIcon(':/img/icon.ico'))
 app.setFont('Calibri')
 
+# ! Splash Screen
+
+pixmap = qtGui.QPixmap();
+
+pixmap.load(":/img/splash_screen.jpg")
+
+splashScreen = qtWidgets.QSplashScreen()
+
+splashScreen.setPixmap(pixmap)
+splashScreen.show()
+
 # ! Engine
 
 engine = qtQml.QQmlApplicationEngine()
@@ -63,6 +74,8 @@ engine.quit.connect(app.quit)
 engine.load(qtCore.QUrl('qrc:/main.qml'))
 
 if not engine.rootObjects(): sys.exit(-1)
+
+splashScreen.close()
 
 # ! EXEC
 

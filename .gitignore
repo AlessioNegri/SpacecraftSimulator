@@ -6,3 +6,4 @@
 
 # * Ignore pyinstaller directories
 build/
+dist/

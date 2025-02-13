@@ -34,31 +34,37 @@ Rectangle
     radius: 10
     border.width: 2
     border.color: Material.color(Material.Grey)
-    onWidthChanged: if (r_Model !== null) r_Model.resize_figure(width, height)
-    onHeightChanged: if (r_Model !== null) r_Model.resize_figure(width, height)
-    Component.onCompleted: if (r_Model !== null) r_Model.resize_figure(width, height)
+    onWidthChanged: if (r_Model !== null) r_Model.resize_figure(width, height - _tool_bar_.height)
+    onHeightChanged: if (r_Model !== null) r_Model.resize_figure(width, height - _tool_bar_.height)
+    Component.onCompleted: if (r_Model !== null) r_Model.resize_figure(width, height - _tool_bar_.height)
 
     states:
     [
         State
         {
             name: "expand"
+            changes: 
+            [
+                ParentChange
+                {
+                    target: figure
+                    parent: r_ExpandedParent
+                }
+            ]
             
-            ParentChange
-            {
-                target: figure
-                parent: r_ExpandedParent
-            }
+            
         },
         State
         {
             name: "collapse"
-            
-            ParentChange
-            {
-                target: figure
-                parent: r_OriginalParent
-            }
+            changes:
+            [
+                ParentChange
+                {
+                    target: figure
+                    parent: r_OriginalParent
+                }
+            ]
         }
     ]
 
@@ -192,13 +198,14 @@ Rectangle
     FigureCanvas
     {
         objectName: p_ObjectName
-        dpi_ratio: Screen.devicePixelRatio
+        dpi_ratio: Screen.devicePixelRatio // ! Causes the white border appearance
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        anchors.right: parent.right
+        //anchors.right: parent.right
         anchors.leftMargin: 5
         anchors.bottomMargin: 5
-        anchors.rightMargin: 5
-        height: parent.height - _tool_bar_.height - 10
+        //anchors.rightMargin: 5
+        width: r_Model !== null ? r_Model.width : 0
+        height: r_Model !== null ? r_Model.height : 0// - _tool_bar_.height - 5
     }
 }

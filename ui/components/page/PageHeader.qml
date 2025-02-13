@@ -5,7 +5,7 @@ import QtQuick.Layouts
 import "../material"
 
 // * The PageHeader class manages the page header.
-Item
+Rectangle
 {
     // * Title.
     property string p_Title: ""
@@ -18,11 +18,17 @@ Item
     id: root
     width: parent.width
     height: 50
+    color: "#162A35"
+    radius: 10
+    //border.color: "#93F9D8"
+    //border.width: 2
 
     RowLayout
     {
         anchors.fill: parent
         spacing: 10
+
+        Item {}
 
         Image
         {
@@ -61,8 +67,8 @@ Item
         MaterialIcon
         {
             source: "/svg/remove_circle.svg"
-            baseColor: "#FFFF00"
-            hoverColor: "#AAFFFF00"
+            baseColor: "#93F9D8"
+            hoverColor: "#487D76"
 
             function f_Click() { window.showMinimized() }
         }
@@ -70,8 +76,8 @@ Item
         MaterialIcon
         {
             source: window.visibility === Window.Maximized ? "/svg/fullscreen_exit.svg" : "/svg/fullscreen.svg"
-            baseColor: "#00FF00"
-            hoverColor: "#AA00FF00"
+            baseColor: "#93F9D8"
+            hoverColor: "#487D76"
 
             function f_Click() { window.visibility === Window.Maximized ? window.showNormal() : window.showMaximized() }
         }
@@ -79,8 +85,8 @@ Item
         MaterialIcon
         {
             source: "/svg/cancel.svg"
-            baseColor: "#FF0000"
-            hoverColor: "#AAFF0000"
+            baseColor: "#93F9D8"
+            hoverColor: "#487D76"
 
             function f_Click() { _dialog_exit_.open() }
         }

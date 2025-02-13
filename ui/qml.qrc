@@ -24,6 +24,7 @@
         <file>components/maneuver/ManeuverInfo.qml</file>
 
         <file>components/material/MaterialButton.qml</file>
+        <file>components/material/MaterialComboBox.qml</file>
         <file>components/material/MaterialIcon.qml</file>
         <file>components/material/MaterialProgressBar.qml</file>
         <file>components/material/MaterialScrollBar.qml</file>
@@ -41,6 +42,7 @@
         <file>dialogs/DialogAbout.qml</file>
         <file>dialogs/DialogExit.qml</file>
         <file>dialogs/DialogFigure.qml</file>
+        <file>dialogs/DialogLauncher.qml</file>
         <file>dialogs/DialogSettings.qml</file>
 
         <!-- >>> ENUMS -->
@@ -55,12 +57,17 @@
         <file>pages/js/PageAtmosphericEntryLeft.js</file>
         <file>pages/js/PageCapsuleLeft.js</file>
         <file>pages/js/PageInterplanetaryTransferLeft.js</file>
-        <file>pages/js/PageLauncherLeft.js</file>
         <file>pages/js/PageOrbitInsertionLeft.js</file>
         <file>pages/js/PageOrbitPropagationLeft.js</file>
         <file>pages/js/PageOrbitTransfer.js</file>
         <file>pages/js/PageOrbitTransferLeft.js</file>
         <file>pages/js/PageSpacecraftLeft.js</file>
+
+        <file>pages/PageLauncherLeft/Frustum.qml</file>
+        <file>pages/PageLauncherLeft/Payload.qml</file>
+        <file>pages/PageLauncherLeft/Stage1.qml</file>
+        <file>pages/PageLauncherLeft/Stage2.qml</file>
+        <file>pages/PageLauncherLeft/Stage3.qml</file>
 
         <file>pages/PageAtmosphericEntry.qml</file>
         <file>pages/PageAtmosphericEntryLeft.qml</file>
@@ -88,6 +95,7 @@
 
         <file alias="icon.ico">../img/icon.ico</file>
         <file alias="icon.png">../img/icon.png</file>
+        <file alias="splash_screen.jpg">../img/splash_screen.jpg</file>
 
     </qresource>
 
@@ -111,18 +119,23 @@
         <file alias="arrival.png">../img/png/arrival.png</file>
         <file alias="atmospheric_entry.png">../img/png/atmospheric_entry.png</file>
         <file alias="capsule.png">../img/png/capsule.png</file>
+        <file alias="center_of_gravity.png">../img/png/center_of_gravity.png</file>
+        <file alias="center_of_pressure.png">../img/png/center_of_pressure.png</file>
         <file alias="departure.png">../img/png/departure.png</file>
         <file alias="earth.png">../img/png/earth.png</file>
         <file alias="entry.png">../img/png/entry.png</file>
         <file alias="interplanetary_transfer.png">../img/png/interplanetary_transfer.png</file>
         <file alias="jupiter.png">../img/png/jupiter.png</file>
+        <file alias="launcher.png">../img/png/launcher.png</file>
+        <file alias="launcher_full.png">../img/png/launcher_full.png</file>
+        <file alias="launcher_frustum.png">../img/png/launcher_frustum.png</file>
         <file alias="launcher_payload.png">../img/png/launcher_payload.png</file>
         <file alias="launcher_stage_1.png">../img/png/launcher_stage_1.png</file>
         <file alias="launcher_stage_2.png">../img/png/launcher_stage_2.png</file>
         <file alias="launcher_stage_3.png">../img/png/launcher_stage_3.png</file>
-        <file alias="launcher.png">../img/png/launcher.png</file>
         <file alias="maneuvers.png">../img/png/maneuvers.png</file>
         <file alias="mars.png">../img/png/mars.png</file>
+        <file alias="mass.png">../img/png/mass.png</file>
         <file alias="mercury.png">../img/png/mercury.png</file>
         <file alias="moon.png">../img/png/moon.png</file>
         <file alias="neptune.png">../img/png/neptune.png</file>
