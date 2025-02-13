@@ -13,7 +13,7 @@
 ![Static Badge](https://img.shields.io/badge/pyinstaller-white?logo=python&logoColor=white&label=6.11.1&labelColor=red&color=darkcyan)
 ![Static Badge](https://img.shields.io/badge/PySide6-white?logo=qt&logoColor=white&label=6.8.0&labelColor=red&color=darkcyan)
 
-<p align="center"><img src="./images/home.png?" width="100%"></p>
+<p align="center"><img src="./images/home.png" width="100%"></p>
 
 ## 1. Introduction 📖
 
@@ -122,7 +122,9 @@ From the left menu, it is possible to configure all the properties of the system
 - `Spacecraft`
 - `Re-Entry Capsule` <br/><br/>
 
-<p align="center"><img src="./images/launcher.png?" width="100%"></p>
+<p align="center"><img src="./images/launcher.png" width="100%"></p>
+
+<p align="center"><img src="./images/launcher_details.png" width="100%"></p>
 
 <p align="center"><img src="./images/spacecraft.png?" width="100%"></p>
 
