@@ -253,6 +253,10 @@ After you have decided the *Entry Conditions*, by clicking on the `Simulate` but
 
 <p align="center"><img src="./images/atmospheric_entry_1.png" width="100%"></p>
 
-<img src="./images/atmospheric_entry_2.png" width="33%">
-<img src="./images/atmospheric_entry_3.png" width="33%">
-<img src="./images/atmospheric_entry_4.png" width="32%">
+<p align="center">
+    <img src="./images/atmospheric_entry_2.png" width="30%">
+    &nbsp;
+    <img src="./images/atmospheric_entry_3.png" width="30%">
+    &nbsp;
+    <img src="./images/atmospheric_entry_4.png" width="30%">
+</p>
