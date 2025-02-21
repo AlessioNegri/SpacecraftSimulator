@@ -28,9 +28,10 @@ Rectangle
 
         MaterialIcon
         {
-            source: "/img/icon.png"
-            baseColor: "transparent"
-            hoverColor: "transparent"
+            source: "/img/icon.svg"
+            tooltip: "Home"
+            baseColor: "#93F9D8"
+            hoverColor: "#FFEB3B"
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
 
             function f_Click() { gp_CurrentPage = 0; loader.source = "pages/PageHome.qml" }
@@ -46,10 +47,10 @@ Rectangle
 
         MaterialIcon
         {
-            source: "/png/launcher.png"
-            baseColor: "transparent"
-            hoverColor: "transparent"
+            source: "/svg/launcher.svg"
             tooltip: "Launcher"
+            baseColor: "#93F9D8"
+            hoverColor: "#FFEB3B"
             selectable: true
             checked: gp_CurrentPage === 1
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
@@ -59,10 +60,10 @@ Rectangle
 
         MaterialIcon
         {
-            source: "/png/spacecraft.png"
-            baseColor: "transparent"
-            hoverColor: "transparent"
+            source: "/svg/spacecraft.svg"
             tooltip: "Spacecraft"
+            baseColor: "#93F9D8"
+            hoverColor: "#FFEB3B"
             selectable: true
             checked: gp_CurrentPage === 2
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
@@ -72,10 +73,10 @@ Rectangle
 
         MaterialIcon
         {
-            source: "/png/capsule.png"
-            baseColor: "transparent"
-            hoverColor: "transparent"
+            source: "/svg/capsule.svg"
             tooltip: "Capsule"
+            baseColor: "#93F9D8"
+            hoverColor: "#FFEB3B"
             selectable: true
             checked: gp_CurrentPage === 3
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
@@ -93,10 +94,10 @@ Rectangle
 
         MaterialIcon
         {
-            source: "/png/orbit_insertion.png"
-            baseColor: "transparent"
-            hoverColor: "transparent"
+            source: "/svg/orbit_insertion.svg"
             tooltip: "Orbit Insertion"
+            baseColor: "#93F9D8"
+            hoverColor: "#FFEB3B"
             selectable: true
             checked: gp_CurrentPage === 4
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
@@ -106,10 +107,10 @@ Rectangle
 
         MaterialIcon
         {
-            source: "/png/orbit_transfer.png"
-            baseColor: "transparent"
-            hoverColor: "transparent"
+            source: "/svg/orbit_transfer.svg"
             tooltip: "Orbit Transfer"
+            baseColor: "#93F9D8"
+            hoverColor: "#FFEB3B"
             selectable: true
             checked: gp_CurrentPage === 5
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
@@ -119,10 +120,10 @@ Rectangle
 
         MaterialIcon
         {
-            source: "/png/orbit_propagation.png"
-            baseColor: "transparent"
-            hoverColor: "transparent"
+            source: "/svg/orbit_propagation.svg"
             tooltip: "Orbit Propagation"
+            baseColor: "#93F9D8"
+            hoverColor: "#FFEB3B"
             selectable: true
             checked: gp_CurrentPage === 6
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
@@ -132,10 +133,10 @@ Rectangle
 
         MaterialIcon
         {
-            source: "/png/interplanetary_transfer.png"
-            baseColor: "transparent"
-            hoverColor: "transparent"
+            source: "/svg/interplanetary_transfer.svg"
             tooltip: "Interplanetary Transfer"
+            baseColor: "#93F9D8"
+            hoverColor: "#FFEB3B"
             selectable: true
             checked: gp_CurrentPage === 7
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
@@ -145,10 +146,10 @@ Rectangle
 
         MaterialIcon
         {
-            source: "/png/atmospheric_entry.png"
-            baseColor: "transparent"
-            hoverColor: "transparent"
+            source: "/svg/atmospheric_entry.svg"
             tooltip: "Atmospheric Entry"
+            baseColor: "#93F9D8"
+            hoverColor: "#FFEB3B"
             selectable: true
             checked: gp_CurrentPage === 8
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter

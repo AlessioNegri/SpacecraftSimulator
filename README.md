@@ -13,7 +13,7 @@
 ![Static Badge](https://img.shields.io/badge/pyinstaller-white?logo=python&logoColor=white&label=6.11.1&labelColor=red&color=darkcyan)
 ![Static Badge](https://img.shields.io/badge/PySide6-white?logo=qt&logoColor=white&label=6.8.0&labelColor=red&color=darkcyan)
 
-<p align="center"><img src="./images/home.png" width="100%"></p>
+<p align="center"><img src="./images/home.png?" width="100%"></p>
 
 ## 1. Introduction 📖
 
@@ -128,7 +128,7 @@ From the left menu, it is possible to configure all the properties of the system
 
 <p align="center"><img src="./images/spacecraft.png?" width="100%"></p>
 
-<p align="center"><img src="./images/re_entry_capsule.png?" width="100%"></p>
+<p align="center"><img src="./images/re_entry_capsule.png" width="100%"></p>
 
 ## 3 Orbit Insertion 🏷️
 
@@ -248,10 +248,11 @@ After you have decided the *Entry Conditions*, by clicking on the `Simulate` but
 - **Altitude vs Downrange Distance**
 - **Fight Path Angle vs Time**
 - **Stagnation Point Convective Heat Flux vs Time**
+- **Stagnation Point Radiative Heat Flux vs Time**
 - **Altitude vs Velocity**
 
-<p align="center"><img src="./images/atmospheric_entry_1.png?" width="100%"></p>
+<p align="center"><img src="./images/atmospheric_entry_1.png" width="100%"></p>
 
-<p align="center"><img src="./images/atmospheric_entry_2.png?" width="100%"></p>
-
-<p align="center"><img src="./images/atmospheric_entry_3.png?" width="100%"></p>
+<img src="./images/atmospheric_entry_2.png" width="33%">
+<img src="./images/atmospheric_entry_3.png" width="33%">
+<img src="./images/atmospheric_entry_4.png" width="32%">

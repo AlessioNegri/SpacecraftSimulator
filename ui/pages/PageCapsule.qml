@@ -5,6 +5,8 @@ import QtQuick.Layouts
 import "../components/material"
 import "../components/page"
 
+import "js/PageCapsuleCanvas.js" as Script
+
 // * The PageCapsule class manages the capsule page.
 Page
 {
@@ -80,6 +82,18 @@ Page
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                     }
+                }
+            }
+
+            PageBox
+            {
+                width: 300
+                Layout.fillHeight: true
+
+                Canvas
+                {
+                    anchors.fill: parent
+                    onPaint: Script.paint(getContext("2d"), width, height)
                 }
             }
         }

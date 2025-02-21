@@ -5,6 +5,8 @@ __license__     = "LGPL v3"
 __maintainer__  = "Alessio Negri"
 __book__        = "Manned Spacecraft: Design Principles"
 __chapter__     = "6 - Atmospheric Entry Mechanics"
+__chapter__     = "8 - Space Flight Mechanics"
+__chapter__     = "9 - Thermal Protection Systems"
 
 import os
 import sys
@@ -21,20 +23,25 @@ class AtmosphericEntry:
     
     # --- MEMBERS 
     
-    g_E     = AstronomicalData.gravity(CelestialBody.EARTH, km=True)        # * Sea Level Gravity           [ km / s^2 ]
-    R_E     = AstronomicalData.equatiorial_radius(CelestialBody.EARTH)      # * Planet Equatiorial Radius   [ km ]
-    k       = AstronomicalData.gravitational_parameter(CelestialBody.EARTH) # * Gravitational Parameter     [ km^3 / s^2 ]
-    m       = 0.0                                                           # * Initial Mass                [ kg ]
-    F       = 0.0                                                           # * Thrust                      [ kg * m / s^2 ]
-    I_sp    = 300.0                                                         # * Specific Impulse            [ s ]
-    csi     = 0.0                                                           # * Thrust Angle                [ rad ]
-    C_L     = 0.0                                                           # * Lift Coefficient            [ ]
-    C_D     = 1.0                                                           # * Drag Coefficient            [ ]
-    S       = 1.0                                                           # * Reference Surface           [ m^2 ]
-    H       = 6.9                                                           # * Constant Scale Height       [ km ]
-    R_N     = 0.3                                                           # * Nose Radius                 [ m ]
-    C_D_P   = 1.4                                                           # * Parachute Drag Coefficient  [ ]
-    S_P     = 70.0                                                          # * Parachute Reference Surface [ ]
+    g_E     = AstronomicalData.gravity(CelestialBody.EARTH, km=True)        # * Sea Level Gravity                       [ km / s^2 ]
+    R_E     = AstronomicalData.equatiorial_radius(CelestialBody.EARTH)      # * Planet Equatiorial Radius               [ km ]
+    k       = AstronomicalData.gravitational_parameter(CelestialBody.EARTH) # * Gravitational Parameter                 [ km^3 / s^2 ]
+    m       = 0.0                                                           # * Initial Mass                            [ kg ]
+    F       = 0.0                                                           # * Thrust                                  [ kg * m / s^2 ]
+    I_sp    = 300.0                                                         # * Specific Impulse                        [ s ]
+    csi     = 0.0                                                           # * Thrust Angle                            [ rad ]
+    C_L     = 0.0                                                           # * Lift Coefficient                        [ ]
+    C_D     = 1.0                                                           # * Drag Coefficient                        [ ]
+    S       = 1.0                                                           # * Reference Surface                       [ m^2 ]
+    H       = 6.9                                                           # * Constant Scale Height                   [ km ]
+    R_N     = 0.3 / 0.33                                                    # * Nose Radius                             [ m ]
+    C_D_P   = 1.4                                                           # * Parachute Drag Coefficient              [ ]
+    S_P     = 70.0                                                          # * Parachute Reference Surface             [ ]
+    
+    R_B     = 0.3                                                           # * Body Radius                             [ m ]
+    phi_1   = np.arcsin(R_B/R_N)                                            # * Angle between capsule and shield radius [ rad ]
+    phic_c  = np.deg2rad(15)                                                # * Afterbody cone angle                    [ rad ]
+    gamma   = 1.4                                                           # * Air specific heat ratio                 [ ]
     
     use_parachute = False                                                   # * Check for parachute usage
     
@@ -235,6 +242,98 @@ class AtmosphericEntry:
             axes[1,2].plot(t[1:] / 60, a / cls.g_E)
         
         return dict(t=t, y=integrationResult['y'], dt=np.abs(t[-1] - t[0]))
+
+    # ! SECTION 8.3
+    
+    @classmethod
+    def set_capsule_aerodynamics(cls, R_N : float, R_B : float, phi_1 : float, phi_c : float, gamma : float) -> None:
+        """Set the capsule aerodynamics parameters
+
+        Args:
+            R_N (float): Nose radius [m]
+            R_B (float): Body radius [m]
+            phi_1 (float): Angle between capsule and shield radius [rad]
+            phi_c (float): Afterbody cone angle [rad]
+            gamma (float): Air specific heat ratio []
+        """
+        
+        cls.R_N     = R_N
+        cls.R_B     = R_B
+        cls.phi_1   = phi_1
+        cls.phic_c  = phi_c
+        cls.gamma   = gamma
+        
+    @classmethod
+    def calculate_aerodynamics_coefficients(cls, alpha : float) -> list:
+        """Calculates the Aerodynamics coefficients
+
+        Args:
+            alpha (float): Angle of attack
+
+        Returns:
+            list: [ Zero-Lift Drag Coefficient, Lift Coefficient, Drag Coefficient ]
+        """
+        
+        # ! The Newtonian approximation for hypersonic aerodynamics is applied
+        
+        # >>> Density ratio (not function of Mach number)
+        
+        epsilon = (cls.gamma - 1) / (cls.gamma + 1)
+        
+        # >>> Zero-lift drag coefficient + capsule afterbody correction
+        
+        C_D_0 = (1 - 0.5 * epsilon) * (1 + np.cos(cls.phi_1)**2) - 0.05 / cls.gamma
+        
+        # >>> Lift and drag coefficients
+        
+        C_L = (C_D_0 * np.cos(alpha)**2 + 0.5 * (1 - 0.5 * epsilon) * np.sin(cls.phi_1)**2 * (3 * np.sin(alpha)**2 - 2)) * np.sin(alpha)
+        C_D = (C_D_0 * np.cos(alpha)**2 + 1.5 * (1 - 0.5 * epsilon) * np.sin(cls.phi_1)**2 * np.sin(alpha)**2) * np.cos(alpha)
+        
+        return [ C_D_0, C_L, C_D ]
+    
+    # ! SECTION 9.1
+    
+    @classmethod
+    def stagnation_point_heat_tranfer_rate(cls, r : float, V : float) -> list:
+        """Calculates the Stagnation Point heat transfer rates
+
+        Args:
+            r (float): Position [km]
+            V (float): velocity [km/s]
+
+        Returns:
+            list: [ Convection, Radiation ]
+        """
+        
+        # >>> Convective - Sutton and Graves approximation (1971)
+        
+        C_sg = 1.74153e-8 * 1 / np.sqrt(cls.R_N)
+        
+        rho = 1.225 * np.exp(-(r - cls.R_E) / cls.H)
+        
+        q_c_dot = C_sg * np.sqrt(rho) * (V * 1e3)**3
+        
+        # >>> Radiative - Johnson, Starkey, and Lewis approximation (2007)
+        
+        k_1 = 0
+        k_2 = 0
+        k_3 = 0
+        
+        if V < 7.62:
+            
+            k_1 = 372.6
+            k_2 = 8.5
+            k_3 = 1.6
+        
+        elif 7.62 < V < 9:
+            
+            k_1 = 25.34
+            k_2 = 12.5
+            k_3 = 1.78
+        
+        q_r_dot = cls.R_N * k_1 * (3.28084e-4 * V * 1e3)**k_2 * (rho / 1.225)**k_3
+        
+        return [ q_c_dot, q_r_dot ]
 
 if __name__ == '__main__':
     

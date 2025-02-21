@@ -36,6 +36,8 @@ Image
     sourceSize.width: 32
     sourceSize.height: 32
     fillMode: Image.PreserveAspectFit
+    smooth: true
+    antialiasing: true
     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
     ColorOverlay

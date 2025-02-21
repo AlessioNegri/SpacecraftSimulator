@@ -8,6 +8,12 @@ import "dialogs"
 // * Main window application
 ApplicationWindow
 {
+    // * Previous x position
+    property int previousX: 0
+
+    // * Previous y position
+    property int previousY: 0
+
     // * Current page.
     property int gp_CurrentPage: 0
 
@@ -25,6 +31,8 @@ ApplicationWindow
     visibility: Window.Maximized
     width: 1200
     height: 700
+    minimumWidth: 1200
+    minimumHeight: 700
     flags: Qt.Window | Qt.FramelessWindowHint
     
     background: Rectangle
@@ -165,6 +173,96 @@ ApplicationWindow
             duration: 5000
             easing.type: Easing.InExpo
         }
+    }
+
+    // * Resizing
+
+    MouseArea
+    {
+        height: 5
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.leftMargin: 10
+        anchors.rightMargin: 10
+        cursorShape: Qt.SizeVerCursor
+        onPressed: window.startSystemResize(Qt.TopEdge)
+    }
+
+    MouseArea
+    {
+        width: 5
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.topMargin: 10
+        anchors.bottomMargin: 10
+        cursorShape: Qt.SizeHorCursor
+        onPressed: window.startSystemResize(Qt.LeftEdge)
+    }
+
+    MouseArea
+    {
+        width: 5
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.topMargin: 10
+        anchors.bottomMargin: 10
+        cursorShape: Qt.SizeHorCursor
+        onPressed: window.startSystemResize(Qt.RightEdge)
+    }
+
+    MouseArea
+    {
+        height: 5
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.leftMargin: 10
+        anchors.rightMargin: 10
+        cursorShape: Qt.SizeVerCursor
+        onPressed: window.startSystemResize(Qt.BottomEdge)
+    }
+
+    MouseArea
+    {
+        width: 10
+        height: 10
+        anchors.top: parent.top
+        anchors.left: parent.left
+        cursorShape: Qt.SizeFDiagCursor
+        onPressed: window.startSystemResize(Qt.TopEdge | Qt.LeftEdge)
+    }
+
+    MouseArea
+    {
+        width: 10
+        height: 10
+        anchors.top: parent.top
+        anchors.right: parent.right
+        cursorShape: Qt.SizeBDiagCursor
+        onPressed: window.startSystemResize(Qt.TopEdge | Qt.RightEdge)
+    }
+
+    MouseArea
+    {
+        width: 10
+        height: 10
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        cursorShape: Qt.SizeBDiagCursor
+        onPressed: window.startSystemResize(Qt.BottomEdge | Qt.LeftEdge)
+    }
+
+    MouseArea
+    {
+        width: 10
+        height: 10
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        cursorShape: Qt.SizeFDiagCursor
+        onPressed: window.startSystemResize(Qt.BottomEdge | Qt.RightEdge)
     }
 
     /*

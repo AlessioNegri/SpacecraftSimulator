@@ -29,6 +29,7 @@ Rectangle
 
     objectName: p_ObjectName + "Parent"
     id: figure
+    clip: true
     height: 450
     color: "#162A35"
     radius: 10
@@ -198,6 +199,7 @@ Rectangle
     FigureCanvas
     {
         objectName: p_ObjectName
+        clip: true
         dpi_ratio: Screen.devicePixelRatio // ! Causes the white border appearance
         anchors.left: parent.left
         anchors.bottom: parent.bottom

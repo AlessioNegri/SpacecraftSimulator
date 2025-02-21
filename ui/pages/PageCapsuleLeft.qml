@@ -75,7 +75,37 @@ ScrollView
 
             SectionItemValue
             {
-                id: _capsule_node_radius_
+                id: _capsule_nose_radius_
+            }
+
+            SectionItemName
+            {
+                text: "Body Radius [m]"
+            }
+
+            SectionItemValue
+            {
+                id: _capsule_body_radius_
+            }
+
+            SectionItemName
+            {
+                text: "Shield Angle [deg]"
+            }
+
+            SectionItemValue
+            {
+                id: _capsule_shield_angle_
+            }
+
+            SectionItemName
+            {
+                text: "Afterbody Angle [deg]"
+            }
+
+            SectionItemValue
+            {
+                id: _capsule_afterbody_angle_
             }
         }
 
@@ -95,6 +125,26 @@ ScrollView
             columnSpacing: 20
             visible: !_aerodynamics_.p_Hide
             Layout.fillWidth: true
+
+            SectionItemName
+            {
+                text: "Specific Heat Ratio [-]"
+            }
+
+            SectionItemValue
+            {
+                id: _specific_heat_ratio_
+            }
+
+            SectionItemName
+            {
+                text: "Zero-Lift Drag Coefficient [-]"
+            }
+
+            SectionItemValue
+            {
+                id: _capsule_zero_lift_drag_coefficient_
+            }
 
             SectionItemName
             {
@@ -124,6 +174,39 @@ ScrollView
             SectionItemValue
             {
                 id: _capsule_reference_surface_
+            }
+                
+            SectionItemName
+            {
+                text: "Angle Of Attack [deg]"
+            }
+
+            RowLayout
+            {
+                spacing: 10
+
+                SectionItemValue
+                {
+                    id: _capsule_angle_of_attack_
+                }
+
+                MaterialButton
+                {
+                    text: "Update Coefficients"
+
+                    onClicked:
+                    {
+                        __Capsule.capsule_angle_of_attack = _capsule_angle_of_attack_.text
+
+                        __Capsule.update_coefficients()
+
+                        Script.reloadAerodynamicCoefficients()
+
+                        notification_text.text = "Aerodynamic Coefficients Updated"
+                                
+                        notification.start()
+                    }
+                }
             }
         }
 

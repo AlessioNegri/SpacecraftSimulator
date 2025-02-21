@@ -55,6 +55,7 @@
         <!-- >>> PAGES -->
         
         <file>pages/js/PageAtmosphericEntryLeft.js</file>
+        <file>pages/js/PageCapsuleCanvas.js</file>
         <file>pages/js/PageCapsuleLeft.js</file>
         <file>pages/js/PageInterplanetaryTransferLeft.js</file>
         <file>pages/js/PageOrbitInsertionLeft.js</file>
@@ -95,6 +96,7 @@
 
         <file alias="icon.ico">../img/icon.ico</file>
         <file alias="icon.png">../img/icon.png</file>
+        <file alias="icon.svg">../img/icon.svg</file>
         <file alias="splash_screen.jpg">../img/splash_screen.jpg</file>
 
     </qresource>
@@ -170,7 +172,9 @@
         <file alias="arrow_drop_down.svg">../img/svg/arrow_drop_down.svg</file>
         <file alias="arrow_drop_up.svg">../img/svg/arrow_drop_up.svg</file>
         <file alias="arrow_forward.svg">../img/svg/arrow_forward.svg</file>
+        <file alias="atmospheric_entry.svg">../img/svg/atmospheric_entry.svg</file>
         <file alias="cancel.svg">../img/svg/cancel.svg</file>
+        <file alias="capsule.svg">../img/svg/capsule.svg</file>
         <file alias="clear.svg">../img/svg/clear.svg</file>
         <file alias="delete.svg">../img/svg/delete.svg</file>
         <file alias="error.svg">../img/svg/error.svg</file>
@@ -179,12 +183,18 @@
         <file alias="fullscreen_exit.svg">../img/svg/fullscreen_exit.svg</file>
         <file alias="help.svg">../img/svg/help.svg</file>
         <file alias="home.svg">../img/svg/home.svg</file>
+        <file alias="interplanetary_transfer.svg">../img/svg/interplanetary_transfer.svg</file>
+        <file alias="launcher.svg">../img/svg/launcher.svg</file>
+        <file alias="orbit_insertion.svg">../img/svg/orbit_insertion.svg</file>
+        <file alias="orbit_propagation.svg">../img/svg/orbit_propagation.svg</file>
+        <file alias="orbit_transfer.svg">../img/svg/orbit_transfer.svg</file>
         <file alias="pan_tool.svg">../img/svg/pan_tool.svg</file>
         <file alias="play_arrow.svg">../img/svg/play_arrow.svg</file>
         <file alias="remove.svg">../img/svg/remove.svg</file>
         <file alias="remove_circle.svg">../img/svg/remove_circle.svg</file>
         <file alias="save.svg">../img/svg/save.svg</file>
         <file alias="settings.svg">../img/svg/settings.svg</file>
+        <file alias="spacecraft.svg">../img/svg/spacecraft.svg</file>
         <file alias="update.svg">../img/svg/update.svg</file>
         <file alias="warning.svg">../img/svg/warning.svg</file>
         <file alias="zoom_in.svg">../img/svg/zoom_in.svg</file>

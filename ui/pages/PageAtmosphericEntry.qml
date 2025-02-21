@@ -196,6 +196,22 @@ Page
 
                     Item
                     {
+                        id: _figure_radiative_heat_flux_container_
+                        height: 450
+                        Layout.fillWidth: true
+
+                        Figure
+                        {
+                            p_ObjectName: "AtmosphericEntryFigureRadiativeHeatFlux"
+                            r_Model: __AtmosphericEntryFigureRadiativeHeatFlux
+                            r_OriginalParent: _figure_radiative_heat_flux_container_
+                            r_ExpandedParent: _expanded_container_
+                            anchors.fill: parent
+                        }
+                    }
+
+                    Item
+                    {
                         id: _figure_altitude_container_
                         height: 450
                         Layout.fillWidth: true

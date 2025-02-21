@@ -95,6 +95,7 @@ class MissionAtmosphericEntry(qtCore.QObject):
         self.figure_trajectory              = FigureCanvas()
         self.figure_flight_path_angle       = FigureCanvas()
         self.figure_convective_heat_flux    = FigureCanvas()
+        self.figure_radiative_heat_flux     = FigureCanvas()
         self.figure_altitude                = FigureCanvas()
         
         # ? Context properties
@@ -104,6 +105,7 @@ class MissionAtmosphericEntry(qtCore.QObject):
         engine.rootContext().setContextProperty("__AtmosphericEntryFigureTrajectory", self.figure_trajectory)
         engine.rootContext().setContextProperty("__AtmosphericEntryFigureFlightPathAngle", self.figure_flight_path_angle)
         engine.rootContext().setContextProperty("__AtmosphericEntryFigureConvectiveHeatFlux", self.figure_convective_heat_flux)
+        engine.rootContext().setContextProperty("__AtmosphericEntryFigureRadiativeHeatFlux", self.figure_radiative_heat_flux)
         engine.rootContext().setContextProperty("__AtmosphericEntryFigureAltitude", self.figure_altitude)
     
     # --- PUBLIC SLOTS 
@@ -120,6 +122,7 @@ class MissionAtmosphericEntry(qtCore.QObject):
         self.figure_trajectory.update_with_canvas(win.findChild(qtCore.QObject, "AtmosphericEntryFigureTrajectory"), win.findChild(qtCore.QObject, "AtmosphericEntryFigureTrajectoryParent"))
         self.figure_flight_path_angle.update_with_canvas(win.findChild(qtCore.QObject, "AtmosphericEntryFigureFlightPathAngle"), win.findChild(qtCore.QObject, "AtmosphericEntryFigureFlightPathAngleParent"))
         self.figure_convective_heat_flux.update_with_canvas(win.findChild(qtCore.QObject, "AtmosphericEntryFigureConvectiveHeatFlux"), win.findChild(qtCore.QObject, "AtmosphericEntryFigureConvectiveHeatFluxParent"))
+        self.figure_radiative_heat_flux.update_with_canvas(win.findChild(qtCore.QObject, "AtmosphericEntryFigureRadiativeHeatFlux"), win.findChild(qtCore.QObject, "AtmosphericEntryFigureRadiativeHeatFluxParent"))
         self.figure_altitude.update_with_canvas(win.findChild(qtCore.QObject, "AtmosphericEntryFigureAltitude"), win.findChild(qtCore.QObject, "AtmosphericEntryFigureAltitudeParent"))
         
         self.init_figure()
@@ -134,6 +137,7 @@ class MissionAtmosphericEntry(qtCore.QObject):
         self.figure_trajectory              = FigureCanvas()
         self.figure_flight_path_angle       = FigureCanvas()
         self.figure_convective_heat_flux    = FigureCanvas()
+        self.figure_radiative_heat_flux     = FigureCanvas()
         self.figure_altitude                = FigureCanvas()
         
         self.engine.rootContext().setContextProperty("__AtmosphericEntryFigureVelocity", self.figure_velocity)
@@ -141,6 +145,7 @@ class MissionAtmosphericEntry(qtCore.QObject):
         self.engine.rootContext().setContextProperty("__AtmosphericEntryFigureTrajectory", self.figure_trajectory)
         self.engine.rootContext().setContextProperty("__AtmosphericEntryFigureFlightPathAngle", self.figure_flight_path_angle)
         self.engine.rootContext().setContextProperty("__AtmosphericEntryFigureConvectiveHeatFlux", self.figure_convective_heat_flux)
+        self.engine.rootContext().setContextProperty("__AtmosphericEntryFigureRadiativeHeatFlux", self.figure_radiative_heat_flux)
         self.engine.rootContext().setContextProperty("__AtmosphericEntryFigureAltitude", self.figure_altitude)
     
     @qtCore.Slot()
@@ -153,6 +158,8 @@ class MissionAtmosphericEntry(qtCore.QObject):
         AtmosphericEntry.set_capsule_parameters(0, 300, 0, self.capsule.capsule_lift_coefficient, self.capsule.capsule_drag_coefficient, self.capsule.capsule_reference_surface)
         
         AtmosphericEntry.set_parachute_parameters(self.use_parachute, self.capsule.parachute_drag_coefficient, self.capsule.parachute_reference_surface)
+        
+        AtmosphericEntry.set_capsule_aerodynamics(self.capsule.capsule_nose_radius, self.capsule.capsule_body_radius, self.capsule.capsule_shield_angle, self.capsule.capsule_afterbody_angle, self.capsule.specific_heat_ratio)
         
         y_0 = np.array([self.entry_velocity, np.deg2rad(self.entry_flight_path_angle), self.entry_altitude, 0, self.capsule.capsule_mass])
         
@@ -197,8 +204,14 @@ class MissionAtmosphericEntry(qtCore.QObject):
         # ? Convective Heat Flux
         
         self.figure_convective_heat_flux.reset_canvas()
-        self.figure_convective_heat_flux.format_canvas('Time [ $min$ ]', 'S.P. Convective Heat Flux [ $W\;/\;cm^2$ ]', -220)
+        self.figure_convective_heat_flux.format_canvas('Time [ $min$ ]', 'S.P. Convective Heat Flux [ $W\;/\;cm^2$ ]', -250)
         self.figure_convective_heat_flux.redraw_canvas()
+        
+        # ? Radiative Heat Flux
+        
+        self.figure_radiative_heat_flux.reset_canvas()
+        self.figure_radiative_heat_flux.format_canvas('Time [ $min$ ]', 'S.P. Radiative Heat Flux [ $W\;/\;cm^2$ ]', -250)
+        self.figure_radiative_heat_flux.redraw_canvas()
         
         # ? Altitude
         
@@ -225,6 +238,8 @@ class MissionAtmosphericEntry(qtCore.QObject):
         
         C       = (1.7415 * 1e-4 * 1 / np.sqrt(self.capsule.capsule_nose_radius))
         q_t_c   = np.array([C * np.sqrt(1.225 * np.exp(-(r[i] - AtmosphericEntry.R_E) / AtmosphericEntry.H)) * (V[i] * 1e3)**3 for i in range(0, len(t))])
+        q_c_dot = np.array([AtmosphericEntry.stagnation_point_heat_tranfer_rate(r[i], V[i])[0] for i in range(0, len(t))])
+        q_r_dot = np.array([AtmosphericEntry.stagnation_point_heat_tranfer_rate(r[i], V[i])[1] for i in range(0, len(t))])
         a       = np.array([(V[i] - V[i - 1]) / (t[i] - t[i - 1]) for i in range(1, len(t))])
         
         t = t / 60
@@ -260,9 +275,16 @@ class MissionAtmosphericEntry(qtCore.QObject):
         # ? Convective Heat Flux
         
         self.figure_convective_heat_flux.reset_canvas()
-        self.figure_convective_heat_flux.format_canvas('Time [ $min$ ]', 'S.P. Convective Heat Flux [ $W\;/\;cm^2$ ]', -220, '$\dot{q}_{max}^{conv} = ' + f'{max(q_t_c * 1e-4):.3f}\;\;W\;/\;cm^2$')
-        self.figure_convective_heat_flux.axes.plot(t, q_t_c * 1e-4, color=FigureCanvas.default_color)
+        self.figure_convective_heat_flux.format_canvas('Time [ $min$ ]', 'S.P. Convective Heat Flux [ $W\;/\;cm^2$ ]', -250, '$\dot{q}_{max}^{conv} = ' + f'{max(q_c_dot * 1e-4):.3f}\;\;W\;/\;cm^2$')
+        self.figure_convective_heat_flux.axes.plot(t, q_c_dot * 1e-4, color=FigureCanvas.default_color)
         self.figure_convective_heat_flux.redraw_canvas()
+        
+        # ? Radiative Heat Flux
+        
+        self.figure_radiative_heat_flux.reset_canvas()
+        self.figure_radiative_heat_flux.format_canvas('Time [ $min$ ]', 'S.P. Radiative Heat Flux [ $W\;/\;cm^2$ ]', -250, '$\dot{q}_{max}^{rad} = ' + f'{max(q_r_dot * 1e-4):.3f}\;\;W\;/\;cm^2$')
+        self.figure_radiative_heat_flux.axes.plot(t, q_r_dot * 1e-4, color=FigureCanvas.default_color)
+        self.figure_radiative_heat_flux.redraw_canvas()
         
         # ? Altitude
         
